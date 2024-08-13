@@ -1,1 +1,3 @@
-export const myPackage = (taco = ''): string => `${taco} from my package`;
+const myPackage = (taco = ''): string => `${taco} from my package`;
+
+export default myPackage;
