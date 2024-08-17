@@ -9,6 +9,7 @@ import {
 } from '@playwright/test/reporter';
 import {
   type TestPerformance, type Options, type SupportedBrowsers, type Hooks, type HookOrder, HookOrderToMetricOrder, HookOrderToMeasurementOrder,
+  HookOrderToMeasurementOffsetOrder,
 } from '../types/index.js';
 import {MetricsEngine} from './index.js';
 
@@ -158,6 +159,7 @@ export class PerformanceReporter implements Reporter {
    * @param browser which settings and metrics to use
    */
   private async executeMetrics(name: string, hook: Hooks, hookOrder: HookOrder, browser: SupportedBrowsers) {
+    const startOfTrigger = Date.now();
     const metrics = Promise.all(
       this.options.browsers[browser]?.[hook]?.metrics.map(async metric => this.metricsEngine.getMetric(metric)) ?? [],
     );
@@ -170,8 +172,10 @@ export class PerformanceReporter implements Reporter {
 
     const resolvedMetrics = await metrics;
     const resolvedCustomMetrics = await customMetrics;
+    const endOfTrigger = Date.now();
 
     this.results[name][HookOrderToMeasurementOrder[hookOrder]] = Date.now();
+    this.results[name][HookOrderToMeasurementOffsetOrder[hookOrder]] = endOfTrigger - startOfTrigger;
     this.results[name][HookOrderToMetricOrder[hookOrder]].push(
       ...resolvedMetrics.filter(m => m !== undefined),
       ...resolvedCustomMetrics.filter(m => m !== undefined),

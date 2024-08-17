@@ -10,6 +10,11 @@ export enum HookOrderToMeasurementOrder {
   'onStop' = 'endMeasurement',
 }
 
+export enum HookOrderToMeasurementOffsetOrder {
+  'onStart' = 'startMeasurementOffset',
+  'onStop' = 'endMeasurementOffset',
+}
+
 /**
  * Common metric type
  */
@@ -25,9 +30,19 @@ export type PerformanceMetrics = {
   startMeasurement: number;
 
   /**
+   * Amount of milliseconds between metric trigger and when it was measured
+   */
+  startMeasurementOffset?: number
+
+  /**
    * Unix timestamp of end of capture
    */
   endMeasurement: number;
+
+  /**
+   * Amount of milliseconds between metric trigger and when it was measured
+   */
+  endMeasurementOffset?: number
 
   /**
    * Metrics gathered from the extractors
