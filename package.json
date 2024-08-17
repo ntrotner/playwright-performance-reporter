@@ -3,7 +3,8 @@
   "version": "0.0.0-development",
   "description": "Measure and publish performance metrics from browser dev-tools when running playwright",
   "type": "module",
-  "exports": "./lib/index.js",
+  "exports": "./lib/src/index.js",
+  "types": "./lib/src/index.d.ts",
   "files": [
     "lib/**/*"
   ],
@@ -12,6 +13,7 @@
     "clean": "rm -rf ./lib/",
     "cm": "cz",
     "lint": "xo ./src/ --fix",
+    "lint:tests": "xo ./test/ --fix",
     "prepare": "husky install",
     "semantic-release": "semantic-release",
     "test:watch": "jest --watch",
@@ -39,6 +41,7 @@
     "@playwright/test": "^1.46.0",
     "@ryansonshine/commitizen": "^4.2.8",
     "@ryansonshine/cz-conventional-changelog": "^3.3.4",
+    "@types/chrome-remote-interface": "^0.31.14",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.14.8",
     "conventional-changelog-conventionalcommits": "^8.0.0",
@@ -108,8 +111,12 @@
     "rules": {
       "new-cap": 0,
       "no-async-promise-executor": 0,
-      "@typescript-eslint/no-empty-function": 0
+      "@typescript-eslint/no-empty-function": 0,
+      "@typescript-eslint/class-literal-property-style": 0
     },
     "space": true
+  },
+  "dependencies": {
+    "chrome-remote-interface": "^0.33.2"
   }
 }

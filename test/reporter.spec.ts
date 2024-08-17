@@ -84,7 +84,7 @@ const mockTestStep: TestStep = {
   titlePath(): string[] {
     return ['file', 'path'];
   },
-  category: '',
+  category: 'test.step',
   duration: 0,
   startTime: new Date(),
   steps: [],
@@ -123,6 +123,8 @@ describe('Playwright Performance Reporter', () => {
 
   beforeEach(() => {
     options = {
+      outputDir: './',
+      outputFile: 'output.json',
       browsers: {
         chromium: {
           onTest: {
@@ -138,31 +140,6 @@ describe('Playwright Performance Reporter', () => {
 
   it('should create reporter with passed options', () => {
     expect((playwrightPerformanceReporter as any).options).toEqual(options);
-  });
-
-  describe('onBegin', () => {
-    it('should pass browser when test suite', () => {
-      let suite = {
-        entries: () => ([{title: 'chromium'}]),
-      } as Suite;
-      playwrightPerformanceReporter.onBegin({} as any, suite);
-
-      expect(mockMetricsEngine.setupBrowser).toHaveBeenCalledWith('chromium');
-
-      suite = {
-        entries: () => ([{title: 'someBrowser'}]),
-      } as Suite;
-      playwrightPerformanceReporter.onBegin({} as any, suite);
-
-      expect(mockMetricsEngine.setupBrowser).toHaveBeenCalledWith('someBrowser');
-    });
-  });
-
-  describe('onEnd', () => {
-    it('should destroy browser when test suite is done', () => {
-      playwrightPerformanceReporter.onEnd({} as any);
-      expect(mockMetricsEngine.destroy).toHaveBeenCalled();
-    });
   });
 
   describe('browserName', () => {
@@ -232,8 +209,8 @@ describe('Playwright Performance Reporter', () => {
       (playwrightPerformanceReporter as any).executeMetrics = jest.fn();
       playwrightPerformanceReporter.onTestBegin(mockTestCase, mockTestResult);
 
-      expect((playwrightPerformanceReporter as any).registerTestPerformance).toHaveBeenCalledWith('Parent Test Case - ');
-      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('Parent Test Case - ', 'onTest', 'onStart', 'chromium');
+      expect((playwrightPerformanceReporter as any).registerTestPerformance).toHaveBeenCalledWith('Parent Test Case');
+      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('Parent Test Case', 'onTest', 'onStart', 'chromium');
     });
 
     it('should skip TestPerformance creation when identifier is empty in onTestEnd', () => {
@@ -249,7 +226,7 @@ describe('Playwright Performance Reporter', () => {
       (playwrightPerformanceReporter as any).executeMetrics = jest.fn();
       playwrightPerformanceReporter.onTestEnd(mockTestCase, mockTestResult);
 
-      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('Parent Test Case - ', 'onTest', 'onStop', 'chromium');
+      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('Parent Test Case', 'onTest', 'onStop', 'chromium');
     });
 
     it('should skip TestPerformance creation when identifier is empty in onStepBegin', () => {
@@ -268,8 +245,8 @@ describe('Playwright Performance Reporter', () => {
       (playwrightPerformanceReporter as any).executeMetrics = jest.fn();
       playwrightPerformanceReporter.onStepBegin(mockTestCase, mockTestResult, mockTestStep);
 
-      expect((playwrightPerformanceReporter as any).registerTestPerformance).toHaveBeenCalledWith('Child Test Step - ');
-      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('Child Test Step - ', 'onTestStep', 'onStart', 'chromium');
+      expect((playwrightPerformanceReporter as any).registerTestPerformance).toHaveBeenCalledWith('Child Test Step');
+      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('Child Test Step', 'onTestStep', 'onStart', 'chromium');
     });
 
     it('should skip TestPerformance creation when identifier is empty in onStepEnd', () => {
@@ -285,16 +262,18 @@ describe('Playwright Performance Reporter', () => {
       (playwrightPerformanceReporter as any).executeMetrics = jest.fn();
       playwrightPerformanceReporter.onStepEnd(mockTestCase, mockTestResult, mockTestStep);
 
-      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('Child Test Step - ', 'onTestStep', 'onStop', 'chromium');
+      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('Child Test Step', 'onTestStep', 'onStop', 'chromium');
     });
   });
 
   describe('buildTestPerformance and registerTestPerformance', () => {
     it('should register new TestPerformance with given name', () => {
+      const pivot = 'Test';
       const customTest = 'Test - Case';
+      (playwrightPerformanceReporter as any).pivotTest = pivot;
       (playwrightPerformanceReporter as any).registerTestPerformance(customTest);
 
-      expect((playwrightPerformanceReporter as any).results[customTest]).not.toBeUndefined();
+      expect((playwrightPerformanceReporter as any).results[pivot][customTest]).not.toBeUndefined();
     });
   });
 
@@ -304,15 +283,17 @@ describe('Playwright Performance Reporter', () => {
     });
 
     it('should propagate metrics to the metricsEngine', async () => {
+      const pivot = 'Test';
       const customTest = 'Test - Case';
+      (playwrightPerformanceReporter as any).pivotTest = pivot;
       (playwrightPerformanceReporter as any).registerTestPerformance(customTest);
       mockMetricsEngine.getMetric.mockReturnValue(Promise.resolve([{metric1: 123}]));
       await (playwrightPerformanceReporter as any).executeMetrics(customTest, 'onTest', 'onStart', 'chromium');
       expect(mockMetricsEngine.getMetric).toHaveBeenCalledTimes(3);
-      expect(mockMetricsEngine.getMetric).toHaveBeenCalledWith(options.browsers.chromium?.onTest?.metrics[0]);
-      expect(mockMetricsEngine.getMetric).toHaveBeenCalledWith(options.browsers.chromium?.onTest?.metrics[1]);
-      expect(mockMetricsEngine.getMetric).toHaveBeenCalledWith(options.browsers.chromium?.onTest?.metrics[2]);
-      expect((playwrightPerformanceReporter as any).results[customTest].startMetrics.length).toEqual(3);
+      expect(mockMetricsEngine.getMetric).toHaveBeenCalledWith(options.browsers.chromium?.onTest?.metrics[0], 'onStart');
+      expect(mockMetricsEngine.getMetric).toHaveBeenCalledWith(options.browsers.chromium?.onTest?.metrics[1], 'onStart');
+      expect(mockMetricsEngine.getMetric).toHaveBeenCalledWith(options.browsers.chromium?.onTest?.metrics[2], 'onStart');
+      expect((playwrightPerformanceReporter as any).results[pivot][customTest].startMetrics.length).toEqual(3);
     });
 
     it('should propagate custom metrics to the metricsEngine', async () => {
@@ -329,8 +310,12 @@ describe('Playwright Performance Reporter', () => {
               customMetrics: {
                 metric1: {
                   name: 'metric1',
-                  onStart: async () => ({metric: 123}),
-                  onStop: async () => ({metric: 456}),
+                  async onStart(accumulator) {
+                    accumulator.push({metric: 123});
+                  },
+                  async onStop(accumulator) {
+                    accumulator.push({metric: 456});
+                  },
                 },
               },
             },

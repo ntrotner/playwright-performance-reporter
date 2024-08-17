@@ -1,4 +1,4 @@
-import {type BrowserClient} from '../browsers/client.js';
+import type CDP from 'chrome-remote-interface';
 
 export enum HookOrderToMetricOrder {
   'onStart' = 'startMetrics',
@@ -32,7 +32,7 @@ export type PerformanceMetrics = {
   /**
    * Amount of milliseconds between metric trigger and when it was measured
    */
-  startMeasurementOffset?: number
+  startMeasurementOffset?: number;
 
   /**
    * Unix timestamp of end of capture
@@ -42,7 +42,7 @@ export type PerformanceMetrics = {
   /**
    * Amount of milliseconds between metric trigger and when it was measured
    */
-  endMeasurementOffset?: number
+  endMeasurementOffset?: number;
 
   /**
    * Metrics gathered from the extractors
@@ -58,9 +58,11 @@ export type PerformanceMetrics = {
 /**
  * Start metric measurement and write the preliminary result into the storage
  */
-export type OnStartMeasure = (input: BrowserClient) => Promise<Metric>;
+export type OnStartMeasure = <T extends CDP.Client>(accumulator: Metric[], developmentTools: T) => Promise<void>;
 
 /**
  * Stop metric measurement and write the result into the storage
  */
-export type OnStopMeasure = (input: BrowserClient) => Promise<Metric>;
+export type OnStopMeasure = <T extends CDP.Client>(accumulator: Metric[], developmentTools: T) => Promise<void>;
+
+export {type default as CDP} from 'chrome-remote-interface';

@@ -1,16 +1,30 @@
-import {type SupportedBrowsers, type Metric, type Metrics} from '../../types/index.js';
+import {
+  type SupportedBrowsers, type Metric, type Metrics, type OnStartMeasure, type OnStopMeasure,
+} from '../../types/index.js';
 import {type BrowserClient} from '../client.js';
 
 export class FirefoxDevelopmentTools implements BrowserClient {
   /**
    * @inheritdoc
    */
-  async connect(options: Record<string, any>): Promise<void> {}
+  constructor(private readonly options: Record<string, any>) {}
+
+  /**
+   * @inheritdoc
+   */
+  async connect(): Promise<void> {}
 
   /**
    * @inheritdoc
    */
   async getMetric(metric: Metrics): Promise<Metric[]> {
+    return [];
+  }
+
+  /**
+   * @inheritdoc
+   */
+  async runCustomObserver(observer: OnStartMeasure | OnStopMeasure): Promise<Metric[]> {
     return [];
   }
 
