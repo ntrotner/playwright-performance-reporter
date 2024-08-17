@@ -105,6 +105,11 @@
     ]
   },
   "xo": {
+    "rules": {
+      "new-cap": 0,
+      "no-async-promise-executor": 0,
+      "@typescript-eslint/no-empty-function": 0
+    },
     "space": true
   }
 }

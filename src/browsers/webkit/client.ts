@@ -5,6 +5,11 @@ export class WebkitDevelopmentTools implements BrowserClient {
   /**
    * @inheritdoc
    */
+  async connect(options: Record<string, any>): Promise<void> {}
+
+  /**
+   * @inheritdoc
+   */
   async getMetric(metric: Metrics): Promise<Metric[]> {
     return [];
   }

@@ -2,6 +2,13 @@ import {type SupportedBrowsers, type Metric, type Metrics} from '../types/index.
 
 export type BrowserClient = {
   /**
+   * Create connection to browser
+   *
+   * @param options parameters for browser setup
+   */
+  connect(options: Record<string, any>): Promise<void>;
+
+  /**
    * Call client api and retrieve metric
    *
    * @param metric identifier type
