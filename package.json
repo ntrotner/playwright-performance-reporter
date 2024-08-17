@@ -36,6 +36,7 @@
   },
   "homepage": "https://github.com/ntrotner/playwright-performance-reporter#readme",
   "devDependencies": {
+    "@playwright/test": "^1.46.0",
     "@ryansonshine/commitizen": "^4.2.8",
     "@ryansonshine/cz-conventional-changelog": "^3.3.4",
     "@types/jest": "^29.5.0",
@@ -102,5 +103,8 @@
       "@semantic-release/npm",
       "@semantic-release/github"
     ]
+  },
+  "xo": {
+    "space": true
   }
 }

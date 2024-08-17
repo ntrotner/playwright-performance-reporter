@@ -1,3 +1,1 @@
-const myPackage = (taco = ''): string => `${taco} from my package`;
-
-export default myPackage;
+export {PerformanceReporter as default} from './engines/reporter.js';
