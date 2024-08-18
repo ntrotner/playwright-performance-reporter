@@ -1,6 +1,7 @@
 # playwright-performance-reporter
+[![Release](https://github.com/ntrotner/playwright-performance-reporter/actions/workflows/release.yml/badge.svg)](https://github.com/ntrotner/playwright-performance-reporter/actions/workflows/release.yml)
 [![codecov](https://codecov.io/github/ntrotner/playwright-performance-reporter/graph/badge.svg?token=3UGRT92UT9)](https://codecov.io/github/ntrotner/playwright-performance-reporter)
-![version](https://img.shields.io/npm/v/playwright-performance-reporter.svg?style=flat-square)
+[![version](https://img.shields.io/npm/v/playwright-performance-reporter.svg?style=flat-square)](https://www.npmjs.com/package/playwright-performance-reporter)
 
 > Metrics from the dev tools to measure performance
 
@@ -15,13 +16,13 @@
 ## Install
 
 ```bash
-npm install playwright-performance-reporter
+npm install -D playwright-performance-reporter
 ```
 
 ## Usage
 
 Disable parallelism:
-```
+```ts
 export default defineConfig({
   ...
   fullyParallel: false,
@@ -111,6 +112,7 @@ The top level is hooked into `test()`.
   "Dashboard": {
     ...
   }
+}
 ```
 
 The content consists of steps of the test suite.
@@ -118,7 +120,7 @@ Please keep in mind that the metric request is async and is not awaited by
 Playwright. This means that the browser API might still in the process of collecting the metrics,
 even though Playwright instructed the browser to continue to the next step. This could lead to wrong output.
 To check if the output is invalid, the values `startMeasurementOffset` and `endMeasurementOffset` are provided, which measure
-the time delta between the browser request until the response of all metrics, to evaluate if the output is plausible.
+the time delta in milliseconds between the request until the browser provides all metrics.
 
 ```json
 {
