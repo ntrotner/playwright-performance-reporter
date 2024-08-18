@@ -1,4 +1,7 @@
-import {type OnStartMeasure, type OnStopMeasure} from './index.js';
+import {
+  type OnStartMeasure,
+  type OnStopMeasure,
+} from './index.js';
 
 /**
  * Supported hooks to run measurements on

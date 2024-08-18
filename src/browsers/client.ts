@@ -1,5 +1,10 @@
 import {
-  type SupportedBrowsers, type Metric, type Metrics, type HookOrder, type OnStopMeasure, type OnStartMeasure,
+  type SupportedBrowsers,
+  type Metric,
+  type Metrics,
+  type HookOrder,
+  type OnStopMeasure,
+  type OnStartMeasure,
 } from '../types/index.js';
 
 export type BrowserClient = {

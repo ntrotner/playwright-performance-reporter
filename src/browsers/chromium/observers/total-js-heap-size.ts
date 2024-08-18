@@ -1,7 +1,8 @@
 import type CDP from 'chrome-remote-interface';
 import type Protocol from 'devtools-protocol/types/protocol';
 import {
-  type Metric, type MetricObserver,
+  type Metric,
+  type MetricObserver,
 } from '../../../types/index.js';
 
 export class TotalJsHeapSize implements MetricObserver {

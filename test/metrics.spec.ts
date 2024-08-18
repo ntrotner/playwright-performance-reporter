@@ -1,6 +1,6 @@
-import {MetricsEngine} from '../src/engines';
-import {type OnStartMeasure} from '../src/types';
-import {BrowserClientFixture} from './fixtures';
+import {MetricsEngine} from '../src/engines/index.js';
+import {type OnStartMeasure} from '../src/types/index.js';
+import {BrowserClientFixture} from './fixtures/index.js';
 
 describe('Playwright Performance Reporter', () => {
   let metricsEngine: MetricsEngine;

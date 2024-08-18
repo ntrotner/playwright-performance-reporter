@@ -1,9 +1,13 @@
 import {
-  type FullProject, type Suite, type TestCase, type TestResult, type TestStep,
+  type FullProject,
+  type Suite,
+  type TestCase,
+  type TestResult,
+  type TestStep,
 } from '@playwright/test/reporter';
-import PlaywrightPerformanceReporter from '../src/index';
-import {type Options} from '../src/types/options';
-import {MetricsEngineFixture} from './fixtures/metrics.fixture';
+import PlaywrightPerformanceReporter from '../src/index.js';
+import {type Options} from '../src/types/options.js';
+import {MetricsEngineFixture} from './fixtures/metrics.fixture.js';
 
 const mockSuite: Suite = {
   allTests(): TestCase[] {

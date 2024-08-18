@@ -16,7 +16,7 @@
 ## Install
 
 ```bash
-npm install -D playwright-performance-reporter
+npm install playwright-performance-reporter --save-dev
 ```
 
 ## Usage
