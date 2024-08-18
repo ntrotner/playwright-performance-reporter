@@ -1,5 +1,9 @@
 import {
-  type SupportedBrowsers, type Metric, type Metrics, type OnStartMeasure, type OnStopMeasure,
+  type SupportedBrowsers,
+  type Metric,
+  type Metrics,
+  type OnStartMeasure,
+  type OnStopMeasure,
 } from '../../types/index.js';
 import {type BrowserClient} from '../client.js';
 

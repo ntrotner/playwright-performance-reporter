@@ -24,6 +24,12 @@
     "type": "git",
     "url": "git+https://github.com/ntrotner/playwright-performance-reporter.git"
   },
+  "keywords": [
+    "playwright",
+    "playwright-typescript",
+    "reporter",
+    "chrome-devtools-protocol"
+  ],
   "license": "MIT",
   "author": {
     "name": "Nikita Trotner",
@@ -38,8 +44,8 @@
   },
   "homepage": "https://github.com/ntrotner/playwright-performance-reporter#readme",
   "dependencies": {
-    "chrome-remote-interface": "^0.33.2",
-    "@types/chrome-remote-interface": "^0.31.14"
+    "@types/chrome-remote-interface": "^0.31.14",
+    "chrome-remote-interface": "^0.33.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.46.0",
@@ -48,6 +54,7 @@
     "@types/jest": "^29.5.0",
     "@types/node": "^20.14.8",
     "conventional-changelog-conventionalcommits": "^8.0.0",
+    "eslint-plugin-import-newlines": "^1.4.0",
     "husky": "^9.1.4",
     "jest": "^29.7.0",
     "lint-staged": "^15.2.9",
@@ -121,9 +128,13 @@
     "rules": {
       "new-cap": 0,
       "no-async-promise-executor": 0,
+      "import-newlines/enforce": ["error", { "items": 1 }],
       "@typescript-eslint/no-empty-function": 0,
       "@typescript-eslint/class-literal-property-style": 0
     },
+    "plugins": [
+      "import-newlines"
+    ],
     "space": true
   }
 }

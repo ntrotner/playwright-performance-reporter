@@ -1,16 +1,23 @@
-import {ChromiumDevelopmentTools} from '../../src/browsers/chromium/index';
-import {TotalJsHeapSize, UsedJsHeapSize} from '../../src/browsers/chromium/observers';
-import {type ChromiumSupportedMetrics, type OnStartMeasure} from '../../src/types';
-import {ChromiumCDPFixture} from '../fixtures/chromium-cdp.fixture';
+import {ChromiumDevelopmentTools} from '../../src/browsers/chromium/index.js';
+import {
+  TotalJsHeapSize,
+  UsedJsHeapSize,
+} from '../../src/browsers/chromium/observers/index.js';
+import {
+  type ChromiumSupportedMetrics,
+  type OnStartMeasure,
+} from '../../src/types/index.js';
+import {ChromiumCDPFixture} from '../fixtures/chromium-cdp.fixture.js';
 
-const customObserver: OnStartMeasure = async (accumulator, client) => new Promise(resolve =>
+const customObserver: OnStartMeasure = async (accumulator, client) => new Promise(resolve => {
   client.send('Custom.Protocol.Command' as any, (error, response) => {
     if (!error) {
       accumulator.push(response);
     }
 
     resolve();
-  }),
+  });
+},
 );
 
 describe('Playwright Performance Reporter', () => {

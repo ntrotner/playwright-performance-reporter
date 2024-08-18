@@ -1,13 +1,19 @@
 import CDP from 'chrome-remote-interface';
 import {type BrowserClient} from '../client.js';
 import {
-  type Metrics, type Metric, type SupportedBrowsers, type ChromiumSupportedMetrics,
+  type Metrics,
+  type Metric,
+  type SupportedBrowsers,
+  type ChromiumSupportedMetrics,
   type MetricObserver,
   type HookOrder,
   type OnStartMeasure,
   type OnStopMeasure,
 } from '../../types/index.js';
-import {TotalJsHeapSize, UsedJsHeapSize} from './observers/index.js';
+import {
+  TotalJsHeapSize,
+  UsedJsHeapSize,
+} from './observers/index.js';
 
 export class ChromiumDevelopmentTools implements BrowserClient {
   /**

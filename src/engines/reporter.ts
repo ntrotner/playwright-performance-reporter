@@ -10,7 +10,13 @@ import {
   type TestStep,
 } from '@playwright/test/reporter';
 import {
-  type TestPerformance, type Options, type SupportedBrowsers, type Hooks, type HookOrder, HookOrderToMetricOrder, HookOrderToMeasurementOrder,
+  type TestPerformance,
+  type Options,
+  type SupportedBrowsers,
+  type Hooks,
+  type HookOrder,
+  HookOrderToMetricOrder,
+  HookOrderToMeasurementOrder,
   HookOrderToMeasurementOffsetOrder,
 } from '../types/index.js';
 import {sanitizeStringInput} from '../helpers/index.js';

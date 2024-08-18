@@ -3,7 +3,11 @@ import {type BrowserClient} from '../browsers/client.js';
 import {FirefoxDevelopmentTools} from '../browsers/firefox/index.js';
 import {WebkitDevelopmentTools} from '../browsers/webkit/index.js';
 import {
-  type OnStartMeasure, type OnStopMeasure, type Metric, type Metrics, type SupportedBrowsers,
+  type OnStartMeasure,
+  type OnStopMeasure,
+  type Metric,
+  type Metrics,
+  type SupportedBrowsers,
   type HookOrder,
 } from '../types/index.js';
 
