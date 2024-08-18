@@ -4,6 +4,7 @@ import {FirefoxDevelopmentTools} from '../browsers/firefox/index.js';
 import {WebkitDevelopmentTools} from '../browsers/webkit/index.js';
 import {
   type OnStartMeasure, type OnStopMeasure, type Metric, type Metrics, type SupportedBrowsers,
+  type HookOrder,
 } from '../types/index.js';
 
 export class MetricsEngine {
@@ -13,25 +14,32 @@ export class MetricsEngine {
   private browser: BrowserClient | undefined;
 
   /**
+   * Options for connection to the browser
+   */
+  private browserOptions: Record<string, any> = {};
+
+  /**
    * Starts client
    *
    * @param browser which client to setup
    */
-  public setupBrowser(browser: SupportedBrowsers | string) {
+  public async setupBrowser(browser: SupportedBrowsers | string | undefined, options: Record<string, any>) {
+    this.browserOptions = options;
+
     switch (browser) {
       case 'chromium': {
-        this.browser = new ChromiumDevelopmentTools();
-        return true;
+        this.browser = new ChromiumDevelopmentTools(this.browserOptions);
+        break;
       }
 
       case 'firefox': {
-        this.browser = new FirefoxDevelopmentTools();
-        return true;
+        this.browser = new FirefoxDevelopmentTools(this.browserOptions);
+        break;
       }
 
       case 'webkit': {
-        this.browser = new WebkitDevelopmentTools();
-        return true;
+        this.browser = new WebkitDevelopmentTools(this.browserOptions);
+        break;
       }
 
       default: {
@@ -39,6 +47,9 @@ export class MetricsEngine {
         return false;
       }
     }
+
+    await this.browser?.connect();
+    return true;
   }
 
   /**
@@ -46,6 +57,7 @@ export class MetricsEngine {
    */
   public destroy() {
     this.browser?.destroy();
+    this.browser = undefined;
   }
 
   /**
@@ -60,12 +72,14 @@ export class MetricsEngine {
    *
    * @param metric which metric to measure
    */
-  public async getMetric(metric: Metrics): Promise<Metric | undefined> {
-    const newMetric = await this.browser?.getMetric(metric);
+  public async getMetric(metric: Metrics, hookOrder: HookOrder): Promise<Metric | undefined> {
+    try {
+      const newMetric = await this.browser?.getMetric(metric, hookOrder);
 
-    if (newMetric) {
-      return newMetric[0];
-    }
+      if (newMetric) {
+        return newMetric[0];
+      }
+    } catch {}
 
     return undefined;
   }
@@ -76,9 +90,13 @@ export class MetricsEngine {
    * @param customMetric user defined fetch function
    */
   public async runCustomMetric(customMetric: OnStartMeasure | OnStopMeasure): Promise<Metric | undefined> {
-    if (this.browser) {
-      return customMetric(this.browser);
-    }
+    try {
+      const newMetric = await this.browser?.runCustomObserver(customMetric);
+
+      if (newMetric) {
+        return newMetric[0];
+      }
+    } catch {}
 
     return undefined;
   }

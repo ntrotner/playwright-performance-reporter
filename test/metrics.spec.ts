@@ -12,16 +12,16 @@ describe('Playwright Performance Reporter', () => {
   });
 
   it('should select the correct browser from input', () => {
-    metricsEngine.setupBrowser('chromium');
+    metricsEngine.setupBrowser('chromium', {});
     expect(metricsEngine.getBrowser()).toEqual('chromium');
 
-    metricsEngine.setupBrowser('firefox');
+    metricsEngine.setupBrowser('firefox', {});
     expect(metricsEngine.getBrowser()).toEqual('firefox');
 
-    metricsEngine.setupBrowser('webkit');
+    metricsEngine.setupBrowser('webkit', {});
     expect(metricsEngine.getBrowser()).toEqual('webkit');
 
-    metricsEngine.setupBrowser('chrome');
+    metricsEngine.setupBrowser('chrome', {});
     expect(metricsEngine.getBrowser()).toEqual(undefined);
   });
 
@@ -38,20 +38,20 @@ describe('Playwright Performance Reporter', () => {
 
   it('should propagate metric to collect', async () => {
     (metricsEngine as any).browser = mockBrowserClient;
-    await metricsEngine.getMetric('usedJsHeapSize');
-    expect(mockBrowserClient.getMetric).toHaveBeenCalledWith('usedJsHeapSize');
+    await metricsEngine.getMetric('usedJsHeapSize', 'onStart');
+    expect(mockBrowserClient.getMetric).toHaveBeenCalledWith('usedJsHeapSize', 'onStart');
   });
 
   it('should only collect first metric by browser', async () => {
     (metricsEngine as any).browser = mockBrowserClient;
     (metricsEngine as any).browser.getMetric.mockResolvedValue(Promise.resolve([{metric1: 123}, {metric2: 456}]));
-    const metric = await metricsEngine.getMetric('jsHeapSizeLimit');
+    const metric = await metricsEngine.getMetric('jsHeapSizeLimit', 'onStop');
 
     expect(metric).toEqual({metric1: 123});
   });
 
   it('should skip custom metric in browser client', async () => {
-    const onStart: OnStartMeasure = async () => ({metric: 123});
+    const onStart: OnStartMeasure = async () => {};
     const metric = await metricsEngine.runCustomMetric(onStart);
 
     expect(metric).toEqual(undefined);
@@ -59,7 +59,11 @@ describe('Playwright Performance Reporter', () => {
 
   it('should run custom metric in browser client', async () => {
     (metricsEngine as any).browser = mockBrowserClient;
-    const onStart: OnStartMeasure = async () => ({metric: 123});
+    const onStart: OnStartMeasure = async (accumulator, _) => {
+      accumulator.push({metric: 123});
+    };
+
+    mockBrowserClient.runCustomObserver.mockResolvedValue([{metric: 123}]);
     const metric = await metricsEngine.runCustomMetric(onStart);
 
     expect(metric).toEqual({metric: 123});

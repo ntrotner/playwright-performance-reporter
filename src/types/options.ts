@@ -16,9 +16,9 @@ export const metrics = ['usedJsHeapSize', 'totalJsHeapSize', 'jsHeapSizeLimit', 
 export type Metrics = typeof metrics[number];
 
 /**
- * Allow users of the reporter to define custom metrics without contributing
+ * Common interface to define procedures to observe metrics
  */
-export type CustomMetric = {
+export type MetricObserver = {
   name: string;
   onStart: OnStartMeasure;
   onStop: OnStopMeasure;
@@ -34,27 +34,32 @@ export type SupportedBrowsers = typeof supportedBrowsers[number];
  * Restrict metrics to browsers as some don't expose APIs or
  * don't support extraction at all
  */
-const browsersSupportingMetrics = {
+export const browsersSupportingMetrics = {
   chromium: ['usedJsHeapSize', 'totalJsHeapSize', 'jsHeapSizeLimit'],
   firefox: [],
   webkit: [],
 } as const;
+export type ChromiumSupportedMetrics = typeof browsersSupportingMetrics.chromium[number] & Metrics;
 
 /**
  * Customize the reporter with desired browser and (custom) metrics
  */
 export type Options = {
+  outputDir: string;
+  outputFile: string;
   browsers: {
     [browser in SupportedBrowsers]?: {
       [hook in Hooks]?: {
         metrics: Array<typeof browsersSupportingMetrics[browser][number] & Metrics>;
-        customMetrics?: Record<string, CustomMetric>;
+        customMetrics?: Record<string, MetricObserver>;
       }
     }
   };
 };
 
 export const defaultOptions: Options = {
+  outputDir: './',
+  outputFile: 'performance-report.json',
   browsers: {
     chromium: {
       onTest: {
