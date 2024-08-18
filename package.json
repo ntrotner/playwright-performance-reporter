@@ -37,11 +37,14 @@
     "url": "https://github.com/ntrotner/playwright-performance-reporter/issues"
   },
   "homepage": "https://github.com/ntrotner/playwright-performance-reporter#readme",
+  "dependencies": {
+    "chrome-remote-interface": "^0.33.2",
+    "@types/chrome-remote-interface": "^0.31.14"
+  },
   "devDependencies": {
     "@playwright/test": "^1.46.0",
     "@ryansonshine/commitizen": "^4.2.8",
     "@ryansonshine/cz-conventional-changelog": "^3.3.4",
-    "@types/chrome-remote-interface": "^0.31.14",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.14.8",
     "conventional-changelog-conventionalcommits": "^8.0.0",
@@ -122,8 +125,5 @@
       "@typescript-eslint/class-literal-property-style": 0
     },
     "space": true
-  },
-  "dependencies": {
-    "chrome-remote-interface": "^0.33.2"
   }
 }
