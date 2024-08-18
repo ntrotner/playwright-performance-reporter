@@ -1,5 +1,6 @@
 # playwright-performance-reporter
 [![codecov](https://codecov.io/github/ntrotner/playwright-performance-reporter/graph/badge.svg?token=3UGRT92UT9)](https://codecov.io/github/ntrotner/playwright-performance-reporter)
+![version](https://img.shields.io/npm/v/playwright-performance-reporter.svg?style=flat-square)
 
 > Metrics from the dev tools to measure performance
 
