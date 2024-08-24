@@ -15,7 +15,7 @@ export type HookOrder = typeof hookOrder[number];
 /**
  * All metrics implemented in the reporter
  */
-export const metrics = ['usedJsHeapSize', 'totalJsHeapSize', 'jsHeapSizeLimit', 'powerInWatts'] as const;
+export const metrics = ['usedJsHeapSize', 'totalJsHeapSize', 'jsHeapSizeLimit', 'powerInWatts', 'allPerformanceMetrics'] as const;
 export type Metrics = typeof metrics[number];
 
 /**
@@ -38,7 +38,7 @@ export type SupportedBrowsers = typeof supportedBrowsers[number];
  * don't support extraction at all
  */
 export const browsersSupportingMetrics = {
-  chromium: ['usedJsHeapSize', 'totalJsHeapSize', 'jsHeapSizeLimit'],
+  chromium: ['usedJsHeapSize', 'totalJsHeapSize', 'allPerformanceMetrics'],
   firefox: [],
   webkit: [],
 } as const;

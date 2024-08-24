@@ -132,7 +132,7 @@ describe('Playwright Performance Reporter', () => {
       browsers: {
         chromium: {
           onTest: {
-            metrics: ['usedJsHeapSize', 'totalJsHeapSize', 'jsHeapSizeLimit'],
+            metrics: ['usedJsHeapSize', 'totalJsHeapSize'],
           },
         },
       },
@@ -293,11 +293,10 @@ describe('Playwright Performance Reporter', () => {
       (playwrightPerformanceReporter as any).registerTestPerformance(customTest);
       mockMetricsEngine.getMetric.mockReturnValue(Promise.resolve([{metric1: 123}]));
       await (playwrightPerformanceReporter as any).executeMetrics(customTest, 'onTest', 'onStart', 'chromium');
-      expect(mockMetricsEngine.getMetric).toHaveBeenCalledTimes(3);
+      expect(mockMetricsEngine.getMetric).toHaveBeenCalledTimes(2);
       expect(mockMetricsEngine.getMetric).toHaveBeenCalledWith(options.browsers.chromium?.onTest?.metrics[0], 'onStart');
       expect(mockMetricsEngine.getMetric).toHaveBeenCalledWith(options.browsers.chromium?.onTest?.metrics[1], 'onStart');
-      expect(mockMetricsEngine.getMetric).toHaveBeenCalledWith(options.browsers.chromium?.onTest?.metrics[2], 'onStart');
-      expect((playwrightPerformanceReporter as any).results[pivot][customTest].startMetrics.length).toEqual(3);
+      expect((playwrightPerformanceReporter as any).results[pivot][customTest].startMetrics.length).toEqual(2);
     });
 
     it('should propagate custom metrics to the metricsEngine', async () => {

@@ -11,6 +11,7 @@ import {
   type OnStopMeasure,
 } from '../../types/index.js';
 import {
+  AllPerformanceMetrics,
   TotalJsHeapSize,
   UsedJsHeapSize,
 } from './observers/index.js';
@@ -115,7 +116,7 @@ export class ChromiumDevelopmentTools implements BrowserClient {
   /**
    * Provide observer to collect metric
    */
-  private mapMetric(metric: Metrics): MetricObserver | undefined {
+  private mapMetric(metric: Metrics & ChromiumSupportedMetrics): MetricObserver | undefined {
     switch (metric) {
       case 'usedJsHeapSize': {
         return new UsedJsHeapSize();
@@ -125,8 +126,8 @@ export class ChromiumDevelopmentTools implements BrowserClient {
         return new TotalJsHeapSize();
       }
 
-      default: {
-        return undefined;
+      case 'allPerformanceMetrics': {
+        return new AllPerformanceMetrics();
       }
     }
   }
@@ -153,7 +154,7 @@ export class ChromiumDevelopmentTools implements BrowserClient {
    * Setup domain which need a setup
    */
   private async activateDomain(metricObserver: MetricObserver): Promise<void> {
-    if (['totalJsHeapSize', 'usedJsHeapSize'].includes(metricObserver.name)) {
+    if (['totalJsHeapSize', 'usedJsHeapSize', 'allPerformanceMetrics'].includes(metricObserver.name)) {
       if (!this.client) {
         this.isPerformanceActive = false;
         return;
