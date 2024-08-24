@@ -1,5 +1,6 @@
 import {ChromiumDevelopmentTools} from '../../src/browsers/chromium/index.js';
 import {
+    AllPerformanceMetrics,
   TotalJsHeapSize,
   UsedJsHeapSize,
 } from '../../src/browsers/chromium/observers/index.js';
@@ -26,7 +27,13 @@ describe('Playwright Performance Reporter', () => {
   let options: Record<string, any>;
 
   beforeEach(() => {
-    options = {};
+    options = {
+      launchOptions: {
+          args: [
+            '--remote-debugging-port=9222'
+          ]
+        }
+    };
     chromiumDevelopmentTools = new ChromiumDevelopmentTools(options);
     mockClient = new ChromiumCDPFixture();
     // Disable connect function as it's environment specific and I don't care mocking the CDP client
@@ -168,6 +175,57 @@ describe('Playwright Performance Reporter', () => {
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
     expect(response).toEqual([]);
+  });
+
+  it('should activate the Performance domain and return the requested metric for AllPerformanceMetrics', async () => {
+    const testObserver = new AllPerformanceMetrics();
+    const executedCommands: string[] = [];
+    mockClient.send.mockImplementation((command, callback) => {
+      executedCommands.push(command);
+      if (command === 'Performance.enable') {
+        callback(true);
+      } else if (command === 'Performance.getMetrics') {
+        callback(false, {metrics: [{name: 'MetricOne', value: 456}, {name: 'MetricTwo', value: 123}, {name: 'MetricThree', value: 789}]});
+      }
+    });
+    const responseStop = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStop');
+
+    expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
+    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(true);
+    expect(executedCommands[0]).toEqual('Performance.enable');
+    expect(executedCommands[1]).toEqual('Performance.getMetrics');
+    expect(responseStop).toEqual([{MetricOne: 456, MetricTwo: 123, MetricThree: 789}]);
+
+    mockClient.send.mockImplementation((command, callback) => {
+      executedCommands.push(command);
+      if (command === 'Performance.enable') {
+        callback(true);
+      } else if (command === 'Performance.getMetrics') {
+        callback(true, {});
+      }
+    });
+    const responseFailed = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStart');
+
+    expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
+    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(true);
+    expect(executedCommands[2]).toEqual('Performance.enable');
+    expect(executedCommands[3]).toEqual('Performance.getMetrics');
+    expect(responseFailed).toEqual([]);
+
+    mockClient.send.mockImplementation((command, callback) => {
+      executedCommands.push(command);
+      if (command === 'Performance.enable') {
+        callback(true);
+      } else if (command === 'Performance.getMetrics') {
+        callback(false, {metrics: []});
+      }
+    });
+    const responseEmptyMetrics = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStart');
+
+    expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
+    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(true);
+    expect(executedCommands[3]).toEqual('Performance.getMetrics');
+    expect(responseEmptyMetrics).toEqual([]);
   });
 
   it('should run a custom observer', async () => {
