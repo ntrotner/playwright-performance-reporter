@@ -68,7 +68,7 @@ const mockTestCase: TestCase = {
   },
   annotations: [],
   expectedStatus: 'passed',
-  id: '',
+  id: '1f',
   location: {
     column: 0,
     file: 'file/path',
@@ -90,7 +90,7 @@ const mockTestStep: TestStep = {
   },
   category: 'test.step',
   duration: 0,
-  startTime: new Date(),
+  startTime: new Date(0),
   steps: [],
   title: 'Child Test Step',
 };
@@ -101,7 +101,7 @@ const mockTestStepEmptyStepName: TestStep = {
   },
   category: '',
   duration: 0,
-  startTime: new Date(),
+  startTime: new Date(0),
   steps: [],
   title: '',
 };
@@ -112,7 +112,7 @@ const mockTestResult: TestResult = {
   errors: [],
   parallelIndex: 0,
   retry: 0,
-  startTime: new Date(),
+  startTime: new Date(0),
   status: 'skipped',
   stderr: [],
   stdout: [],
@@ -213,8 +213,8 @@ describe('Playwright Performance Reporter', () => {
       (playwrightPerformanceReporter as any).executeMetrics = jest.fn();
       playwrightPerformanceReporter.onTestBegin(mockTestCase, mockTestResult);
 
-      expect((playwrightPerformanceReporter as any).registerTestPerformance).toHaveBeenCalledWith('Parent Test Case');
-      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('Parent Test Case', 'onTest', 'onStart', 'chromium');
+      expect((playwrightPerformanceReporter as any).registerTestPerformance).toHaveBeenCalledWith('1f', 'TEST_CASE_PARENT', 'title > path');
+      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('1f', 'TEST_CASE_PARENT', 'onTest', 'onStart', 'chromium');
     });
 
     it('should skip TestPerformance creation when identifier is empty in onTestEnd', () => {
@@ -230,7 +230,7 @@ describe('Playwright Performance Reporter', () => {
       (playwrightPerformanceReporter as any).executeMetrics = jest.fn();
       playwrightPerformanceReporter.onTestEnd(mockTestCase, mockTestResult);
 
-      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('Parent Test Case', 'onTest', 'onStop', 'chromium');
+      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('1f', 'TEST_CASE_PARENT', 'onTest', 'onStop', 'chromium');
     });
 
     it('should skip TestPerformance creation when identifier is empty in onStepBegin', () => {
@@ -249,8 +249,8 @@ describe('Playwright Performance Reporter', () => {
       (playwrightPerformanceReporter as any).executeMetrics = jest.fn();
       playwrightPerformanceReporter.onStepBegin(mockTestCase, mockTestResult, mockTestStep);
 
-      expect((playwrightPerformanceReporter as any).registerTestPerformance).toHaveBeenCalledWith('Child Test Step');
-      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('Child Test Step', 'onTestStep', 'onStart', 'chromium');
+      expect((playwrightPerformanceReporter as any).registerTestPerformance).toHaveBeenCalledWith('1f', expect.anything(), 'file > path');
+      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('1f', expect.anything(), 'onTestStep', 'onStart', 'chromium');
     });
 
     it('should skip TestPerformance creation when identifier is empty in onStepEnd', () => {
@@ -266,7 +266,7 @@ describe('Playwright Performance Reporter', () => {
       (playwrightPerformanceReporter as any).executeMetrics = jest.fn();
       playwrightPerformanceReporter.onStepEnd(mockTestCase, mockTestResult, mockTestStep);
 
-      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('Child Test Step', 'onTestStep', 'onStop', 'chromium');
+      expect((playwrightPerformanceReporter as any).executeMetrics).toHaveBeenCalledWith('1f', expect.anything(), 'onTestStep', 'onStop', 'chromium');
     });
   });
 
@@ -274,8 +274,8 @@ describe('Playwright Performance Reporter', () => {
     it('should register new TestPerformance with given name', () => {
       const pivot = 'Test';
       const customTest = 'Test - Case';
-      (playwrightPerformanceReporter as any).pivotTest = pivot;
-      (playwrightPerformanceReporter as any).registerTestPerformance(customTest);
+      const customName = 'customName';
+      (playwrightPerformanceReporter as any).registerTestPerformance(pivot, customTest, customName);
 
       expect((playwrightPerformanceReporter as any).results[pivot][customTest]).not.toBeUndefined();
     });
@@ -289,10 +289,10 @@ describe('Playwright Performance Reporter', () => {
     it('should propagate metrics to the metricsEngine', async () => {
       const pivot = 'Test';
       const customTest = 'Test - Case';
-      (playwrightPerformanceReporter as any).pivotTest = pivot;
-      (playwrightPerformanceReporter as any).registerTestPerformance(customTest);
+      const customName = 'customName';
+      (playwrightPerformanceReporter as any).registerTestPerformance(pivot, customTest, customName);
       mockMetricsEngine.getMetric.mockReturnValue(Promise.resolve([{metric1: 123}]));
-      await (playwrightPerformanceReporter as any).executeMetrics(customTest, 'onTest', 'onStart', 'chromium');
+      await (playwrightPerformanceReporter as any).executeMetrics(pivot, customTest, 'onTest', 'onStart', 'chromium');
       expect(mockMetricsEngine.getMetric).toHaveBeenCalledTimes(2);
       expect(mockMetricsEngine.getMetric).toHaveBeenCalledWith(options.browsers.chromium?.onTest?.metrics[0], 'onStart');
       expect(mockMetricsEngine.getMetric).toHaveBeenCalledWith(options.browsers.chromium?.onTest?.metrics[1], 'onStart');
@@ -300,7 +300,9 @@ describe('Playwright Performance Reporter', () => {
     });
 
     it('should propagate custom metrics to the metricsEngine', async () => {
+      const pivot = 'Test';
       const customTest = 'Test - Case';
+      const customName = 'customName';
 
       const optionsWithCustomMetrics = {
         ...options,
@@ -326,9 +328,9 @@ describe('Playwright Performance Reporter', () => {
         },
       } as Options;
       (playwrightPerformanceReporter as any).options = optionsWithCustomMetrics;
-      (playwrightPerformanceReporter as any).registerTestPerformance(customTest);
-      await (playwrightPerformanceReporter as any).executeMetrics(customTest, 'onTest', 'onStart', 'chromium');
-      await (playwrightPerformanceReporter as any).executeMetrics(customTest, 'onTest', 'onStop', 'chromium');
+      (playwrightPerformanceReporter as any).registerTestPerformance(pivot, customTest, customName);
+      await (playwrightPerformanceReporter as any).executeMetrics(pivot, customTest, 'onTest', 'onStart', 'chromium');
+      await (playwrightPerformanceReporter as any).executeMetrics(pivot, customTest, 'onTest', 'onStop', 'chromium');
 
       expect(mockMetricsEngine.runCustomMetric).toHaveBeenCalledTimes(2);
       expect(mockMetricsEngine.runCustomMetric).toHaveBeenCalledWith(optionsWithCustomMetrics.browsers.chromium?.onTest?.customMetrics?.metric1.onStart);
@@ -336,18 +338,22 @@ describe('Playwright Performance Reporter', () => {
     });
 
     it('should ignore customMetrics if none are provided', async () => {
+      const pivot = 'Test';
       const customTest = 'Test - Case';
-      (playwrightPerformanceReporter as any).registerTestPerformance(customTest);
-      await (playwrightPerformanceReporter as any).executeMetrics(customTest, 'onTest', 'onStart', 'chromium');
-      await (playwrightPerformanceReporter as any).executeMetrics(customTest, 'onTest', 'onStop', 'chromium');
+      const customName = 'customName';
+      (playwrightPerformanceReporter as any).registerTestPerformance(pivot, customTest, customName);
+      await (playwrightPerformanceReporter as any).executeMetrics(pivot, customTest, 'onTest', 'onStart', 'chromium');
+      await (playwrightPerformanceReporter as any).executeMetrics(pivot, customTest, 'onTest', 'onStop', 'chromium');
 
       expect(mockMetricsEngine.runCustomMetric).toHaveBeenCalledTimes(0);
     });
 
     it('should not propagate tests to the metricsEngine if no metrics are registered', () => {
+      const pivot = 'Test';
       const customTest = 'Test - Case';
-      (playwrightPerformanceReporter as any).registerTestPerformance(customTest);
-      (playwrightPerformanceReporter as any).executeMetrics(customTest, 'onTest', 'onStart', 'firefox');
+      const customName = 'customName';
+      (playwrightPerformanceReporter as any).registerTestPerformance(pivot, customTest, customName);
+      (playwrightPerformanceReporter as any).executeMetrics(pivot, customTest, 'onTest', 'onStart', 'firefox');
 
       expect(mockMetricsEngine.getMetric).not.toHaveBeenCalled();
       expect(mockMetricsEngine.runCustomMetric).not.toHaveBeenCalled();

@@ -110,9 +110,15 @@ The top level is hooked into `test()`.
 
 ```json
 {
-  "Dashboard": {
+  ...
+  "4dde6239d9ac8c9468f3-82e3094b06379c51b729": {
+    "TEST_CASE_PARENT": {
+      "name": " > chromium > scenarios/profile.spec.ts > Profile",
+      ...
+    }
     ...
   }
+  ...
 }
 ```
 
@@ -126,7 +132,7 @@ the time delta in milliseconds between the request until the browser provides al
 ```json
 {
   ...
-  "click login": {
+  "08e5cdf7227924757e4a8f402ac2167d": {
     "name": "click login",
     "startMetrics": [
       {
@@ -149,7 +155,7 @@ the time delta in milliseconds between the request until the browser provides al
     "startMeasurementOffset": 4,
     "endMeasurementOffset": 3
   },
-  "fill mock data": {
+  "f957b5d47615b372c20ea69a16f5f344": {
     "name": "fill mock data",
     "startMetrics": [
       {

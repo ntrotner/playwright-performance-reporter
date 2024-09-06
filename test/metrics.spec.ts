@@ -2,7 +2,7 @@ import {MetricsEngine} from '../src/engines/index.js';
 import {type OnStartMeasure} from '../src/types/index.js';
 import {BrowserClientFixture} from './fixtures/index.js';
 
-describe('Playwright Performance Reporter', () => {
+describe('Metrics engine', () => {
   let metricsEngine: MetricsEngine;
   let mockBrowserClient: BrowserClientFixture;
 

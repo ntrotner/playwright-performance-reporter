@@ -1,6 +1,6 @@
 import {ChromiumDevelopmentTools} from '../../src/browsers/chromium/index.js';
 import {
-    AllPerformanceMetrics,
+  AllPerformanceMetrics,
   TotalJsHeapSize,
   UsedJsHeapSize,
 } from '../../src/browsers/chromium/observers/index.js';
@@ -21,7 +21,7 @@ const customObserver: OnStartMeasure = async (accumulator, client) => new Promis
 },
 );
 
-describe('Playwright Performance Reporter', () => {
+describe('Chromium client', () => {
   let chromiumDevelopmentTools: ChromiumDevelopmentTools;
   let mockClient: ChromiumCDPFixture;
   let options: Record<string, any>;
@@ -29,10 +29,10 @@ describe('Playwright Performance Reporter', () => {
   beforeEach(() => {
     options = {
       launchOptions: {
-          args: [
-            '--remote-debugging-port=9222'
-          ]
-        }
+        args: [
+          '--remote-debugging-port=9222',
+        ],
+      },
     };
     chromiumDevelopmentTools = new ChromiumDevelopmentTools(options);
     mockClient = new ChromiumCDPFixture();

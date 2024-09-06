@@ -1,5 +1,3 @@
-import path from 'node:path';
-import fs from 'node:fs';
 import {
   type FullConfig,
   type FullResult,
@@ -18,8 +16,14 @@ import {
   HookOrderToMetricOrder,
   HookOrderToMeasurementOrder,
   HookOrderToMeasurementOffsetOrder,
+  testCaseParent,
 } from '../types/index.js';
-import {sanitizeStringInput} from '../helpers/index.js';
+import {
+  buildTestCaseIdentifier,
+  buildTestPerformance,
+  buildTestStepIdentifier,
+  writeReportToFile,
+} from '../helpers/index.js';
 import {MetricsEngine} from './index.js';
 
 export class PerformanceReporter implements Reporter {
@@ -29,9 +33,9 @@ export class PerformanceReporter implements Reporter {
   public results: Record<string, Record<string, TestPerformance>> = {};
 
   /**
-   * Current test case name
+   * Maps unique playwright test ids to the computed name
    */
-  private pivotTest = '';
+  private readonly idToNameMapping = new Map<string, string>();
 
   /*
    * Metrics engine to retrieve metrics from a browser
@@ -45,11 +49,10 @@ export class PerformanceReporter implements Reporter {
   onBegin(config: FullConfig, suite: Suite) {}
 
   onEnd(result: FullResult) {
-    this.writeReportToFile();
+    writeReportToFile({...this.options, content: this.results});
   }
 
   async onTestBegin(test: TestCase, result: TestResult) {
-    this.pivotTest = sanitizeStringInput(test.title);
     const browserDetails = test.parent.project()?.use;
     if (browserDetails) {
       try {
@@ -63,14 +66,14 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    const identifier = this.buildIdentifier(test);
-    if (identifier === '') {
+    const {id, name} = buildTestCaseIdentifier(test);
+    if (id === '') {
       // Root of test suite
       return;
     }
 
-    this.registerTestPerformance(identifier);
-    await this.executeMetrics(identifier, 'onTest', 'onStart', browserName);
+    this.registerTestPerformance(id, testCaseParent, name);
+    await this.executeMetrics(id, testCaseParent, 'onTest', 'onStart', browserName);
   }
 
   async onTestEnd(test: TestCase, result: TestResult) {
@@ -80,15 +83,14 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    const identifier = this.buildIdentifier(test);
-    if (identifier === '') {
+    const {id} = buildTestCaseIdentifier(test);
+    if (id === '') {
       // Root of test suite
       return;
     }
 
-    await this.executeMetrics(identifier, 'onTest', 'onStop', browserName);
+    await this.executeMetrics(id, testCaseParent, 'onTest', 'onStop', browserName);
     this.metricsEngine.destroy();
-    this.pivotTest = '';
   }
 
   async onStepBegin(test: TestCase, result: TestResult, step: TestStep) {
@@ -102,14 +104,15 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    const identifier = this.buildIdentifier(step);
-    if (identifier === '') {
+    const caseIdentifier = buildTestCaseIdentifier(test);
+    const stepIdentifier = buildTestStepIdentifier(step);
+    if (stepIdentifier.name === '') {
       // Root of test suite
       return;
     }
 
-    this.registerTestPerformance(identifier);
-    await this.executeMetrics(identifier, 'onTestStep', 'onStart', browserName);
+    this.registerTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
+    await this.executeMetrics(caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStart', browserName);
   }
 
   async onStepEnd(test: TestCase, result: TestResult, step: TestStep) {
@@ -123,73 +126,39 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    const identifier = this.buildIdentifier(step);
-    if (identifier === '') {
+    const caseIdentifier = buildTestCaseIdentifier(test);
+    const stepIdentifier = buildTestStepIdentifier(step);
+    if (stepIdentifier.name === '') {
       // Root of test suite
       return;
     }
 
-    await this.executeMetrics(identifier, 'onTestStep', 'onStop', browserName);
-  }
-
-  /**
-   * Get name from test hierarchy
-   *
-   * @param testCases test or test step
-   */
-  private buildIdentifier(testCases: TestCase | TestStep): string {
-    let identifier = '';
-    let pivot: Suite | TestCase | TestStep | undefined = testCases;
-
-    while (pivot) {
-      if (pivot.title !== '') {
-        if (identifier !== '') {
-          identifier = ' - ' + identifier;
-        }
-
-        identifier = pivot.title + identifier;
-      }
-
-      pivot = pivot.parent;
-    }
-
-    return identifier;
-  }
-
-  /**
-   * Create generic `TestPerformance` object to fill during measurements
-   *
-   * @param name identifier for the performance metrics
-   */
-  private buildTestPerformance(name: string): TestPerformance {
-    return {
-      name,
-      startMetrics: [],
-      stopMetrics: [],
-      startMeasurement: Date.now(),
-      endMeasurement: Date.now(),
-    };
+    await this.executeMetrics(caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStop', browserName);
   }
 
   /**
    * Add new `TestPerformance` with identifier
    *
-   * @param name identifier for the performance metrics
+   * @param caseId identifier for case
+   * @param stepId identifier for step
+   * @param name human friendly identifier
    */
-  private registerTestPerformance(name: string) {
-    this.results[this.pivotTest] ||= {};
-    this.results[this.pivotTest][name] ||= this.buildTestPerformance(name);
+  private registerTestPerformance(caseId: string, stepId: string, name: string) {
+    this.idToNameMapping.set(caseId, name);
+    this.results[caseId] ||= {};
+    this.results[caseId][stepId] ||= buildTestPerformance(name);
   }
 
   /**
    * Execute metrics gathering for existing metrics and custom metrics
    *
-   * @param name identifier for the performance metrics
+   * @param caseId identifier for case
+   * @param stepId identifier for step
    * @param hook playwright hook
    * @param hookOrder playwright hook order
    * @param browser which settings and metrics to use
    */
-  private async executeMetrics(name: string, hook: Hooks, hookOrder: HookOrder, browser: SupportedBrowsers) {
+  private async executeMetrics(caseId: string, stepId: string, hook: Hooks, hookOrder: HookOrder, browser: SupportedBrowsers) {
     const startOfTrigger = Date.now();
     const metrics = Promise.all(
       this.options.browsers[browser]?.[hook]?.metrics.map(async metric => this.metricsEngine.getMetric(metric, hookOrder)) ?? [],
@@ -205,32 +174,12 @@ export class PerformanceReporter implements Reporter {
     const resolvedCustomMetrics = await customMetrics;
     const endOfTrigger = Date.now();
 
-    this.results[this.pivotTest][name][HookOrderToMeasurementOrder[hookOrder]] = Date.now();
-    this.results[this.pivotTest][name][HookOrderToMeasurementOffsetOrder[hookOrder]] = endOfTrigger - startOfTrigger;
-    this.results[this.pivotTest][name][HookOrderToMetricOrder[hookOrder]].push(
+    this.results[caseId][stepId][HookOrderToMeasurementOrder[hookOrder]] = Date.now();
+    this.results[caseId][stepId][HookOrderToMeasurementOffsetOrder[hookOrder]] = endOfTrigger - startOfTrigger;
+    this.results[caseId][stepId][HookOrderToMetricOrder[hookOrder]].push(
       ...resolvedMetrics.filter(m => m !== undefined),
       ...resolvedCustomMetrics.filter(m => m !== undefined),
     );
-  }
-
-  /**
-   * Write raw output to filesystem
-   *
-   * Credits to https://github.com/ctrf-io/playwright-ctrf-json-report
-   */
-  private writeReportToFile(): void {
-    const filePath = path.join(this.options.outputDir, this.options.outputFile);
-    const output = JSON.stringify(this.results, null, 2);
-    try {
-      fs.writeFileSync(filePath, output + '\n', {flag: 'ax'});
-      console.log(
-        'Playwright-Performance-Reporter: successfully written json to %s/%s',
-        this.options.outputDir,
-        this.options.outputFile,
-      );
-    } catch (error) {
-      console.error(`Error writing json report:, ${String(error)}`);
-    }
   }
 }
 

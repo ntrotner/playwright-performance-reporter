@@ -3,8 +3,8 @@
   "version": "0.0.0-development",
   "description": "Measure and publish performance metrics from browser dev-tools when running playwright",
   "type": "module",
-  "exports": "./lib/src/index.js",
-  "types": "./lib/src/index.d.ts",
+  "exports": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "files": [
     "lib/**/*"
   ],
