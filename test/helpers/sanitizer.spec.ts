@@ -1,14 +1,22 @@
-import {sanitizeStringInput} from "../../src/helpers";
+import {sanitizeStringInput} from '../../src/helpers';
 
-describe('Playwright Performance Reporter', () => {
+describe('Sanitizer helpers', () => {
   describe('sanitizeStringInput', () => {
     it('should return empty if prohibited key is used', () => {
       const prohibitedKeys = ['__proto__', 'constructor', 'prototype'];
 
-      prohibitedKeys.forEach(key => {
-        expect(sanitizeStringInput(key)).toEqual('')
-      })
-    })
+      for (const key of prohibitedKeys) {
+        expect(sanitizeStringInput(key)).toEqual('');
+      }
+    });
+
+    it('should pass the key that is not prohibited', () => {
+      const allowedKeys = ['title', 'name', 'id'];
+
+      for (const key of allowedKeys) {
+        expect(sanitizeStringInput(key)).toEqual(key);
+      }
+    });
   });
 });
 
