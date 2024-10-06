@@ -13,7 +13,7 @@ import {ChromiumCDPFixture} from '../fixtures/chromium-cdp.fixture.js';
 const customObserver: OnStartMeasure = async (accumulator, client) => new Promise(resolve => {
   client.send('Custom.Protocol.Command' as any, (error, response) => {
     if (!error) {
-      accumulator.push(response);
+      Object.assign(accumulator, response);
     }
 
     resolve();
@@ -38,7 +38,7 @@ describe('Chromium client', () => {
     mockClient = new ChromiumCDPFixture();
     // Disable connect function as it's environment specific and I don't care mocking the CDP client
     chromiumDevelopmentTools.connect = jest.fn();
-    (chromiumDevelopmentTools as any).client = mockClient;
+    (chromiumDevelopmentTools as any).clients = {'mockClient': mockClient};
   });
 
   it('should give the correct browser name', () => {
@@ -53,18 +53,16 @@ describe('Chromium client', () => {
   });
 
   it('should not activate Performance domain if client is not ready', async () => {
-    (chromiumDevelopmentTools as any).client = undefined;
+    (chromiumDevelopmentTools as any).clients = {};
     const response = await (chromiumDevelopmentTools as any).startPerformance();
 
     expect(response).toBe(false);
-    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(false);
   });
 
   it('should skip domain activation when client is not ready', async () => {
-    (chromiumDevelopmentTools as any).client = undefined;
-    await (chromiumDevelopmentTools as any).activateDomain({name: 'totalJsHeapSize'});
+    (chromiumDevelopmentTools as any).clients = {};
+    await (chromiumDevelopmentTools as any).activateDomain('someId', {name: 'totalJsHeapSize'});
 
-    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(false);
   });
 
   it('should activate the Performance domain and return the requested metric for UsedJsHeapSize', async () => {
@@ -81,10 +79,9 @@ describe('Chromium client', () => {
     const responseStop = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStop');
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
-    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(true);
     expect(executedCommands[0]).toEqual('Performance.enable');
     expect(executedCommands[1]).toEqual('Performance.getMetrics');
-    expect(responseStop).toEqual([{[testObserver.name]: 123}]);
+    expect(responseStop).toEqual([{metric: {[testObserver.name]: 123}}]);
 
     mockClient.send.mockImplementation((command, callback) => {
       executedCommands.push(command);
@@ -97,10 +94,9 @@ describe('Chromium client', () => {
     const responseFailed = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStart');
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
-    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(true);
     expect(executedCommands[2]).toEqual('Performance.enable');
     expect(executedCommands[3]).toEqual('Performance.getMetrics');
-    expect(responseFailed).toEqual([]);
+    expect(responseFailed).toEqual([{metric: {}}]);
 
     mockClient.send.mockImplementation((command, callback) => {
       executedCommands.push(command);
@@ -113,9 +109,8 @@ describe('Chromium client', () => {
     const responseEmptyMetrics = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStart');
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
-    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(true);
     expect(executedCommands[3]).toEqual('Performance.getMetrics');
-    expect(responseEmptyMetrics).toEqual([]);
+    expect(responseEmptyMetrics).toEqual([{metric: {}}]);
   });
 
   it('should activate the Performance domain and return the requested metric for TotalJsHeapSize', async () => {
@@ -132,10 +127,9 @@ describe('Chromium client', () => {
     const responseStop = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStop');
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
-    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(true);
     expect(executedCommands[0]).toEqual('Performance.enable');
     expect(executedCommands[1]).toEqual('Performance.getMetrics');
-    expect(responseStop).toEqual([{[testObserver.name]: 456}]);
+    expect(responseStop).toEqual([{metric: {[testObserver.name]: 456}}]);
 
     mockClient.send.mockImplementation((command, callback) => {
       executedCommands.push(command);
@@ -148,10 +142,9 @@ describe('Chromium client', () => {
     const responseFailed = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStart');
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
-    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(true);
     expect(executedCommands[2]).toEqual('Performance.enable');
     expect(executedCommands[3]).toEqual('Performance.getMetrics');
-    expect(responseFailed).toEqual([]);
+    expect(responseFailed).toEqual([{metric: {}}]);
 
     mockClient.send.mockImplementation((command, callback) => {
       executedCommands.push(command);
@@ -164,13 +157,12 @@ describe('Chromium client', () => {
     const responseEmptyMetrics = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStart');
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
-    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(true);
     expect(executedCommands[3]).toEqual('Performance.getMetrics');
-    expect(responseEmptyMetrics).toEqual([]);
+    expect(responseEmptyMetrics).toEqual([{metric: {}}]);
   });
 
   it('should skip custom observer if client is not ready', async () => {
-    (chromiumDevelopmentTools as any).client = undefined;
+    (chromiumDevelopmentTools as any).clients = {};
     const response = await chromiumDevelopmentTools.runCustomObserver(customObserver);
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
@@ -191,10 +183,9 @@ describe('Chromium client', () => {
     const responseStop = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStop');
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
-    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(true);
     expect(executedCommands[0]).toEqual('Performance.enable');
     expect(executedCommands[1]).toEqual('Performance.getMetrics');
-    expect(responseStop).toEqual([{MetricOne: 456, MetricTwo: 123, MetricThree: 789}]);
+    expect(responseStop).toEqual([{metric: {MetricOne: 456, MetricTwo: 123, MetricThree: 789}}]);
 
     mockClient.send.mockImplementation((command, callback) => {
       executedCommands.push(command);
@@ -207,10 +198,9 @@ describe('Chromium client', () => {
     const responseFailed = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStart');
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
-    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(true);
     expect(executedCommands[2]).toEqual('Performance.enable');
     expect(executedCommands[3]).toEqual('Performance.getMetrics');
-    expect(responseFailed).toEqual([]);
+    expect(responseFailed).toEqual([{metric: {}}]);
 
     mockClient.send.mockImplementation((command, callback) => {
       executedCommands.push(command);
@@ -223,9 +213,8 @@ describe('Chromium client', () => {
     const responseEmptyMetrics = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStart');
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
-    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(true);
     expect(executedCommands[3]).toEqual('Performance.getMetrics');
-    expect(responseEmptyMetrics).toEqual([]);
+    expect(responseEmptyMetrics).toEqual([{metric: {}}]);
   });
 
   it('should run a custom observer', async () => {
@@ -238,10 +227,31 @@ describe('Chromium client', () => {
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
     expect(executedCommands[0]).toEqual('Custom.Protocol.Command');
-    expect(response).toEqual([{success: true}]);
+    expect(response).toEqual([{metric: {success: true}}]);
   });
 
-  it('should destroy client', async () => {
+  it('should skip connection to specific target if already exists', async () => {
+    (chromiumDevelopmentTools as any).buildOptions = jest.fn();
+    await (chromiumDevelopmentTools as any).connectToTarget({id: 'mockClient'});
+
+    expect((chromiumDevelopmentTools as any).clients['mockClient']).toBeTruthy();
+    expect((chromiumDevelopmentTools as any).buildOptions).not.toHaveBeenCalled();
+  });
+
+  it('should connect to specific target', async () => {
+    const response = (chromiumDevelopmentTools as any).buildOptions('mockTarget');
+
+    expect(response.target).toEqual('mockTarget');
+  });
+
+  it('should build options with targetId', async () => {
+    (chromiumDevelopmentTools as any).buildOptions = jest.fn();
+    await (chromiumDevelopmentTools as any).connectToTarget({id: 'mockTarget'});
+
+    expect((chromiumDevelopmentTools as any).buildOptions).toHaveBeenCalled();
+  });
+
+  it('should destroy all client', async () => {
     const executedCommands: string[] = [];
     mockClient.send.mockImplementation(async command =>
       new Promise(resolve => {
@@ -251,7 +261,21 @@ describe('Chromium client', () => {
     );
     await chromiumDevelopmentTools.destroy();
 
-    expect((chromiumDevelopmentTools as any).isPerformanceActive).toBe(false);
     expect(executedCommands[0]).toEqual('IO.close');
+  });
+
+  it('should destroy specific client that exist', async () => {
+    const executedCommands: string[] = [];
+    mockClient.send.mockImplementation(async command =>
+      new Promise(resolve => {
+        executedCommands.push(command);
+        resolve(true);
+      }),
+    );
+    await chromiumDevelopmentTools.destroy('mockClient');
+    await chromiumDevelopmentTools.destroy('mockClientNotExisting');
+
+    expect(executedCommands[0]).toEqual('IO.close');
+    expect(executedCommands.length).toEqual(1);
   });
 });

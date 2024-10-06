@@ -21,6 +21,13 @@ export enum HookOrderToMeasurementOffsetOrder {
 export type Metric = Record<string, string | number>;
 
 /**
+ * Metric type specific for targets
+ */
+export type TargetMetric = {
+  metric: Metric;
+} & Partial<CDP.Target>;
+
+/**
  * Common interface to expose performance metrics during a timeframe
  */
 export type PerformanceMetrics = {
@@ -47,22 +54,22 @@ export type PerformanceMetrics = {
   /**
    * Metrics gathered from the extractors
    */
-  startMetrics: Metric[];
+  startMetrics: TargetMetric[];
 
   /**
    * Metrics gathered from the extractors
    */
-  stopMetrics: Metric[];
+  stopMetrics: TargetMetric[];
 };
 
 /**
  * Start metric measurement and write the preliminary result into the storage
  */
-export type OnStartMeasure = <T extends CDP.Client>(accumulator: Metric[], developmentTools: T) => Promise<void>;
+export type OnStartMeasure = <T extends CDP.Client>(accumulator: Metric, developmentTools: T) => Promise<void>;
 
 /**
  * Stop metric measurement and write the result into the storage
  */
-export type OnStopMeasure = <T extends CDP.Client>(accumulator: Metric[], developmentTools: T) => Promise<void>;
+export type OnStopMeasure = <T extends CDP.Client>(accumulator: Metric, developmentTools: T) => Promise<void>;
 
 export {type default as CDP} from 'chrome-remote-interface';

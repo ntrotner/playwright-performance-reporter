@@ -55,10 +55,10 @@ const PlayWrightPerformanceReporterOptions: Options = {
           someMetric: {
             name: 'someMetric',
             onStart: (accumulator: Metric[], client: CDP.Client) => new Promise(resolve => {
-                client.send('Performance.getMetrics', (error, response) => { accumulator.push(response); resolve(); });
+                client.send('Performance.getMetrics', (error, response) => { Object.assign(accumulator, response); resolve(); });
             }),
             onStop: (accumulator: Metric[], client: CDP.Client) => new Promise(resolve => {
-                client.send('Performance.getMetrics', (error, response) => { accumulator.push(response); resolve(); });
+                client.send('Performance.getMetrics', (error, response) => { Object.assign(accumulator, response); resolve(); });
             })
           }
         }
@@ -158,20 +158,26 @@ the time delta in milliseconds between the request until the browser provides al
   "f957b5d47615b372c20ea69a16f5f344": {
     "name": "fill mock data",
     "startMetrics": [
-      {
-        "usedJsHeapSize": 8863700
-      },
-      {
-        "totalJsHeapSize": 12873728
-      }
+        {
+          "id": "77713049204E5C0865F8220A34F7FC0C",
+          "title": "template.de",
+          "type": "page",
+          "url": "http://template.de/",
+          "metric": {
+            "totalJsHeapSize": 12873728
+          }
+        }
     ],
     "stopMetrics": [
-      {
-        "usedJsHeapSize": 9055816
-      },
-      {
-        "totalJsHeapSize": 12873728
-      }
+        {
+          "id": "77713049204E5C0865F8220A34F7FC0C",
+          "title": "template.de",
+          "type": "page",
+          "url": "http://template.de/",
+          "metric": {
+            "totalJsHeapSize": 12873728
+          }
+        }
     ],
     "startMeasurement": 1724001218914,
     "endMeasurement": 1724001218947,

@@ -1,9 +1,9 @@
 import {
   type SupportedBrowsers,
-  type Metric,
   type Metrics,
   type OnStartMeasure,
   type OnStopMeasure,
+  type TargetMetric,
 } from '../../types/index.js';
 import {type BrowserClient} from '../client.js';
 
@@ -21,14 +21,14 @@ export class WebkitDevelopmentTools implements BrowserClient {
   /**
    * @inheritdoc
    */
-  async getMetric(metric: Metrics): Promise<Metric[]> {
+  async getMetric(metric: Metrics): Promise<TargetMetric[]> {
     return [];
   }
 
   /**
    * @inheritdoc
    */
-  async runCustomObserver(observer: OnStartMeasure | OnStopMeasure): Promise<Metric[]> {
+  async runCustomObserver(observer: OnStartMeasure | OnStopMeasure): Promise<TargetMetric[]> {
     return [];
   }
 

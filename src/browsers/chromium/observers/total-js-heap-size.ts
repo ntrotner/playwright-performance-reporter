@@ -12,21 +12,21 @@ export class TotalJsHeapSize implements MetricObserver {
   /**
    * @inheritdoc
    */
-  async onStart(accumulator: Metric[], developmentTools: CDP.Client): Promise<void> {
+  async onStart(accumulator: Metric, developmentTools: CDP.Client): Promise<void> {
     await this.common(accumulator, developmentTools);
   }
 
   /**
    * @inheritdoc
    */
-  async onStop(accumulator: Metric[], developmentTools: CDP.Client): Promise<void> {
+  async onStop(accumulator: Metric, developmentTools: CDP.Client): Promise<void> {
     await this.common(accumulator, developmentTools);
   }
 
   /**
    * Common function for onStart and onStop hook
    */
-  private async common(accumulator: Metric[], client: CDP.Client) {
+  private async common(accumulator: Metric, client: CDP.Client) {
     return new Promise(resolve => {
       client.send('Performance.getMetrics', (error, cdpResponse) => {
         if (!cdpResponse || Boolean(error)) {
@@ -40,7 +40,7 @@ export class TotalJsHeapSize implements MetricObserver {
           return;
         }
 
-        accumulator.push({[this.name]: foundMetric.value});
+        Object.assign(accumulator, {[this.name]: foundMetric.value});
         resolve(true);
       });
     });

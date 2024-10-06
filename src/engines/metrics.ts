@@ -5,10 +5,10 @@ import {WebkitDevelopmentTools} from '../browsers/webkit/index.js';
 import {
   type OnStartMeasure,
   type OnStopMeasure,
-  type Metric,
   type Metrics,
   type SupportedBrowsers,
   type HookOrder,
+  type TargetMetric,
 } from '../types/index.js';
 
 export class MetricsEngine {
@@ -76,13 +76,9 @@ export class MetricsEngine {
    *
    * @param metric which metric to measure
    */
-  public async getMetric(metric: Metrics, hookOrder: HookOrder): Promise<Metric | undefined> {
+  public async getMetric(metric: Metrics, hookOrder: HookOrder): Promise<TargetMetric[] | undefined> {
     try {
-      const newMetric = await this.browser?.getMetric(metric, hookOrder);
-
-      if (newMetric) {
-        return newMetric[0];
-      }
+      return await this.browser?.getMetric(metric, hookOrder);
     } catch {}
 
     return undefined;
@@ -93,13 +89,9 @@ export class MetricsEngine {
    *
    * @param customMetric user defined fetch function
    */
-  public async runCustomMetric(customMetric: OnStartMeasure | OnStopMeasure): Promise<Metric | undefined> {
+  public async runCustomMetric(customMetric: OnStartMeasure | OnStopMeasure): Promise<TargetMetric[] | undefined> {
     try {
-      const newMetric = await this.browser?.runCustomObserver(customMetric);
-
-      if (newMetric) {
-        return newMetric[0];
-      }
+      return await this.browser?.runCustomObserver(customMetric);
     } catch {}
 
     return undefined;
