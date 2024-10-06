@@ -177,8 +177,8 @@ export class PerformanceReporter implements Reporter {
     this.results[caseId][stepId][HookOrderToMeasurementOrder[hookOrder]] = Date.now();
     this.results[caseId][stepId][HookOrderToMeasurementOffsetOrder[hookOrder]] = endOfTrigger - startOfTrigger;
     this.results[caseId][stepId][HookOrderToMetricOrder[hookOrder]].push(
-      ...resolvedMetrics.filter(m => m !== undefined),
-      ...resolvedCustomMetrics.filter(m => m !== undefined),
+      ...resolvedMetrics.filter(m => m !== undefined).flat(),
+      ...resolvedCustomMetrics.filter(m => m !== undefined).flat(),
     );
   }
 }

@@ -316,10 +316,10 @@ describe('Playwright Performance Reporter', () => {
                 metric1: {
                   name: 'metric1',
                   async onStart(accumulator) {
-                    accumulator.push({metric: 123});
+                    Object.assign(accumulator, {metric: 123});
                   },
                   async onStop(accumulator) {
-                    accumulator.push({metric: 456});
+                    Object.assign(accumulator, {metric: 456});
                   },
                 },
               },
