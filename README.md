@@ -135,20 +135,44 @@ the time delta in milliseconds between the request until the browser provides al
   "08e5cdf7227924757e4a8f402ac2167d": {
     "name": "click login",
     "startMetrics": [
-      {
-        "usedJsHeapSize": 8653828
-      },
-      {
-        "totalJsHeapSize": 12611584
-      }
+        {
+          "id": "77713049204E5C0865F8220A34F7FC0C",
+          "title": "template.de",
+          "type": "page",
+          "url": "http://template.de/",
+          "metric": {
+            "usedJsHeapSize": 12873728
+          }
+        },
+        {
+          "id": "77713049204E5C0865F8220A34F7FC0C",
+          "title": "template.de",
+          "type": "page",
+          "url": "http://template.de/",
+          "metric": {
+            "totalJsHeapSize": 12873728
+          }
+        }
     ],
     "stopMetrics": [
-      {
-        "usedJsHeapSize": 8863700
-      },
-      {
-        "totalJsHeapSize": 12873728
-      }
+        {
+          "id": "77713049204E5C0865F8220A34F7FC0C",
+          "title": "template.de",
+          "type": "page",
+          "url": "http://template.de/",
+          "metric": {
+            "usedJsHeapSize": 12873728
+          }
+        },
+        {
+          "id": "77713049204E5C0865F8220A34F7FC0C",
+          "title": "template.de",
+          "type": "page",
+          "url": "http://template.de/",
+          "metric": {
+            "totalJsHeapSize": 12873728
+          }
+        }
     ],
     "startMeasurement": 1724001218666,
     "endMeasurement": 1724001218914,
