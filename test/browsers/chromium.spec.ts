@@ -9,6 +9,7 @@ import {
   type OnStartMeasure,
 } from '../../src/types/index.js';
 import {ChromiumCDPFixture} from '../fixtures/chromium-cdp.fixture.js';
+import {LockFixture} from '../fixtures/index.js';
 
 const customObserver: OnStartMeasure = async (accumulator, client) => new Promise(resolve => {
   client.send('Custom.Protocol.Command' as any, (error, response) => {
@@ -38,6 +39,7 @@ describe('Chromium client', () => {
     mockClient = new ChromiumCDPFixture();
     // Disable connect function as it's environment specific and I don't care mocking the CDP client
     chromiumDevelopmentTools.connect = jest.fn();
+    (chromiumDevelopmentTools as any).connectLock = new LockFixture();
     (chromiumDevelopmentTools as any).clients = {'mockClient': mockClient};
   });
 
@@ -49,6 +51,15 @@ describe('Chromium client', () => {
     const response = await chromiumDevelopmentTools.getMetric('unrelated' as ChromiumSupportedMetrics, 'onStart');
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
+    expect(response).toEqual([]);
+  });
+
+  it('should shortly remain in the waiting stage due to connect lock', async () => {
+    (chromiumDevelopmentTools as any).connectLock.isLocked = jest.fn().mockReturnValue(true);
+    const response = await chromiumDevelopmentTools.getMetric('unrelated' as ChromiumSupportedMetrics, 'onStart');
+
+    expect((chromiumDevelopmentTools as any).connectLock.notifyOnUnlock).toHaveBeenCalled();
+    expect((chromiumDevelopmentTools as any).connect).not.toHaveBeenCalled();
     expect(response).toEqual([]);
   });
 
