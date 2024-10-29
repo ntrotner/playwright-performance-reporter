@@ -10,6 +10,7 @@ import {
   type OnStopMeasure,
   type TargetMetric,
 } from '../../types/index.js';
+import {Lock} from '../../helpers/index.js';
 import {
   AllPerformanceMetrics,
   TotalJsHeapSize,
@@ -28,6 +29,11 @@ export class ChromiumDevelopmentTools implements BrowserClient {
   private readonly targets: Record<string, CDP.Target> = {};
 
   /**
+   * Lock to indicate if connection request is going on
+   */
+  private readonly connectLock = new Lock();
+
+  /**
    * @inheritdoc
    */
   constructor(private readonly options: Record<string, any>) {}
@@ -36,11 +42,18 @@ export class ChromiumDevelopmentTools implements BrowserClient {
    * @inheritdoc
    */
   public async connect() {
+    let unlockCallback;
+    while (!unlockCallback) {
+      unlockCallback = this.connectLock.lock();
+    }
+
     try {
       const customOptions = this.buildOptions();
       const targetList = await CDP.List(customOptions);
       await Promise.allSettled(targetList.map(async target => this.connectToTarget(target)));
     } catch {}
+
+    unlockCallback();
   }
 
   /**
@@ -48,29 +61,38 @@ export class ChromiumDevelopmentTools implements BrowserClient {
    */
   public async getMetric(metric: ChromiumSupportedMetrics, hookOrder: HookOrder): Promise<TargetMetric[]> {
     return new Promise(async resolve => {
-      const targetMetric: TargetMetric[] = [];
-      await this.connect();
+      let newConnectionRequests: Promise<void> | undefined;
+      if (this.connectLock.isLocked()) {
+        await this.connectLock.notifyOnUnlock();
+      } else {
+        newConnectionRequests = this.connect();
+      }
 
-      await Promise.allSettled(
-        Object.keys(this.clients).map(async targetId => {
-          const newTargetMetric: TargetMetric = {
-            ...this.targets[targetId],
-            metric: {},
-          };
+      const currentAvailableTargets = Object.keys(this.clients);
+      const targetMetric: Record<string, TargetMetric> = {};
+      const metricRequests = [];
 
-          const mapping = this.mapMetric(metric);
-          const client = this.clients[targetId];
-          if (!mapping || !client) {
-            return;
-          }
-
-          await this.activateDomain(targetId, mapping);
-          await mapping[hookOrder](newTargetMetric.metric, client);
-          targetMetric.push(newTargetMetric);
-        }),
+      // Get metrics from available targets
+      metricRequests.push(
+        ...currentAvailableTargets.map(async targetId => this.runPredefinedMetricFetch(targetId, targetMetric, metric, hookOrder)),
       );
 
-      resolve(targetMetric);
+      // Check if new targets were yielded from connection
+      await newConnectionRequests;
+      const newTargets = Object.keys(this.clients).filter(targetId => !currentAvailableTargets.includes(targetId));
+      if (newTargets.length > 0) {
+        metricRequests.push(
+          ...newTargets.map(async targetId => this.runPredefinedMetricFetch(targetId, targetMetric, metric, hookOrder)),
+        );
+      }
+
+      // Wait for metric request to be done and fill targets with metadata
+      await Promise.allSettled(metricRequests);
+      for (const targetId of Object.keys(targetMetric)) {
+        Object.assign(targetMetric[targetId], {...this.targets[targetId]});
+      }
+
+      resolve(Object.values(targetMetric));
     });
   }
 
@@ -140,6 +162,30 @@ export class ChromiumDevelopmentTools implements BrowserClient {
    */
   public getBrowserName(): SupportedBrowsers {
     return 'chromium';
+  }
+
+  /**
+   * Fetch metric for a target
+   *
+   * @param targetId target to fill
+   * @param targetMetric mapping of all targets
+   * @param metric type of metric
+   * @param hookOrder hook order
+   */
+  private async runPredefinedMetricFetch(targetId: string, targetMetric: Record<string, TargetMetric>, metric: ChromiumSupportedMetrics, hookOrder: HookOrder): Promise<void> {
+    const newTargetMetric: TargetMetric = {
+      metric: {},
+    };
+
+    const mapping = this.mapMetric(metric);
+    const client = this.clients[targetId];
+    if (!mapping || !client) {
+      return;
+    }
+
+    await this.activateDomain(targetId, mapping);
+    await mapping[hookOrder](newTargetMetric.metric, client);
+    targetMetric[targetId] = newTargetMetric;
   }
 
   /**
