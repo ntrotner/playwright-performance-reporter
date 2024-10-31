@@ -120,6 +120,9 @@ const mockTestResult: TestResult = {
   workerIndex: 0,
 };
 
+jest.useFakeTimers();
+jest.spyOn(global, 'setInterval');
+
 describe('Playwright Performance Reporter', () => {
   let options: Options;
   let playwrightPerformanceReporter: PlaywrightPerformanceReporter;
@@ -346,6 +349,44 @@ describe('Playwright Performance Reporter', () => {
       await (playwrightPerformanceReporter as any).executeMetrics(pivot, customTest, 'onTest', 'onStop', 'chromium');
 
       expect(mockMetricsEngine.runCustomMetric).toHaveBeenCalledTimes(0);
+    });
+
+    it('should register sampling for static metrics and destroy afterwards', async () => {
+      const pivot = 'Test';
+      const customTest = 'Test - Case';
+      const customName = 'customName';
+
+      const optionsWithSamplingMetrics = {
+        ...options,
+        browsers: {
+          ...options.browsers,
+          chromium: {
+            ...options.browsers.chromium,
+            onTest: {
+              metrics: ['allPerformanceMetrics'],
+              sampleMetrics: {
+                allPerformanceMetrics: {
+                  samplingTimeoutInMilliseconds: 10
+                }
+              }
+            },
+          },
+        },
+      } as Options;
+      (playwrightPerformanceReporter as any).options = optionsWithSamplingMetrics;
+      mockMetricsEngine.getMetric.mockReturnValue(Promise.resolve([{metric1: 123}]));
+      (playwrightPerformanceReporter as any).registerTestPerformance(pivot, customTest, customName);
+      await (playwrightPerformanceReporter as any).executeSamplingMetrics('1f', '2f', 'onTest', 'chromium');
+
+      expect((playwrightPerformanceReporter as any).samplingRunner.get('onTest').size).toEqual(1);
+
+      (playwrightPerformanceReporter as any).destroySamplingRunner('1f', '2f', 'onTest');
+
+      expect((playwrightPerformanceReporter as any).samplingRunner.get('onTest').size).toEqual(0);
+
+      expect(setInterval).toHaveBeenLastCalledWith(expect.any(Function), 10);
+      jest.advanceTimersByTime(1000);
+      jest.runAllTimers();
     });
 
     it('should not propagate tests to the metricsEngine if no metrics are registered', () => {

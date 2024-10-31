@@ -17,6 +17,8 @@ import {
   HookOrderToMeasurementOrder,
   HookOrderToMeasurementOffsetOrder,
   testCaseParent,
+  metrics,
+  type Metrics,
 } from '../types/index.js';
 import {
   buildTestCaseIdentifier,
@@ -41,6 +43,14 @@ export class PerformanceReporter implements Reporter {
    * Metrics engine to retrieve metrics from a browser
    */
   private readonly metricsEngine: MetricsEngine;
+
+  /**
+   * Reference to the unsubscribe function for a hook and test id
+   */
+  private readonly samplingRunner = new Map<Hooks, Map<string, () => void>>([
+    ['onTest', new Map()],
+    ['onTestStep', new Map()],
+  ]);
 
   constructor(private readonly options: Options) {
     this.metricsEngine = new MetricsEngine();
@@ -74,6 +84,7 @@ export class PerformanceReporter implements Reporter {
 
     this.registerTestPerformance(id, testCaseParent, name);
     await this.executeMetrics(id, testCaseParent, 'onTest', 'onStart', browserName);
+    await this.executeSamplingMetrics(id, testCaseParent, 'onTest', browserName);
   }
 
   async onTestEnd(test: TestCase, result: TestResult) {
@@ -89,6 +100,7 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
+    void this.destroySamplingRunner(id, testCaseParent, 'onTest');
     await this.executeMetrics(id, testCaseParent, 'onTest', 'onStop', browserName);
     this.metricsEngine.destroy();
   }
@@ -113,6 +125,7 @@ export class PerformanceReporter implements Reporter {
 
     this.registerTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
     await this.executeMetrics(caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStart', browserName);
+    await this.executeSamplingMetrics(caseIdentifier.id, stepIdentifier.id, 'onTestStep', browserName);
   }
 
   async onStepEnd(test: TestCase, result: TestResult, step: TestStep) {
@@ -133,6 +146,7 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
+    void this.destroySamplingRunner(caseIdentifier.id, stepIdentifier.id, 'onTestStep');
     await this.executeMetrics(caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStop', browserName);
   }
 
@@ -147,6 +161,18 @@ export class PerformanceReporter implements Reporter {
     this.idToNameMapping.set(caseId, name);
     this.results[caseId] ||= {};
     this.results[caseId][stepId] ||= buildTestPerformance(name);
+  }
+
+  /**
+   * Destroys sampling for metrics
+   *
+   * @param caseId identifier for case
+   * @param stepId identifier for step
+   * @param hook playwright hook
+   */
+  private async destroySamplingRunner(caseId: string, stepId: string, hook: Hooks) {
+    this.samplingRunner.get(hook)?.get(caseId + stepId)?.call(this);
+    this.samplingRunner.get(hook)?.delete(caseId + stepId);
   }
 
   /**
@@ -174,12 +200,73 @@ export class PerformanceReporter implements Reporter {
     const resolvedCustomMetrics = await customMetrics;
     const endOfTrigger = Date.now();
 
-    this.results[caseId][stepId][HookOrderToMeasurementOrder[hookOrder]] = Date.now();
+    this.results[caseId][stepId][HookOrderToMeasurementOrder[hookOrder]] = endOfTrigger;
     this.results[caseId][stepId][HookOrderToMeasurementOffsetOrder[hookOrder]] = endOfTrigger - startOfTrigger;
     this.results[caseId][stepId][HookOrderToMetricOrder[hookOrder]].push(
       ...resolvedMetrics.filter(m => m !== undefined).flat(),
       ...resolvedCustomMetrics.filter(m => m !== undefined).flat(),
     );
+  }
+
+  /**
+   * Setup sampling for existing metrics and custom metrics
+   *
+   * @param caseId identifier for case
+   * @param stepId identifier for step
+   * @param hook playwright hook
+   * @param browser which settings and metrics to use
+   */
+  private async executeSamplingMetrics(caseId: string, stepId: string, hook: Hooks, browser: SupportedBrowsers) {
+    const sampleMetrics = this.options.browsers[browser]?.[hook]?.sampleMetrics;
+    if (!sampleMetrics) {
+      return;
+    }
+
+    const samplingArguments: Array<[() => Promise<void>, number] | undefined> = Object.entries(sampleMetrics).map(([metricName, metricSampling]) => {
+      const registeredMetrics = this.options.browsers[browser]?.[hook]?.metrics;
+      const customMetrics = this.options.browsers[browser]?.[hook]?.customMetrics;
+      const isPredefinedMetric = (registeredMetrics ?? []).find(registeredMetric => registeredMetric === metricName);
+      const isCustomMetric = Object.values(customMetrics ?? {}).find(value => value.name === metricName);
+
+      if (registeredMetrics && isPredefinedMetric) {
+        return [
+          async () => {
+            const metricsResponse = await this.metricsEngine.getMetric(metricName as Metrics, 'onStart');
+
+            if (metricsResponse) {
+              this.results[caseId][stepId].samplingMetrics.push(...metricsResponse);
+            }
+          },
+          metricSampling.samplingTimeoutInMilliseconds,
+        ];
+      }
+
+      if (customMetrics && isCustomMetric) {
+        return [
+          async () => {
+            const metricsResponse = await this.metricsEngine.runCustomMetric(customMetrics[metricName].onStart);
+
+            if (metricsResponse) {
+              this.results[caseId][stepId].samplingMetrics.push(...metricsResponse);
+            }
+          },
+          metricSampling.samplingTimeoutInMilliseconds,
+        ];
+      }
+
+      return undefined;
+    });
+
+    for (const sampling of samplingArguments) {
+      if (!sampling) {
+        continue;
+      }
+
+      const interval = setInterval(...sampling);
+      this.samplingRunner.get(hook)?.set(caseId + stepId, () => {
+        clearInterval(interval);
+      });
+    }
   }
 }
 
