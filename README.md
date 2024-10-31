@@ -61,6 +61,11 @@ const PlayWrightPerformanceReporterOptions: Options = {
                 client.send('Performance.getMetrics', (error, response) => { Object.assign(accumulator, response); resolve(); });
             })
           }
+        },
+        sampleMetrics: {
+          totalJsHeapSize: {
+            samplingTimeoutInMilliseconds: 1000
+          }
         }
       }
     }

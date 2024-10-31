@@ -28,6 +28,13 @@ export type MetricObserver = {
 };
 
 /**
+ * Define which metric should regularly be requested
+ */
+export type MetricSampling = {
+  samplingTimeoutInMilliseconds: number;
+};
+
+/**
  * Browsers that have been tested to work with performance metric extraction
  */
 export const supportedBrowsers = ['chromium', 'webkit', 'firefox'] as const;
@@ -55,6 +62,7 @@ export type Options = {
       [hook in Hooks]?: {
         metrics: Array<typeof browsersSupportingMetrics[browser][number] & Metrics>;
         customMetrics?: Record<string, MetricObserver>;
+        sampleMetrics?: Record<string, MetricSampling>;
       }
     }
   };

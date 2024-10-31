@@ -60,6 +60,11 @@ export type PerformanceMetrics = {
    * Metrics gathered from the extractors
    */
   stopMetrics: TargetMetric[];
+
+  /**
+   * Metrics gathered from the extractors in sampling mode
+   */
+  samplingMetrics: TargetMetric[];
 };
 
 /**

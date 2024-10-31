@@ -12,6 +12,7 @@ export function buildTestPerformance(name: string): TestPerformance {
     name,
     startMetrics: [],
     stopMetrics: [],
+    samplingMetrics: [],
     startMeasurement: Date.now(),
     endMeasurement: Date.now(),
   };
