@@ -3,11 +3,10 @@
 [![codecov](https://codecov.io/github/ntrotner/playwright-performance-reporter/graph/badge.svg?token=3UGRT92UT9)](https://codecov.io/github/ntrotner/playwright-performance-reporter)
 [![version](https://img.shields.io/npm/v/playwright-performance-reporter.svg?style=flat-square)](https://www.npmjs.com/package/playwright-performance-reporter)
 
-> Metrics from the dev tools to measure performance
+> Metrics from the browser dev tools to inspect performance metrics
 
 > [!CAUTION]
-> This library is work in progress. The measurement is limited to Chromium and to a primitive test suite.
-> Complex test suites/cases were not considered, which will be supported down the line.
+> This library is work in progress. The measurement is limited to Chromium.
 > On the long run the goal is to
 > - Support Firefox and Webkit
 > - Useful amount of metrics to choose from
@@ -17,6 +16,10 @@
 
 ```bash
 npm install playwright-performance-reporter --save-dev
+```
+or
+```bash
+yarn add playwright-performance-reporter --dev
 ```
 
 ## Usage
@@ -34,39 +37,19 @@ export default defineConfig({
 
 ### Setup Reporter
 To register the reporter, include the code blow in your playwright config.
-Please see the subsections for more details about browser specific cases.
+Please see the subsections for more details about browser specific cases and advanced configurations.
 
-If you want to extend it with custom metrics, an entry exists for `customMetrics`, where the callback will get
-the accumulator and CDP client. Please see the example below how to use it.
-
-For ease of implementation, the passed object can implement the interface `MetricObserver`.
 
 ```ts
 import type { CDP, Options, Metric } from 'playwright-performance-reporter';
 
-const PlayWrightPerformanceReporterOptions: Options = {
+const PlaywrightPerformanceReporterOptions: Options = {
   outputDir: '/your/path/to/dir',
-  outputFile: 'output.json',
+  outputFile: `${Date.now()}.json`,
   browsers: {
     chromium: {
       onTestStep: {
-        metrics: ['usedJsHeapSize', 'totalJsHeapSize'],
-        customMetrics: {
-          someMetric: {
-            name: 'someMetric',
-            onStart: (accumulator: Metric[], client: CDP.Client) => new Promise(resolve => {
-                client.send('Performance.getMetrics', (error, response) => { Object.assign(accumulator, response); resolve(); });
-            }),
-            onStop: (accumulator: Metric[], client: CDP.Client) => new Promise(resolve => {
-                client.send('Performance.getMetrics', (error, response) => { Object.assign(accumulator, response); resolve(); });
-            })
-          }
-        },
-        sampleMetrics: {
-          totalJsHeapSize: {
-            samplingTimeoutInMilliseconds: 1000
-          }
-        }
+        metrics: ['allPerformanceMetrics'],
       }
     }
   }
@@ -75,12 +58,11 @@ const PlayWrightPerformanceReporterOptions: Options = {
 export default defineConfig({
   ...
   reporter: [
-    ['playwright-performance-reporter', PlayWrightPerformanceReporterOptions]
+    ['playwright-performance-reporter', PlaywrightPerformanceReporterOptions]
   ],
  ...
 });
 ```
-
 
 ### Chromium
 
@@ -106,6 +88,70 @@ The reporter will try to extract that port during start-up.
     }
   }
 },
+```
+
+## Advanced Configurations
+
+### Sampling
+Relying solely on the start and stop metric in a long running step leads to inaccuracies and
+requires a large set of runs to have a meaningful amount of metrics.
+By registering a metric to be collected every `samplingTimeoutInMilliseconds` the sampling output will
+be written to `samplingMetrics`, similar to `startMetrics` or `startMetrics`.
+Make sure to use the unique name of the metric to register the sampling.
+
+```ts
+const PlaywrightPerformanceReporterOptions: Options = {
+  ...
+  browsers: {
+    chromium: {
+      onTestStep: {
+        metrics: ['usedJsHeapSize', 'totalJsHeapSize'],
+        customMetrics: {
+          someMetric: {
+            ...
+          }
+        },
+        sampleMetrics: {
+          totalJsHeapSize: {
+            samplingTimeoutInMilliseconds: 1000
+          },
+          someMetric: {
+            samplingTimeoutInMilliseconds: 5000
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### Custom Metric Observer
+If you want to extend it with custom metrics, an entry exists for `customMetrics`, where the callback will get
+the accumulator and CDP client. Please see the example below how to use it, or checkout the [allPerformanceMetrics](src/browsers/chromium/observers/all-performance-metrics.ts) implementation.
+
+For ease of implementation, the passed object can implement the interface `MetricObserver`.
+By using custom metrics it's possible to make observers stateful and e.g. make the next output dependent on the previous one.
+
+```ts
+import type { MetricObserver, Options } from 'playwright-performance-reporter';
+
+class NewMetric implements MetricObserver {
+  ...
+}
+
+const PlaywrightPerformanceReporterOptions: Options = {
+  outputDir: '/home/nikita',
+  outputFile: 'output.json',
+  browsers: {
+    chromium: {
+      onTestStep: {
+        customMetrics: {
+          newMetric: new NewMetric()
+        }
+      }
+    }
+  }
+}
 ```
 
 ## Output
@@ -134,85 +180,4 @@ even though Playwright instructed the browser to continue to the next step. This
 To check if the output is invalid, the values `startMeasurementOffset` and `endMeasurementOffset` are provided, which measure
 the time delta in milliseconds between the request until the browser provides all metrics.
 
-```json
-{
-  ...
-  "08e5cdf7227924757e4a8f402ac2167d": {
-    "name": "click login",
-    "startMetrics": [
-        {
-          "id": "77713049204E5C0865F8220A34F7FC0C",
-          "title": "template.de",
-          "type": "page",
-          "url": "http://template.de/",
-          "metric": {
-            "usedJsHeapSize": 12873728
-          }
-        },
-        {
-          "id": "77713049204E5C0865F8220A34F7FC0C",
-          "title": "template.de",
-          "type": "page",
-          "url": "http://template.de/",
-          "metric": {
-            "totalJsHeapSize": 12873728
-          }
-        }
-    ],
-    "stopMetrics": [
-        {
-          "id": "77713049204E5C0865F8220A34F7FC0C",
-          "title": "template.de",
-          "type": "page",
-          "url": "http://template.de/",
-          "metric": {
-            "usedJsHeapSize": 12873728
-          }
-        },
-        {
-          "id": "77713049204E5C0865F8220A34F7FC0C",
-          "title": "template.de",
-          "type": "page",
-          "url": "http://template.de/",
-          "metric": {
-            "totalJsHeapSize": 12873728
-          }
-        }
-    ],
-    "startMeasurement": 1724001218666,
-    "endMeasurement": 1724001218914,
-    "startMeasurementOffset": 4,
-    "endMeasurementOffset": 3
-  },
-  "f957b5d47615b372c20ea69a16f5f344": {
-    "name": "fill mock data",
-    "startMetrics": [
-        {
-          "id": "77713049204E5C0865F8220A34F7FC0C",
-          "title": "template.de",
-          "type": "page",
-          "url": "http://template.de/",
-          "metric": {
-            "totalJsHeapSize": 12873728
-          }
-        }
-    ],
-    "stopMetrics": [
-        {
-          "id": "77713049204E5C0865F8220A34F7FC0C",
-          "title": "template.de",
-          "type": "page",
-          "url": "http://template.de/",
-          "metric": {
-            "totalJsHeapSize": 12873728
-          }
-        }
-    ],
-    "startMeasurement": 1724001218914,
-    "endMeasurement": 1724001218947,
-    "startMeasurementOffset": 2,
-    "endMeasurementOffset": 2
-  },
- ...
-}
-```
+See [example/output.json](example/output.json) for detailed reporter output.

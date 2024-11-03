@@ -321,6 +321,9 @@ describe('Playwright Performance Reporter', () => {
                   async onStart(accumulator) {
                     Object.assign(accumulator, {metric: 123});
                   },
+                  async onSampling(accumulator) {
+                    Object.assign(accumulator, {metric: 123});
+                  },
                   async onStop(accumulator) {
                     Object.assign(accumulator, {metric: 456});
                   },
