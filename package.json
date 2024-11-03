@@ -83,6 +83,10 @@
           "preset": "conventionalcommits",
           "releaseRules": [
             {
+              "type": "chore",
+              "release": "patch"
+            },
+            {
               "type": "fix",
               "release": "patch"
             },
