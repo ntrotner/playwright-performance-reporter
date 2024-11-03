@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/github/ntrotner/playwright-performance-reporter/graph/badge.svg?token=3UGRT92UT9)](https://codecov.io/github/ntrotner/playwright-performance-reporter)
 [![version](https://img.shields.io/npm/v/playwright-performance-reporter.svg?style=flat-square)](https://www.npmjs.com/package/playwright-performance-reporter)
 
-> Metrics from the browser dev tools to inspect performance metrics
+> Collect performance metrics from the browser dev tools during playwright test execution
 
 > [!CAUTION]
 > This library is work in progress. The measurement is limited to Chromium.
@@ -140,7 +140,7 @@ class NewMetric implements MetricObserver {
 }
 
 const PlaywrightPerformanceReporterOptions: Options = {
-  outputDir: '/home/nikita',
+  outputDir: '/your/path/to/dir',
   outputFile: 'output.json',
   browsers: {
     chromium: {
