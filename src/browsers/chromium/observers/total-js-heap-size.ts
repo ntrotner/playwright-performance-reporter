@@ -19,6 +19,13 @@ export class TotalJsHeapSize implements MetricObserver {
   /**
    * @inheritdoc
    */
+  async onSampling(accumulator: Metric, developmentTools: CDP.Client): Promise<void> {
+    await this.common(accumulator, developmentTools);
+  }
+
+  /**
+   * @inheritdoc
+   */
   async onStop(accumulator: Metric, developmentTools: CDP.Client): Promise<void> {
     await this.common(accumulator, developmentTools);
   }

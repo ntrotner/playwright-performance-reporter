@@ -73,6 +73,11 @@ export type PerformanceMetrics = {
 export type OnStartMeasure = <T extends CDP.Client>(accumulator: Metric, developmentTools: T) => Promise<void>;
 
 /**
+ * Sampling metric measurement and write the result into the storage
+ */
+export type OnSamplingMeasure = <T extends CDP.Client>(accumulator: Metric, developmentTools: T) => Promise<void>;
+
+/**
  * Stop metric measurement and write the result into the storage
  */
 export type OnStopMeasure = <T extends CDP.Client>(accumulator: Metric, developmentTools: T) => Promise<void>;

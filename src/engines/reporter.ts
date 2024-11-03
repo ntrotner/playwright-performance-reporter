@@ -84,7 +84,7 @@ export class PerformanceReporter implements Reporter {
 
     this.registerTestPerformance(id, testCaseParent, name);
     await this.executeMetrics(id, testCaseParent, 'onTest', 'onStart', browserName);
-    await this.executeSamplingMetrics(id, testCaseParent, 'onTest', browserName);
+    await this.executeMetrics(id, testCaseParent, 'onTest', 'onSampling', browserName);
   }
 
   async onTestEnd(test: TestCase, result: TestResult) {
@@ -100,7 +100,7 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    void this.destroySamplingRunner(id, testCaseParent, 'onTest');
+    this.destroySamplingRunner(id, testCaseParent, 'onTest');
     await this.executeMetrics(id, testCaseParent, 'onTest', 'onStop', browserName);
     this.metricsEngine.destroy();
   }
@@ -125,7 +125,7 @@ export class PerformanceReporter implements Reporter {
 
     this.registerTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
     await this.executeMetrics(caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStart', browserName);
-    await this.executeSamplingMetrics(caseIdentifier.id, stepIdentifier.id, 'onTestStep', browserName);
+    await this.executeMetrics(caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onSampling', browserName);
   }
 
   async onStepEnd(test: TestCase, result: TestResult, step: TestStep) {
@@ -146,7 +146,7 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    void this.destroySamplingRunner(caseIdentifier.id, stepIdentifier.id, 'onTestStep');
+    this.destroySamplingRunner(caseIdentifier.id, stepIdentifier.id, 'onTestStep');
     await this.executeMetrics(caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStop', browserName);
   }
 
@@ -170,7 +170,7 @@ export class PerformanceReporter implements Reporter {
    * @param stepId identifier for step
    * @param hook playwright hook
    */
-  private async destroySamplingRunner(caseId: string, stepId: string, hook: Hooks) {
+  private destroySamplingRunner(caseId: string, stepId: string, hook: Hooks) {
     this.samplingRunner.get(hook)?.get(caseId + stepId)?.call(this);
     this.samplingRunner.get(hook)?.delete(caseId + stepId);
   }
@@ -185,6 +185,11 @@ export class PerformanceReporter implements Reporter {
    * @param browser which settings and metrics to use
    */
   private async executeMetrics(caseId: string, stepId: string, hook: Hooks, hookOrder: HookOrder, browser: SupportedBrowsers) {
+    if (hookOrder === 'onSampling') {
+      await this.executeSamplingMetrics(caseId, stepId, hook, browser);
+      return;
+    }
+
     const startOfTrigger = Date.now();
     const metrics = Promise.all(
       this.options.browsers[browser]?.[hook]?.metrics.map(async metric => this.metricsEngine.getMetric(metric, hookOrder)) ?? [],
@@ -231,7 +236,7 @@ export class PerformanceReporter implements Reporter {
       if (registeredMetrics && isPredefinedMetric) {
         return [
           async () => {
-            const metricsResponse = await this.metricsEngine.getMetric(metricName as Metrics, 'onStart');
+            const metricsResponse = await this.metricsEngine.getMetric(metricName as Metrics, 'onSampling');
 
             if (metricsResponse) {
               this.results[caseId][stepId].samplingMetrics.push(...metricsResponse);
@@ -244,7 +249,7 @@ export class PerformanceReporter implements Reporter {
       if (customMetrics && isCustomMetric) {
         return [
           async () => {
-            const metricsResponse = await this.metricsEngine.runCustomMetric(customMetrics[metricName].onStart);
+            const metricsResponse = await this.metricsEngine.runCustomMetric(customMetrics[metricName].onSampling);
 
             if (metricsResponse) {
               this.results[caseId][stepId].samplingMetrics.push(...metricsResponse);

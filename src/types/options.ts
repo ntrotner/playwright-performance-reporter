@@ -1,4 +1,5 @@
 import {
+  type OnSamplingMeasure,
   type OnStartMeasure,
   type OnStopMeasure,
 } from './index.js';
@@ -9,7 +10,7 @@ import {
 export const hooks = ['onTest', 'onTestStep'] as const;
 export type Hooks = typeof hooks[number];
 
-export const hookOrder = ['onStart', 'onStop'] as const;
+export const hookOrder = ['onStart', 'onSampling', 'onStop'] as const;
 export type HookOrder = typeof hookOrder[number];
 
 /**
@@ -24,6 +25,7 @@ export type Metrics = typeof metrics[number];
 export type MetricObserver = {
   name: string;
   onStart: OnStartMeasure;
+  onSampling: OnSamplingMeasure;
   onStop: OnStopMeasure;
 };
 
