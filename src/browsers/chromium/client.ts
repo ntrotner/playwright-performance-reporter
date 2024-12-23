@@ -13,6 +13,7 @@ import {
 import {Lock} from '../../helpers/index.js';
 import {
   AllPerformanceMetrics,
+  HeapDump,
   TotalJsHeapSize,
   UsedJsHeapSize,
 } from './observers/index.js';
@@ -252,6 +253,10 @@ export class ChromiumDevelopmentTools implements BrowserClient {
       case 'allPerformanceMetrics': {
         return new AllPerformanceMetrics();
       }
+
+      case 'heapDump': {
+        return new HeapDump();
+      }
     }
   }
 
@@ -275,6 +280,44 @@ export class ChromiumDevelopmentTools implements BrowserClient {
   }
 
   /**
+   * Activate heap metric collection
+   *
+   * @param targetId id to start heap on
+   */
+  private async startHeapProfiler(targetId: string): Promise<boolean> {
+    return new Promise(resolve => {
+      const client = this.clients[targetId];
+      if (!client) {
+        resolve(false);
+        return;
+      }
+
+      client.send('HeapProfiler.enable', error => {
+        resolve(Boolean(error));
+      });
+    });
+  }
+
+  /**
+   * Activate debugger
+   *
+   * @param targetId id to start debugger on
+   */
+  private async startDebugger(targetId: string): Promise<boolean> {
+    return new Promise(resolve => {
+      const client = this.clients[targetId];
+      if (!client) {
+        resolve(false);
+        return;
+      }
+
+      client.send('Debugger.enable', error => {
+        resolve(Boolean(error));
+      });
+    });
+  }
+
+  /**
    * Setup domain which need a setup
    *
    * @param targetId id to start performance on
@@ -283,6 +326,11 @@ export class ChromiumDevelopmentTools implements BrowserClient {
   private async activateDomain(targetId: string, metricObserver: MetricObserver): Promise<void> {
     if (['totalJsHeapSize', 'usedJsHeapSize', 'allPerformanceMetrics'].includes(metricObserver.name)) {
       await this.startPerformance(targetId);
+    }
+
+    if (['heapDump'].includes(metricObserver.name)) {
+      await this.startHeapProfiler(targetId);
+      await this.startDebugger(targetId);
     }
   }
 }
