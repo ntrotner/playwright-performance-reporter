@@ -45,7 +45,8 @@
   "homepage": "https://github.com/ntrotner/playwright-performance-reporter#readme",
   "dependencies": {
     "@types/chrome-remote-interface": "^0.31.14",
-    "chrome-remote-interface": "^0.33.2"
+    "chrome-remote-interface": "^0.33.2",
+    "JSONStream": "^1.3.5"
   },
   "devDependencies": {
     "@playwright/test": "^1.46.0",
