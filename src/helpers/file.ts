@@ -1,5 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
+import JSONStream from 'JSONStream';
 
 type OptionsFileWrite = {
   outputDir: string;
@@ -9,14 +10,16 @@ type OptionsFileWrite = {
 
 /**
  * Write raw output to filesystem
- *
- * Credits to https://github.com/ctrf-io/playwright-ctrf-json-report
  */
 export function writeReportToFile(options: OptionsFileWrite): boolean {
   const filePath = path.join(options.outputDir, options.outputFile);
   try {
-    const output = JSON.stringify(options.content, null, 2);
-    fs.writeFileSync(filePath, output + '\n', {flag: 'ax'});
+    const fileStream = fs.createWriteStream(filePath, {flags: 'ax'});
+    const jsonStream = JSONStream.stringify();
+    jsonStream.pipe(fileStream);
+    jsonStream.write(options.content as string);
+    jsonStream.end();
+
     console.log(
       'Playwright-Performance-Reporter: successfully written json to %s/%s',
       options.outputDir,

@@ -4,6 +4,12 @@ import {writeReportToFile} from '../../src/helpers';
 
 describe('File helpers', () => {
   describe('writeReportToFile', () => {
+    beforeEach(() => {
+      try {
+        fs.rmSync(path.join(__dirname, 'output.json'));
+      } catch {}
+    });
+
     it('should write to file', () => {
       const input = {
         outputDir: __dirname,
@@ -13,7 +19,6 @@ describe('File helpers', () => {
       const result = writeReportToFile(input);
 
       expect(result).toEqual(true);
-      fs.rmSync(path.join(__dirname, 'output.json'));
     });
 
     it('should fail when object is not serializable', () => {
