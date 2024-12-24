@@ -92,20 +92,6 @@ describe('Chromium client', () => {
     expect(response).toBe(true);
   });
 
-  it('should not activate Debugger domain if client is not ready', async () => {
-    (chromiumDevelopmentTools as any).clients = {};
-    const response = await (chromiumDevelopmentTools as any).startDebugger('mockClient');
-
-    expect(response).toBe(false);
-  });
-
-  it('should activate Debugger domain if client is ready', async () => {
-    mockClient.send.mockImplementation((command, callback) => callback(true));
-    const response = await (chromiumDevelopmentTools as any).startDebugger('mockClient');
-
-    expect(response).toBe(true);
-  });
-
   it('should skip domain activation when client is not ready', async () => {
     (chromiumDevelopmentTools as any).clients = {};
     await (chromiumDevelopmentTools as any).activateDomain('someId', {name: 'totalJsHeapSize'});
@@ -268,7 +254,7 @@ describe('Chromium client', () => {
     const executedCommands: string[] = [];
     mockClient.send.mockImplementation((command, callback) => {
       executedCommands.push(command);
-      if (['HeapProfiler.enable', 'Debugger.enable'].includes(command)) {
+      if (['HeapProfiler.enable'].includes(command)) {
         callback(true);
       }
     });
@@ -282,10 +268,9 @@ describe('Chromium client', () => {
         setTimeout(() => callback({finished: true}), 1);
         return () => {};
       });
-    const responseStop = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStop');
+    const responseStop = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onSampling');
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
     expect(executedCommands[0]).toEqual('HeapProfiler.enable');
-    expect(executedCommands[1]).toEqual('Debugger.enable');
     expect(responseStop).toEqual([{metric: {heap: 'test'}}]);
 
     mockClient.HeapProfiler.addHeapSnapshotChunk = jest.fn()
@@ -295,8 +280,7 @@ describe('Chromium client', () => {
       })
     const responseStart = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStart');
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
-    expect(executedCommands[2]).toEqual('HeapProfiler.enable');
-    expect(executedCommands[3]).toEqual('Debugger.enable');
+    expect(executedCommands[1]).toEqual('HeapProfiler.enable');
     expect(responseStart).toEqual([{metric: {heap: 'test2'}}]);
   });
 
