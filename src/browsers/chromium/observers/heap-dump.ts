@@ -36,9 +36,7 @@ export class HeapDump implements MetricObserver {
   /**
    * @inheritdoc
    */
-  async onStop(accumulator: Metric, developmentTools: CDP.Client): Promise<void> {
-    await this.common(accumulator, developmentTools);
-  }
+  async onStop(accumulator: Metric, developmentTools: CDP.Client): Promise<void> {}
 
   /**
    * Common function for onStart and onStop hook
@@ -49,7 +47,6 @@ export class HeapDump implements MetricObserver {
       const chunks: string[] = [];
 
       try {
-        await this.pauseJavascriptExecution(client);
         subscriptions.push(this.listenForNextChunk(client, chunks));
         await Promise.all([
           this.waitForHeapDumpCompletion(client),
@@ -63,10 +60,6 @@ export class HeapDump implements MetricObserver {
           subscription();
         }
       }
-
-      try {
-        await this.resumeJavascriptExecution(client);
-      } catch {}
 
       resolve(true);
     });
@@ -108,34 +101,6 @@ export class HeapDump implements MetricObserver {
           resolve(true);
         }
       });
-    });
-  }
-
-  /**
-   * Pause javascript execution
-   */
-  private async pauseJavascriptExecution(client: CDP.Client) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await client.Debugger.pause();
-        resolve(true);
-      } catch {
-        reject(new Error('Debugger.pause command failed'));
-      }
-    });
-  }
-
-  /**
-   * Resume javascript execution
-   */
-  private async resumeJavascriptExecution(client: CDP.Client) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await client.Debugger.resume();
-        resolve(true);
-      } catch {
-        reject(new Error('Debugger.resume command failed'));
-      }
     });
   }
 }

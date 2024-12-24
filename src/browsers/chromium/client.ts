@@ -299,25 +299,6 @@ export class ChromiumDevelopmentTools implements BrowserClient {
   }
 
   /**
-   * Activate debugger
-   *
-   * @param targetId id to start debugger on
-   */
-  private async startDebugger(targetId: string): Promise<boolean> {
-    return new Promise(resolve => {
-      const client = this.clients[targetId];
-      if (!client) {
-        resolve(false);
-        return;
-      }
-
-      client.send('Debugger.enable', error => {
-        resolve(Boolean(error));
-      });
-    });
-  }
-
-  /**
    * Setup domain which need a setup
    *
    * @param targetId id to start performance on
@@ -330,7 +311,6 @@ export class ChromiumDevelopmentTools implements BrowserClient {
 
     if (['heapDump'].includes(metricObserver.name)) {
       await this.startHeapProfiler(targetId);
-      await this.startDebugger(targetId);
     }
   }
 }
