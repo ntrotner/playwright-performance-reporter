@@ -68,6 +68,7 @@ export type ChromiumSupportedMetrics = typeof browsersSupportingMetrics.chromium
 export type Options = {
   outputDir: string;
   outputFile: string;
+  deleteOnFailure: boolean;
   browsers: {
     [browser in SupportedBrowsers]?: {
       [hook in Hooks]?: {
@@ -82,6 +83,7 @@ export type Options = {
 export const defaultOptions: Options = {
   outputDir: './',
   outputFile: 'performance-report.json',
+  deleteOnFailure: false,
   browsers: {
     chromium: {
       onTest: {

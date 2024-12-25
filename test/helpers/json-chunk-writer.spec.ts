@@ -7,14 +7,13 @@ describe('Json chunk writer helpers', () => {
     let jsonChunkWriter: JsonChunkWriter;
 
     beforeEach(() => {
-      try {
-        fs.rmSync(path.join(__dirname, 'output.json'));
-      } catch {}
-
       const options = {
         outputDir: __dirname,
         outputFile: 'output.json',
       };
+      try {
+        fs.rmSync(path.join(options.outputDir, options.outputFile));
+      } catch {}
       jsonChunkWriter = new JsonChunkWriter(options);
     });
 
@@ -30,6 +29,14 @@ describe('Json chunk writer helpers', () => {
       jsonChunkWriter.close();
 
       expect(success).toEqual(false);
+    });
+
+    it('should delete file', async () => {
+      jsonChunkWriter.write({x: 1});
+      await new Promise((r) => setTimeout(r, 2000));
+      const success = jsonChunkWriter.delete();
+
+      expect(success).toEqual(true);
     });
   });
 });
