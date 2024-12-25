@@ -1,337 +1,446 @@
-{
-  "29e0bef958887d406118-fb2fa0f16271d45ce209": {
-    "TEST_CASE_PARENT": {
-      "name": " > chromium > scenarios/home.spec.ts > Home",
-      "startMetrics": [],
-      "stopMetrics": [],
-      "samplingMetrics": [],
-      "startMeasurement": 1730410496842,
-      "endMeasurement": 1730410527449,
-      "startMeasurementOffset": 0,
-      "endMeasurementOffset": 0
-    },
-    "285bed89c8ef78b2600cf2cf3a8e3f1a": {
-      "name": "setup",
-      "startMetrics": [
-        {
-          "description": "",
-          "devtoolsFrontendUrl": "/devtools/inspector.html?ws=127.0.0.1:9222/devtools/page/342BA89C7C7D20E00907A4C100292C6F",
-          "id": "342BA89C7C7D20E00907A4C100292C6F",
-          "title": "about:blank",
-          "type": "page",
-          "url": "http://template.de/",
-          "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/342BA89C7C7D20E00907A4C100292C6F",
-          "metric": {
-            "Timestamp": 11751.158948,
-            "AudioHandlers": 0,
-            "AudioWorkletProcessors": 0,
-            "Documents": 3,
-            "Frames": 1,
-            "JSEventListeners": 13,
-            "LayoutObjects": 7,
-            "MediaKeySessions": 0,
-            "MediaKeys": 0,
-            "Nodes": 32,
-            "Resources": 42,
-            "ContextLifecycleStateObservers": 4,
-            "V8PerContextDatas": 4,
-            "WorkerGlobalScopes": 0,
-            "UACSSResources": 0,
-            "RTCPeerConnections": 0,
-            "ResourceFetchers": 3,
-            "AdSubframes": 0,
-            "DetachedScriptStates": 2,
-            "ArrayBufferContents": 0,
-            "LayoutCount": 0,
-            "RecalcStyleCount": 0,
-            "LayoutDuration": 0,
-            "RecalcStyleDuration": 0,
-            "DevToolsCommandDuration": 0.001162,
-            "ScriptDuration": 0.003104,
-            "V8CompileDuration": 0,
-            "TaskDuration": 0.010711,
-            "TaskOtherDuration": 0.006445,
-            "ThreadTime": 0.011965,
-            "ProcessTime": 0.27,
-            "JSHeapUsedSize": 2577292,
-            "JSHeapTotalSize": 4644864,
-            "FirstMeaningfulPaint": 0,
-            "DomContentLoaded": 11750.968918,
-            "NavigationStart": 11750.929377
-          }
-        }
-      ],
-      "stopMetrics": [
-        {
-          "description": "",
-          "devtoolsFrontendUrl": "/devtools/inspector.html?ws=127.0.0.1:9222/devtools/page/342BA89C7C7D20E00907A4C100292C6F",
-          "id": "342BA89C7C7D20E00907A4C100292C6F",
-          "title": "about:blank",
-          "type": "page",
-          "url": "http://template.de/",
-          "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/342BA89C7C7D20E00907A4C100292C6F",
-          "metric": {
-            "Timestamp": 11751.15919,
-            "AudioHandlers": 0,
-            "AudioWorkletProcessors": 0,
-            "Documents": 3,
-            "Frames": 1,
-            "JSEventListeners": 13,
-            "LayoutObjects": 7,
-            "MediaKeySessions": 0,
-            "MediaKeys": 0,
-            "Nodes": 32,
-            "Resources": 42,
-            "ContextLifecycleStateObservers": 4,
-            "V8PerContextDatas": 4,
-            "WorkerGlobalScopes": 0,
-            "UACSSResources": 0,
-            "RTCPeerConnections": 0,
-            "ResourceFetchers": 3,
-            "AdSubframes": 0,
-            "DetachedScriptStates": 2,
-            "ArrayBufferContents": 0,
-            "LayoutCount": 0,
-            "RecalcStyleCount": 0,
-            "LayoutDuration": 0,
-            "RecalcStyleDuration": 0,
-            "DevToolsCommandDuration": 0.001398,
-            "ScriptDuration": 0.003342,
-            "V8CompileDuration": 0,
-            "TaskDuration": 0.010949,
-            "TaskOtherDuration": 0.006209,
-            "ThreadTime": 0.012184,
-            "ProcessTime": 0.28,
-            "JSHeapUsedSize": 2577292,
-            "JSHeapTotalSize": 4644864,
-            "FirstMeaningfulPaint": 0,
-            "DomContentLoaded": 11750.968918,
-            "NavigationStart": 11750.929377
-          }
-        }
-      ],
-      "samplingMetrics": [
-        {
-          "description": "",
-          "devtoolsFrontendUrl": "/devtools/inspector.html?ws=127.0.0.1:9222/devtools/page/342BA89C7C7D20E00907A4C100292C6F",
-          "faviconUrl": "http://template.de/favicon.png",
-          "id": "342BA89C7C7D20E00907A4C100292C6F",
-          "title": "template.de",
-          "type": "page",
-          "url": "http://template.de/",
-          "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/342BA89C7C7D20E00907A4C100292C6F",
-          "metric": {
-            "Timestamp": 11752.172767,
-            "AudioHandlers": 0,
-            "AudioWorkletProcessors": 0,
-            "Documents": 3,
-            "Frames": 1,
-            "JSEventListeners": 80,
-            "LayoutObjects": 71,
-            "MediaKeySessions": 0,
-            "MediaKeys": 0,
-            "Nodes": 171,
-            "Resources": 195,
-            "ContextLifecycleStateObservers": 5,
-            "V8PerContextDatas": 4,
-            "WorkerGlobalScopes": 0,
-            "UACSSResources": 0,
-            "RTCPeerConnections": 0,
-            "ResourceFetchers": 3,
-            "AdSubframes": 0,
-            "DetachedScriptStates": 2,
-            "ArrayBufferContents": 0,
-            "LayoutCount": 4,
-            "RecalcStyleCount": 16,
-            "LayoutDuration": 0.042418,
-            "RecalcStyleDuration": 0.006694,
-            "DevToolsCommandDuration": 0.010692,
-            "ScriptDuration": 0.033779,
-            "V8CompileDuration": 0,
-            "TaskDuration": 0.395311,
-            "TaskOtherDuration": 0.301728,
-            "ThreadTime": 0.388728,
-            "ProcessTime": 1.1,
-            "JSHeapUsedSize": 8029424,
-            "JSHeapTotalSize": 12853248,
-            "FirstMeaningfulPaint": 0,
-            "DomContentLoaded": 11750.968918,
-            "NavigationStart": 11750.929377
-          }
-        }
-      ],
-      "startMeasurement": 1730410497770,
-      "endMeasurement": 1730410497772,
-      "startMeasurementOffset": 243,
-      "endMeasurementOffset": 70
-    },
-    "30944be7621086b54e43d9ade3381efb": {
-      "name": "is navigator title filled",
-      "startMetrics": [
-        {
-          "description": "",
-          "devtoolsFrontendUrl": "/devtools/inspector.html?ws=127.0.0.1:9222/devtools/page/342BA89C7C7D20E00907A4C100292C6F",
-          "id": "342BA89C7C7D20E00907A4C100292C6F",
-          "title": "about:blank",
-          "type": "page",
-          "url": "http://template.de/",
-          "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/342BA89C7C7D20E00907A4C100292C6F",
-          "metric": {
-            "Timestamp": 11751.159336,
-            "AudioHandlers": 0,
-            "AudioWorkletProcessors": 0,
-            "Documents": 3,
-            "Frames": 1,
-            "JSEventListeners": 13,
-            "LayoutObjects": 7,
-            "MediaKeySessions": 0,
-            "MediaKeys": 0,
-            "Nodes": 32,
-            "Resources": 42,
-            "ContextLifecycleStateObservers": 4,
-            "V8PerContextDatas": 4,
-            "WorkerGlobalScopes": 0,
-            "UACSSResources": 0,
-            "RTCPeerConnections": 0,
-            "ResourceFetchers": 3,
-            "AdSubframes": 0,
-            "DetachedScriptStates": 2,
-            "ArrayBufferContents": 0,
-            "LayoutCount": 0,
-            "RecalcStyleCount": 0,
-            "LayoutDuration": 0,
-            "RecalcStyleDuration": 0,
-            "DevToolsCommandDuration": 0.001546,
-            "ScriptDuration": 0.003491,
-            "V8CompileDuration": 0,
-            "TaskDuration": 0.011098,
-            "TaskOtherDuration": 0.006061,
-            "ThreadTime": 0.012333,
-            "ProcessTime": 0.28,
-            "JSHeapUsedSize": 2577292,
-            "JSHeapTotalSize": 4644864,
-            "FirstMeaningfulPaint": 0,
-            "DomContentLoaded": 11750.968918,
-            "NavigationStart": 11750.929377
-          }
-        }
-      ],
-      "stopMetrics": [
-        {
-          "description": "",
-          "devtoolsFrontendUrl": "/devtools/inspector.html?ws=127.0.0.1:9222/devtools/page/342BA89C7C7D20E00907A4C100292C6F",
-          "faviconUrl": "http://template.de/favicon.png",
-          "id": "342BA89C7C7D20E00907A4C100292C6F",
-          "title": "template.de",
-          "type": "page",
-          "url": "http://template.de/",
-          "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/342BA89C7C7D20E00907A4C100292C6F",
-          "metric": {
-            "Timestamp": 11753.168984,
-            "AudioHandlers": 0,
-            "AudioWorkletProcessors": 0,
-            "Documents": 3,
-            "Frames": 1,
-            "JSEventListeners": 80,
-            "LayoutObjects": 71,
-            "MediaKeySessions": 0,
-            "MediaKeys": 0,
-            "Nodes": 171,
-            "Resources": 195,
-            "ContextLifecycleStateObservers": 5,
-            "V8PerContextDatas": 4,
-            "WorkerGlobalScopes": 0,
-            "UACSSResources": 0,
-            "RTCPeerConnections": 0,
-            "ResourceFetchers": 3,
-            "AdSubframes": 0,
-            "DetachedScriptStates": 2,
-            "ArrayBufferContents": 0,
-            "LayoutCount": 4,
-            "RecalcStyleCount": 16,
-            "LayoutDuration": 0.042418,
-            "RecalcStyleDuration": 0.006694,
-            "DevToolsCommandDuration": 0.016606,
-            "ScriptDuration": 0.034242,
-            "V8CompileDuration": 0,
-            "TaskDuration": 0.404088,
-            "TaskOtherDuration": 0.304128,
-            "ThreadTime": 0.399694,
-            "ProcessTime": 1.11,
-            "JSHeapUsedSize": 8097836,
-            "JSHeapTotalSize": 12853248,
-            "FirstMeaningfulPaint": 11751.69423,
-            "DomContentLoaded": 11750.968918,
-            "NavigationStart": 11750.929377
-          }
-        }
-      ],
-      "samplingMetrics": [
-        {
-          "description": "",
-          "devtoolsFrontendUrl": "/devtools/inspector.html?ws=127.0.0.1:9222/devtools/page/342BA89C7C7D20E00907A4C100292C6F",
-          "faviconUrl": "http://template.de/favicon.png",
-          "id": "342BA89C7C7D20E00907A4C100292C6F",
-          "title": "template.de",
-          "type": "page",
-          "url": "http://template.de/",
-          "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/342BA89C7C7D20E00907A4C100292C6F",
-          "metric": {
-            "Timestamp": 11752.180983,
-            "AudioHandlers": 0,
-            "AudioWorkletProcessors": 0,
-            "Documents": 3,
-            "Frames": 1,
-            "JSEventListeners": 80,
-            "LayoutObjects": 71,
-            "MediaKeySessions": 0,
-            "MediaKeys": 0,
-            "Nodes": 171,
-            "Resources": 195,
-            "ContextLifecycleStateObservers": 5,
-            "V8PerContextDatas": 4,
-            "WorkerGlobalScopes": 0,
-            "UACSSResources": 0,
-            "RTCPeerConnections": 0,
-            "ResourceFetchers": 3,
-            "AdSubframes": 0,
-            "DetachedScriptStates": 2,
-            "ArrayBufferContents": 0,
-            "LayoutCount": 4,
-            "RecalcStyleCount": 16,
-            "LayoutDuration": 0.042418,
-            "RecalcStyleDuration": 0.006694,
-            "DevToolsCommandDuration": 0.011525,
-            "ScriptDuration": 0.033779,
-            "V8CompileDuration": 0,
-            "TaskDuration": 0.396289,
-            "TaskOtherDuration": 0.301873,
-            "ThreadTime": 0.389843,
-            "ProcessTime": 1.1,
-            "JSHeapUsedSize": 8029424,
-            "JSHeapTotalSize": 12853248,
-            "FirstMeaningfulPaint": 0,
-            "DomContentLoaded": 11750.968918,
-            "NavigationStart": 11750.929377
-          }
-        }
-      ],
-      "startMeasurement": 1730410497772,
-      "endMeasurement": 1730410527356,
-      "startMeasurementOffset": 70,
-      "endMeasurementOffset": 18
+[
+  {
+    "29e0bef958887d406118-fb2fa0f16271d45ce209": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > scenarios/home.spec.ts > Home",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1735123598975,
+        "endMeasurement": 1735123598975,
+        "startMeasurementOffset": 0
+      }
     }
   },
-  "4dde6239d9ac8c9468f3-82e3094b06379c51b729": {
-    "TEST_CASE_PARENT": {
-      "name": " > chromium > scenarios/profile.spec.ts > Profile",
-      "startMetrics": [],
-      "stopMetrics": [],
-      "samplingMetrics": [],
-      "startMeasurement": 1730410528302,
-      "endMeasurement": 1730410558821,
-      "startMeasurementOffset": 0,
-      "endMeasurementOffset": 0
+  {
+    "29e0bef958887d406118-fb2fa0f16271d45ce209": {
+      "bee588663f765cccc6e33b8d186c7a1f": {
+        "name": "setup",
+        "startMetrics": [
+          {
+            "metric": {
+              "Timestamp": 119608.120818,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 3,
+              "Frames": 1,
+              "JSEventListeners": 13,
+              "LayoutObjects": 7,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 32,
+              "Resources": 39,
+              "ContextLifecycleStateObservers": 4,
+              "V8PerContextDatas": 4,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 3,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 0,
+              "RecalcStyleCount": 0,
+              "LayoutDuration": 0,
+              "RecalcStyleDuration": 0,
+              "DevToolsCommandDuration": 0.002139,
+              "ScriptDuration": 0,
+              "V8CompileDuration": 0,
+              "TaskDuration": 0.028682,
+              "TaskOtherDuration": 0.026543,
+              "ThreadTime": 0.014936,
+              "ProcessTime": 0.18,
+              "JSHeapUsedSize": 2525920,
+              "JSHeapTotalSize": 5431296,
+              "FirstMeaningfulPaint": 0,
+              "DomContentLoaded": 119607.901107,
+              "NavigationStart": 119607.867065
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "/devtools/inspector.html?ws=127.0.0.1:9222/devtools/page/D102C51263CBA5D500C097CAB79FBCFC",
+            "id": "D102C51263CBA5D500C097CAB79FBCFC",
+            "title": "about:blank",
+            "type": "page",
+            "url": "http://template.de/",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/D102C51263CBA5D500C097CAB79FBCFC"
+          }
+        ],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1735123599769,
+        "endMeasurement": 1735123599506,
+        "startMeasurementOffset": 263
+      }
+    }
+  },
+  {
+    "29e0bef958887d406118-fb2fa0f16271d45ce209": {
+      "bee588663f765cccc6e33b8d186c7a1f": {
+        "name": "setup",
+        "startMetrics": [],
+        "stopMetrics": [
+          {
+            "metric": {
+              "Timestamp": 119608.121415,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 3,
+              "Frames": 1,
+              "JSEventListeners": 13,
+              "LayoutObjects": 7,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 32,
+              "Resources": 39,
+              "ContextLifecycleStateObservers": 4,
+              "V8PerContextDatas": 4,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 3,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 0,
+              "RecalcStyleCount": 0,
+              "LayoutDuration": 0,
+              "RecalcStyleDuration": 0,
+              "DevToolsCommandDuration": 0.00237,
+              "ScriptDuration": 0,
+              "V8CompileDuration": 0,
+              "TaskDuration": 0.028938,
+              "TaskOtherDuration": 0.026568,
+              "ThreadTime": 0.015188,
+              "ProcessTime": 0.18,
+              "JSHeapUsedSize": 2525920,
+              "JSHeapTotalSize": 5431296,
+              "FirstMeaningfulPaint": 0,
+              "DomContentLoaded": 119607.901107,
+              "NavigationStart": 119607.867065
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "/devtools/inspector.html?ws=127.0.0.1:9222/devtools/page/D102C51263CBA5D500C097CAB79FBCFC",
+            "id": "D102C51263CBA5D500C097CAB79FBCFC",
+            "title": "about:blank",
+            "type": "page",
+            "url": "http://template.de/",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/D102C51263CBA5D500C097CAB79FBCFC"
+          }
+        ],
+        "samplingMetrics": [],
+        "startMeasurement": 1735123599671,
+        "endMeasurement": 1735123599770,
+        "endMeasurementOffset": 99
+      }
+    }
+  },
+  {
+    "29e0bef958887d406118-fb2fa0f16271d45ce209": {
+      "8dd0ffa7fc547886099cc99d5754919f": {
+        "name": "is navigator title filled",
+        "startMetrics": [
+          {
+            "metric": {
+              "Timestamp": 119608.12168,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 3,
+              "Frames": 1,
+              "JSEventListeners": 13,
+              "LayoutObjects": 7,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 32,
+              "Resources": 39,
+              "ContextLifecycleStateObservers": 4,
+              "V8PerContextDatas": 4,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 3,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 0,
+              "RecalcStyleCount": 0,
+              "LayoutDuration": 0,
+              "RecalcStyleDuration": 0,
+              "DevToolsCommandDuration": 0.002606,
+              "ScriptDuration": 0,
+              "V8CompileDuration": 0,
+              "TaskDuration": 0.029193,
+              "TaskOtherDuration": 0.026587,
+              "ThreadTime": 0.015384,
+              "ProcessTime": 0.18,
+              "JSHeapUsedSize": 2525920,
+              "JSHeapTotalSize": 5431296,
+              "FirstMeaningfulPaint": 0,
+              "DomContentLoaded": 119607.901107,
+              "NavigationStart": 119607.867065
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "/devtools/inspector.html?ws=127.0.0.1:9222/devtools/page/D102C51263CBA5D500C097CAB79FBCFC",
+            "id": "D102C51263CBA5D500C097CAB79FBCFC",
+            "title": "about:blank",
+            "type": "page",
+            "url": "http://template.de/",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/D102C51263CBA5D500C097CAB79FBCFC"
+          }
+        ],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1735123599770,
+        "endMeasurement": 1735123599671,
+        "startMeasurementOffset": 99
+      }
+    }
+  },
+  {
+    "29e0bef958887d406118-fb2fa0f16271d45ce209": {
+      "8dd0ffa7fc547886099cc99d5754919f": {
+        "name": "is navigator title filled",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1735123629351,
+        "endMeasurement": 1735123629364,
+        "endMeasurementOffset": 13
+      }
+    }
+  },
+  {
+    "29e0bef958887d406118-fb2fa0f16271d45ce209": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > scenarios/home.spec.ts > Home",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1735123629447,
+        "endMeasurement": 1735123629447,
+        "endMeasurementOffset": 0
+      }
+    }
+  },
+  {
+    "4dde6239d9ac8c9468f3-82e3094b06379c51b729": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > scenarios/profile.spec.ts > Profile",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1735123630339,
+        "endMeasurement": 1735123630339,
+        "startMeasurementOffset": 0
+      }
+    }
+  },
+  {
+    "4dde6239d9ac8c9468f3-82e3094b06379c51b729": {
+      "3be6045cc446dcacfd184ee6b73ac676": {
+        "name": "setup",
+        "startMetrics": [],
+        "stopMetrics": [
+          {
+            "metric": {
+              "Timestamp": 119639.519881,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 3,
+              "Frames": 1,
+              "JSEventListeners": 13,
+              "LayoutObjects": 7,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 32,
+              "Resources": 38,
+              "ContextLifecycleStateObservers": 4,
+              "V8PerContextDatas": 4,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 3,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 0,
+              "RecalcStyleCount": 0,
+              "LayoutDuration": 0,
+              "RecalcStyleDuration": 0,
+              "DevToolsCommandDuration": 0.000312,
+              "ScriptDuration": 0,
+              "V8CompileDuration": 0,
+              "TaskDuration": 0.011453,
+              "TaskOtherDuration": 0.011141,
+              "ThreadTime": 0.008656,
+              "ProcessTime": 0.22,
+              "JSHeapUsedSize": 2240136,
+              "JSHeapTotalSize": 4644864,
+              "FirstMeaningfulPaint": 0,
+              "DomContentLoaded": 119639.382177,
+              "NavigationStart": 119639.330626
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "/devtools/inspector.html?ws=127.0.0.1:9222/devtools/page/9C06C3282CA562139C5FAD24E866CA34",
+            "id": "9C06C3282CA562139C5FAD24E866CA34",
+            "title": "about:blank",
+            "type": "page",
+            "url": "about:blank",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/9C06C3282CA562139C5FAD24E866CA34"
+          }
+        ],
+        "samplingMetrics": [],
+        "startMeasurement": 1735123631110,
+        "endMeasurement": 1735123631170,
+        "endMeasurementOffset": 60
+      }
+    }
+  },
+  {
+    "4dde6239d9ac8c9468f3-82e3094b06379c51b729": {
+      "3be6045cc446dcacfd184ee6b73ac676": {
+        "name": "setup",
+        "startMetrics": [
+          {
+            "metric": {
+              "Timestamp": 119639.519622,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 3,
+              "Frames": 1,
+              "JSEventListeners": 13,
+              "LayoutObjects": 7,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 32,
+              "Resources": 38,
+              "ContextLifecycleStateObservers": 4,
+              "V8PerContextDatas": 4,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 3,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 0,
+              "RecalcStyleCount": 0,
+              "LayoutDuration": 0,
+              "RecalcStyleDuration": 0,
+              "DevToolsCommandDuration": 0.000067,
+              "ScriptDuration": 0,
+              "V8CompileDuration": 0,
+              "TaskDuration": 0.011199,
+              "TaskOtherDuration": 0.011132,
+              "ThreadTime": 0.008403,
+              "ProcessTime": 0.22,
+              "JSHeapUsedSize": 2240136,
+              "JSHeapTotalSize": 4644864,
+              "FirstMeaningfulPaint": 0,
+              "DomContentLoaded": 119639.382177,
+              "NavigationStart": 119639.330626
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "/devtools/inspector.html?ws=127.0.0.1:9222/devtools/page/9C06C3282CA562139C5FAD24E866CA34",
+            "id": "9C06C3282CA562139C5FAD24E866CA34",
+            "title": "about:blank",
+            "type": "page",
+            "url": "about:blank",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/9C06C3282CA562139C5FAD24E866CA34"
+          }
+        ],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1735123631169,
+        "endMeasurement": 1735123630963,
+        "startMeasurementOffset": 206
+      }
+    }
+  },
+  {
+    "4dde6239d9ac8c9468f3-82e3094b06379c51b729": {
+      "5581bbc5669ae19c79f29aa0afcbe287": {
+        "name": "is navigator title filled",
+        "startMetrics": [
+          {
+            "metric": {
+              "Timestamp": 119639.520044,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 3,
+              "Frames": 1,
+              "JSEventListeners": 13,
+              "LayoutObjects": 7,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 32,
+              "Resources": 38,
+              "ContextLifecycleStateObservers": 4,
+              "V8PerContextDatas": 4,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 3,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 0,
+              "RecalcStyleCount": 0,
+              "LayoutDuration": 0,
+              "RecalcStyleDuration": 0,
+              "DevToolsCommandDuration": 0.000477,
+              "ScriptDuration": 0,
+              "V8CompileDuration": 0,
+              "TaskDuration": 0.01162,
+              "TaskOtherDuration": 0.011143,
+              "ThreadTime": 0.00881,
+              "ProcessTime": 0.22,
+              "JSHeapUsedSize": 2240136,
+              "JSHeapTotalSize": 4644864,
+              "FirstMeaningfulPaint": 0,
+              "DomContentLoaded": 119639.382177,
+              "NavigationStart": 119639.330626
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "/devtools/inspector.html?ws=127.0.0.1:9222/devtools/page/9C06C3282CA562139C5FAD24E866CA34",
+            "id": "9C06C3282CA562139C5FAD24E866CA34",
+            "title": "about:blank",
+            "type": "page",
+            "url": "about:blank",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/9C06C3282CA562139C5FAD24E866CA34"
+          }
+        ],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1735123631170,
+        "endMeasurement": 1735123631111,
+        "startMeasurementOffset": 59
+      }
+    }
+  },
+  {
+    "4dde6239d9ac8c9468f3-82e3094b06379c51b729": {
+      "5581bbc5669ae19c79f29aa0afcbe287": {
+        "name": "is navigator title filled",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1735123660734,
+        "endMeasurement": 1735123660749,
+        "endMeasurementOffset": 15
+      }
+    }
+  },
+  {
+    "4dde6239d9ac8c9468f3-82e3094b06379c51b729": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > scenarios/profile.spec.ts > Profile",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1735123660830,
+        "endMeasurement": 1735123660830,
+        "endMeasurementOffset": 0
+      }
     }
   }
-}
+]

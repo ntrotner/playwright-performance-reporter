@@ -19,3 +19,8 @@ export type TestPerformance = {
    */
   name: string;
 } & PerformanceMetrics;
+
+/**
+ * Accumulator for results that could be deep merged
+ */
+export type ResultAccumulator = Record<string, Record<string, TestPerformance>>;

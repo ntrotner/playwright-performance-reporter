@@ -1,4 +1,4 @@
-export * from './file.js';
+export * from './json-chunk-writer.js';
 export * from './hash.js';
 export * from './lock.js';
 export * from './sanitizer.js';
