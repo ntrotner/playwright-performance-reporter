@@ -143,6 +143,7 @@ class NewMetric implements MetricObserver {
 const PlaywrightPerformanceReporterOptions: Options = {
   outputDir: '/your/path/to/dir',
   outputFile: 'output.json',
+  deleteOnFailure: false,
   browsers: {
     chromium: {
       onTestStep: {

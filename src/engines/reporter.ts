@@ -58,13 +58,24 @@ export class PerformanceReporter implements Reporter {
   onEnd(result: FullResult) {
     try {
       this.jsonChunkWriter.close();
+    } catch (error) {
+      console.log(`Error writing json report:, ${String(error)}`);
+      return;
+    }
+
+    if (result.status !== 'passed' && this.options.deleteOnFailure) {
+      this.jsonChunkWriter.delete();
+      console.log(
+        'Playwright-Performance-Reporter: test failed and file deleted %s/%s',
+        this.options.outputDir,
+        this.options.outputFile,
+      );
+    } else {
       console.log(
         'Playwright-Performance-Reporter: successfully written json to %s/%s',
         this.options.outputDir,
         this.options.outputFile,
       );
-    } catch (error) {
-      console.log(`Error writing json report:, ${String(error)}`);
     }
   }
 

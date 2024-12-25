@@ -132,6 +132,7 @@ describe('Playwright Performance Reporter', () => {
     options = {
       outputDir: './',
       outputFile: 'output.json',
+      deleteOnFailure: false,
       browsers: {
         chromium: {
           onTest: {
