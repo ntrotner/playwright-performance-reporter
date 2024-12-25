@@ -318,6 +318,7 @@ describe('Playwright Performance Reporter', () => {
               customMetrics: {
                 metric1: {
                   name: 'metric1',
+                  plugins: [],
                   async onStart(accumulator) {
                     Object.assign(accumulator, {metric: 123});
                   },

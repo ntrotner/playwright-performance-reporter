@@ -64,39 +64,6 @@ describe('Chromium client', () => {
     expect(response).toEqual([]);
   });
 
-  it('should not activate Performance domain if client is not ready', async () => {
-    (chromiumDevelopmentTools as any).clients = {};
-    const response = await (chromiumDevelopmentTools as any).startPerformance('mockClient');
-
-    expect(response).toBe(false);
-  });
-
-  it('should activate Performance domain if client is ready', async () => {
-    mockClient.send.mockImplementation((command, callback) => callback(true));
-    const response = await (chromiumDevelopmentTools as any).startPerformance('mockClient');
-
-    expect(response).toBe(true);
-  });
-
-  it('should not activate HeapProfiler domain if client is not ready', async () => {
-    (chromiumDevelopmentTools as any).clients = {};
-    const response = await (chromiumDevelopmentTools as any).startHeapProfiler('mockClient');
-
-    expect(response).toBe(false);
-  });
-
-  it('should activate HeapProfiler domain if client is ready', async () => {
-    mockClient.send.mockImplementation((command, callback) => callback(true));
-    const response = await (chromiumDevelopmentTools as any).startHeapProfiler('mockClient');
-
-    expect(response).toBe(true);
-  });
-
-  it('should skip domain activation when client is not ready', async () => {
-    (chromiumDevelopmentTools as any).clients = {};
-    await (chromiumDevelopmentTools as any).activateDomain('someId', {name: 'totalJsHeapSize'});
-  });
-
   it('should activate the Performance domain and return the requested metric for UsedJsHeapSize', async () => {
     const testObserver = new UsedJsHeapSize();
     const executedCommands: string[] = [];

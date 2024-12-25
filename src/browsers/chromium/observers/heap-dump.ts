@@ -4,9 +4,13 @@ import {
   type Metric,
   type MetricObserver,
 } from '../../../types/index.js';
+import {heapProfilerDomainPlugin} from '../plugins/index.js';
 
 export class HeapDump implements MetricObserver {
   public readonly name = 'heapDump';
+  public readonly plugins = [
+    heapProfilerDomainPlugin,
+  ];
 
   /**
    * Options to call `HeapProfiler.takeHeapSnapshot` which are mandatory to collect
