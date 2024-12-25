@@ -213,7 +213,7 @@ export class PerformanceReporter implements Reporter {
     const customMetrics = Promise.all(
       Object.values(this.options.browsers[browser]?.[hook]?.customMetrics ?? {})
         .map(async customMetric =>
-          this.metricsEngine.runCustomMetric(customMetric[hookOrder]),
+          this.metricsEngine.runCustomMetric(customMetric, hookOrder),
         ) || [],
     );
 
@@ -266,7 +266,7 @@ export class PerformanceReporter implements Reporter {
       if (customMetrics && isCustomMetric) {
         return [
           async () => {
-            const metricsResponse = await this.metricsEngine.runCustomMetric(customMetrics[metricName].onSampling);
+            const metricsResponse = await this.metricsEngine.runCustomMetric(customMetrics[metricName], 'onSampling');
 
             if (metricsResponse) {
               results[caseId][stepId].samplingMetrics.push(...metricsResponse);

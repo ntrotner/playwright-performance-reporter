@@ -2,9 +2,8 @@ import {
   type SupportedBrowsers,
   type Metrics,
   type HookOrder,
-  type OnStopMeasure,
-  type OnStartMeasure,
   type TargetMetric,
+  type MetricObserver,
 } from '../types/index.js';
 
 export type BrowserClient = {
@@ -25,8 +24,9 @@ export type BrowserClient = {
    * Run user defined observer for metric extraction
    *
    * @param observer custom metric observer
+   * @param hookOrder which hook to run
    */
-  runCustomObserver(observer: OnStartMeasure | OnStopMeasure): Promise<TargetMetric[]>;
+  runCustomObserver(observer: MetricObserver, hookOrder: HookOrder): Promise<TargetMetric[]>;
 
   /**
    * Cleans up client connection

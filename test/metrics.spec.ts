@@ -53,7 +53,7 @@ describe('Metrics engine', () => {
     (metricsEngine as any).browser = mockBrowserClient;
     (metricsEngine as any).browser.runCustomObserver = () => {throw new Error('error')};
     const onStart: OnStartMeasure = async () => {};
-    const response = await metricsEngine.runCustomMetric(onStart);
+    const response = await metricsEngine.runCustomMetric({onStart} as any, 'onStart');
     expect(response).toEqual(undefined);
   });
 
@@ -67,7 +67,7 @@ describe('Metrics engine', () => {
 
   it('should skip custom metric in browser client', async () => {
     const onStart: OnStartMeasure = async () => {};
-    const metric = await metricsEngine.runCustomMetric(onStart);
+    const metric = await metricsEngine.runCustomMetric({onStart} as any, 'onStart');
 
     expect(metric).toEqual(undefined);
   });
@@ -79,7 +79,7 @@ describe('Metrics engine', () => {
     };
 
     mockBrowserClient.runCustomObserver.mockResolvedValue([{metric: 123}]);
-    const metric = await metricsEngine.runCustomMetric(onStart);
+    const metric = await metricsEngine.runCustomMetric({onStart} as any, 'onStart');
 
     expect(metric).toEqual([{metric: 123}]);
   });
