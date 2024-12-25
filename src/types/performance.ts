@@ -68,6 +68,11 @@ export type PerformanceMetrics = {
 };
 
 /**
+ * Plugin to execute before the metrics are fetched. Can be used to make the metrics fetch possible.
+ */
+export type MeasurePlugin = <T extends CDP.Client>(developmentTools: T) => Promise<any>;
+
+/**
  * Start metric measurement and write the preliminary result into the storage
  */
 export type OnStartMeasure = <T extends CDP.Client>(accumulator: Metric, developmentTools: T) => Promise<void>;

@@ -4,10 +4,14 @@ import {
   type Metric,
   type MetricObserver,
 } from '../../../types/index.js';
+import {performanceDomainPlugin} from '../plugins/index.js';
 
 export class TotalJsHeapSize implements MetricObserver {
   public readonly name = 'totalJsHeapSize';
   public readonly chromiumCompatibleName = 'JSHeapTotalSize';
+  public readonly plugins = [
+    performanceDomainPlugin,
+  ];
 
   /**
    * @inheritdoc

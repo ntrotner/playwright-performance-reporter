@@ -1,4 +1,5 @@
 import {
+  type MeasurePlugin,
   type OnSamplingMeasure,
   type OnStartMeasure,
   type OnStopMeasure,
@@ -31,6 +32,7 @@ export type Metrics = typeof metrics[number];
  */
 export type MetricObserver = {
   name: string;
+  plugins: MeasurePlugin[];
   onStart: OnStartMeasure;
   onSampling: OnSamplingMeasure;
   onStop: OnStopMeasure;

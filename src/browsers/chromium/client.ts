@@ -184,7 +184,7 @@ export class ChromiumDevelopmentTools implements BrowserClient {
       return;
     }
 
-    await this.activateDomain(targetId, mapping);
+    await this.runPlugins(targetId, mapping);
     await mapping[hookOrder](newTargetMetric.metric, client);
     targetMetric[targetId] = newTargetMetric;
   }
@@ -236,6 +236,23 @@ export class ChromiumDevelopmentTools implements BrowserClient {
   }
 
   /**
+   * Runs every plugin for a metric.
+   *
+   * @param targetId target to fill
+   * @param metric
+   */
+  private async runPlugins(targetId: string, metric: MetricObserver) {
+    const client = this.clients[targetId];
+    if (!client) {
+      return;
+    }
+
+    return Promise.allSettled(
+      metric.plugins.map(async plugin => plugin(client)),
+    );
+  }
+
+  /**
    * Provide observer to collect metric
    *
    * @param metric observer to create
@@ -257,60 +274,6 @@ export class ChromiumDevelopmentTools implements BrowserClient {
       case 'heapDump': {
         return new HeapDump();
       }
-    }
-  }
-
-  /**
-   * Activate performance metric collection
-   *
-   * @param targetId id to start performance on
-   */
-  private async startPerformance(targetId: string): Promise<boolean> {
-    return new Promise(resolve => {
-      const client = this.clients[targetId];
-      if (!client) {
-        resolve(false);
-        return;
-      }
-
-      client.send('Performance.enable', error => {
-        resolve(Boolean(error));
-      });
-    });
-  }
-
-  /**
-   * Activate heap metric collection
-   *
-   * @param targetId id to start heap on
-   */
-  private async startHeapProfiler(targetId: string): Promise<boolean> {
-    return new Promise(resolve => {
-      const client = this.clients[targetId];
-      if (!client) {
-        resolve(false);
-        return;
-      }
-
-      client.send('HeapProfiler.enable', error => {
-        resolve(Boolean(error));
-      });
-    });
-  }
-
-  /**
-   * Setup domain which need a setup
-   *
-   * @param targetId id to start performance on
-   * @param metricObserver observer that will be executed
-   */
-  private async activateDomain(targetId: string, metricObserver: MetricObserver): Promise<void> {
-    if (['totalJsHeapSize', 'usedJsHeapSize', 'allPerformanceMetrics'].includes(metricObserver.name)) {
-      await this.startPerformance(targetId);
-    }
-
-    if (['heapDump'].includes(metricObserver.name)) {
-      await this.startHeapProfiler(targetId);
     }
   }
 }
