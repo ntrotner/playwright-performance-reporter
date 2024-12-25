@@ -8,7 +8,6 @@ import {
   type TestStep,
 } from '@playwright/test/reporter';
 import {
-  type TestPerformance,
   type Options,
   type SupportedBrowsers,
   type Hooks,
@@ -17,23 +16,18 @@ import {
   HookOrderToMeasurementOrder,
   HookOrderToMeasurementOffsetOrder,
   testCaseParent,
-  metrics,
   type Metrics,
+  type ResultAccumulator,
 } from '../types/index.js';
 import {
   buildTestCaseIdentifier,
   buildTestPerformance,
   buildTestStepIdentifier,
-  writeReportToFile,
+  JsonChunkWriter,
 } from '../helpers/index.js';
 import {MetricsEngine} from './index.js';
 
 export class PerformanceReporter implements Reporter {
-  /**
-   * Accumulation of all test cases
-   */
-  public results: Record<string, Record<string, TestPerformance>> = {};
-
   /**
    * Maps unique playwright test ids to the computed name
    */
@@ -43,6 +37,8 @@ export class PerformanceReporter implements Reporter {
    * Metrics engine to retrieve metrics from a browser
    */
   private readonly metricsEngine: MetricsEngine;
+
+  private readonly jsonChunkWriter: JsonChunkWriter;
 
   /**
    * Reference to the unsubscribe function for a hook and test id
@@ -54,12 +50,22 @@ export class PerformanceReporter implements Reporter {
 
   constructor(private readonly options: Options) {
     this.metricsEngine = new MetricsEngine();
+    this.jsonChunkWriter = new JsonChunkWriter(this.options);
   }
 
   onBegin(config: FullConfig, suite: Suite) {}
 
   onEnd(result: FullResult) {
-    writeReportToFile({...this.options, content: this.results});
+    try {
+      this.jsonChunkWriter.close();
+      console.log(
+        'Playwright-Performance-Reporter: successfully written json to %s/%s',
+        this.options.outputDir,
+        this.options.outputFile,
+      );
+    } catch (error) {
+      console.log(`Error writing json report:, ${String(error)}`);
+    }
   }
 
   async onTestBegin(test: TestCase, result: TestResult) {
@@ -82,9 +88,10 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    this.registerTestPerformance(id, testCaseParent, name);
-    await this.executeMetrics(id, testCaseParent, 'onTest', 'onStart', browserName);
-    await this.executeMetrics(id, testCaseParent, 'onTest', 'onSampling', browserName);
+    const results = this.createTestPerformance(id, testCaseParent, name);
+    await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onStart', browserName);
+    await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onSampling', browserName);
+    this.jsonChunkWriter.write(results);
   }
 
   async onTestEnd(test: TestCase, result: TestResult) {
@@ -94,15 +101,17 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    const {id} = buildTestCaseIdentifier(test);
+    const {id, name} = buildTestCaseIdentifier(test);
     if (id === '') {
       // Root of test suite
       return;
     }
 
     this.destroySamplingRunner(id, testCaseParent, 'onTest');
-    await this.executeMetrics(id, testCaseParent, 'onTest', 'onStop', browserName);
+    const results = this.createTestPerformance(id, testCaseParent, name);
+    await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onStop', browserName);
     this.metricsEngine.destroy();
+    this.jsonChunkWriter.write(results);
   }
 
   async onStepBegin(test: TestCase, result: TestResult, step: TestStep) {
@@ -123,9 +132,10 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    this.registerTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
-    await this.executeMetrics(caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStart', browserName);
-    await this.executeMetrics(caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onSampling', browserName);
+    const results = this.createTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
+    await this.executeMetrics(results, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStart', browserName);
+    await this.executeMetrics(results, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onSampling', browserName);
+    this.jsonChunkWriter.write(results);
   }
 
   async onStepEnd(test: TestCase, result: TestResult, step: TestStep) {
@@ -147,7 +157,9 @@ export class PerformanceReporter implements Reporter {
     }
 
     this.destroySamplingRunner(caseIdentifier.id, stepIdentifier.id, 'onTestStep');
-    await this.executeMetrics(caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStop', browserName);
+    const results = this.createTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
+    await this.executeMetrics(results, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStop', browserName);
+    this.jsonChunkWriter.write(results);
   }
 
   /**
@@ -157,10 +169,13 @@ export class PerformanceReporter implements Reporter {
    * @param stepId identifier for step
    * @param name human friendly identifier
    */
-  private registerTestPerformance(caseId: string, stepId: string, name: string) {
+  private createTestPerformance(caseId: string, stepId: string, name: string): ResultAccumulator {
     this.idToNameMapping.set(caseId, name);
-    this.results[caseId] ||= {};
-    this.results[caseId][stepId] ||= buildTestPerformance(name);
+    return {
+      [caseId]: {
+        [stepId]: buildTestPerformance(name),
+      },
+    };
   }
 
   /**
@@ -178,15 +193,16 @@ export class PerformanceReporter implements Reporter {
   /**
    * Execute metrics gathering for existing metrics and custom metrics
    *
+   * @param results result accumulator
    * @param caseId identifier for case
    * @param stepId identifier for step
    * @param hook playwright hook
    * @param hookOrder playwright hook order
    * @param browser which settings and metrics to use
    */
-  private async executeMetrics(caseId: string, stepId: string, hook: Hooks, hookOrder: HookOrder, browser: SupportedBrowsers) {
+  private async executeMetrics(results: ResultAccumulator, caseId: string, stepId: string, hook: Hooks, hookOrder: HookOrder, browser: SupportedBrowsers) {
     if (hookOrder === 'onSampling') {
-      await this.executeSamplingMetrics(caseId, stepId, hook, browser);
+      await this.executeSamplingMetrics(results, caseId, stepId, hook, browser);
       return;
     }
 
@@ -205,9 +221,9 @@ export class PerformanceReporter implements Reporter {
     const resolvedCustomMetrics = await customMetrics;
     const endOfTrigger = Date.now();
 
-    this.results[caseId][stepId][HookOrderToMeasurementOrder[hookOrder]] = endOfTrigger;
-    this.results[caseId][stepId][HookOrderToMeasurementOffsetOrder[hookOrder]] = endOfTrigger - startOfTrigger;
-    this.results[caseId][stepId][HookOrderToMetricOrder[hookOrder]].push(
+    results[caseId][stepId][HookOrderToMeasurementOrder[hookOrder]] = endOfTrigger;
+    results[caseId][stepId][HookOrderToMeasurementOffsetOrder[hookOrder]] = endOfTrigger - startOfTrigger;
+    results[caseId][stepId][HookOrderToMetricOrder[hookOrder]].push(
       ...resolvedMetrics.filter(m => m !== undefined).flat(),
       ...resolvedCustomMetrics.filter(m => m !== undefined).flat(),
     );
@@ -216,12 +232,13 @@ export class PerformanceReporter implements Reporter {
   /**
    * Setup sampling for existing metrics and custom metrics
    *
+   * @param results result accumulator
    * @param caseId identifier for case
    * @param stepId identifier for step
    * @param hook playwright hook
    * @param browser which settings and metrics to use
    */
-  private async executeSamplingMetrics(caseId: string, stepId: string, hook: Hooks, browser: SupportedBrowsers) {
+  private async executeSamplingMetrics(results: ResultAccumulator, caseId: string, stepId: string, hook: Hooks, browser: SupportedBrowsers) {
     const sampleMetrics = this.options.browsers[browser]?.[hook]?.sampleMetrics;
     if (!sampleMetrics) {
       return;
@@ -239,7 +256,7 @@ export class PerformanceReporter implements Reporter {
             const metricsResponse = await this.metricsEngine.getMetric(metricName as Metrics, 'onSampling');
 
             if (metricsResponse) {
-              this.results[caseId][stepId].samplingMetrics.push(...metricsResponse);
+              results[caseId][stepId].samplingMetrics.push(...metricsResponse);
             }
           },
           metricSampling.samplingTimeoutInMilliseconds,
@@ -252,7 +269,7 @@ export class PerformanceReporter implements Reporter {
             const metricsResponse = await this.metricsEngine.runCustomMetric(customMetrics[metricName].onSampling);
 
             if (metricsResponse) {
-              this.results[caseId][stepId].samplingMetrics.push(...metricsResponse);
+              results[caseId][stepId].samplingMetrics.push(...metricsResponse);
             }
           },
           metricSampling.samplingTimeoutInMilliseconds,
