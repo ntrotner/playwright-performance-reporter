@@ -3,12 +3,11 @@ import {type BrowserClient} from '../browsers/client.js';
 import {FirefoxDevelopmentTools} from '../browsers/firefox/index.js';
 import {WebkitDevelopmentTools} from '../browsers/webkit/index.js';
 import {
-  type OnStartMeasure,
-  type OnStopMeasure,
   type Metrics,
   type SupportedBrowsers,
   type HookOrder,
   type TargetMetric,
+  type MetricObserver,
 } from '../types/index.js';
 
 export class MetricsEngine {
@@ -75,6 +74,7 @@ export class MetricsEngine {
    * Dispatches metric fetch from browser and return metric
    *
    * @param metric which metric to measure
+   * @param hookOrder step to run
    */
   public async getMetric(metric: Metrics, hookOrder: HookOrder): Promise<TargetMetric[] | undefined> {
     try {
@@ -88,10 +88,11 @@ export class MetricsEngine {
    * Dispatches custom metric fetch from browser and return metric
    *
    * @param customMetric user defined fetch function
+   * @param hookOrder step to run
    */
-  public async runCustomMetric(customMetric: OnStartMeasure | OnStopMeasure): Promise<TargetMetric[] | undefined> {
+  public async runCustomMetric(customMetric: MetricObserver, hookOrder: HookOrder): Promise<TargetMetric[] | undefined> {
     try {
-      return await this.browser?.runCustomObserver(customMetric);
+      return await this.browser?.runCustomObserver(customMetric, hookOrder);
     } catch {}
 
     return undefined;

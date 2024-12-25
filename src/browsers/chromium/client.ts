@@ -6,8 +6,6 @@ import {
   type ChromiumSupportedMetrics,
   type MetricObserver,
   type HookOrder,
-  type OnStartMeasure,
-  type OnStopMeasure,
   type TargetMetric,
 } from '../../types/index.js';
 import {Lock} from '../../helpers/index.js';
@@ -100,7 +98,7 @@ export class ChromiumDevelopmentTools implements BrowserClient {
   /**
    * @inheritdoc
    */
-  public async runCustomObserver(observer: OnStartMeasure | OnStopMeasure): Promise<TargetMetric[]> {
+  public async runCustomObserver(customMetric: MetricObserver, hookOrder: HookOrder): Promise<TargetMetric[]> {
     return new Promise(async resolve => {
       const targetMetric: TargetMetric[] = [];
       await this.connect();
@@ -117,7 +115,8 @@ export class ChromiumDevelopmentTools implements BrowserClient {
             return;
           }
 
-          await observer(newTargetMetric.metric, client);
+          await this.runPlugins(targetId, customMetric);
+          await customMetric[hookOrder](newTargetMetric.metric, client);
           targetMetric.push(newTargetMetric);
         }),
       );

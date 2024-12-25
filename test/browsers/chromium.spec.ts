@@ -162,7 +162,7 @@ describe('Chromium client', () => {
 
   it('should skip custom observer if client is not ready', async () => {
     (chromiumDevelopmentTools as any).clients = {};
-    const response = await chromiumDevelopmentTools.runCustomObserver(customObserver);
+    const response = await chromiumDevelopmentTools.runCustomObserver({onStart: customObserver} as any, 'onStart');
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
     expect(response).toEqual([]);
@@ -257,7 +257,7 @@ describe('Chromium client', () => {
       executedCommands.push(command);
       callback(false, {success: true});
     });
-    const response = await chromiumDevelopmentTools.runCustomObserver(customObserver);
+    const response = await chromiumDevelopmentTools.runCustomObserver({plugins: [], onStart: customObserver} as any, 'onStart');
 
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
     expect(executedCommands[0]).toEqual('Custom.Protocol.Command');

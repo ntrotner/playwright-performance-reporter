@@ -340,8 +340,8 @@ describe('Playwright Performance Reporter', () => {
       await (playwrightPerformanceReporter as any).executeMetrics(results, pivot, customTest, 'onTest', 'onStop', 'chromium');
 
       expect(mockMetricsEngine.runCustomMetric).toHaveBeenCalledTimes(2);
-      expect(mockMetricsEngine.runCustomMetric).toHaveBeenCalledWith(optionsWithCustomMetrics.browsers.chromium?.onTest?.customMetrics?.metric1.onStart);
-      expect(mockMetricsEngine.runCustomMetric).toHaveBeenCalledWith(optionsWithCustomMetrics.browsers.chromium?.onTest?.customMetrics?.metric1.onStop);
+      expect(mockMetricsEngine.runCustomMetric).toHaveBeenCalledWith(optionsWithCustomMetrics.browsers.chromium?.onTest?.customMetrics?.metric1, 'onStart');
+      expect(mockMetricsEngine.runCustomMetric).toHaveBeenCalledWith(optionsWithCustomMetrics.browsers.chromium?.onTest?.customMetrics?.metric1, 'onStop');
     });
 
     it('should ignore customMetrics if none are provided', async () => {

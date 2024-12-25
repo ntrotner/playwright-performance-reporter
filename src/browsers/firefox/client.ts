@@ -1,9 +1,9 @@
 import {
   type SupportedBrowsers,
   type Metrics,
-  type OnStartMeasure,
-  type OnStopMeasure,
   type TargetMetric,
+  type MetricObserver,
+  type HookOrder,
 } from '../../types/index.js';
 import {type BrowserClient} from '../client.js';
 
@@ -28,7 +28,7 @@ export class FirefoxDevelopmentTools implements BrowserClient {
   /**
    * @inheritdoc
    */
-  async runCustomObserver(observer: OnStartMeasure | OnStopMeasure): Promise<TargetMetric[]> {
+  async runCustomObserver(customMetric: MetricObserver, hookOrder: HookOrder): Promise<TargetMetric[]> {
     return [];
   }
 
