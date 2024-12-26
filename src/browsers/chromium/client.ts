@@ -36,6 +36,11 @@ export class ChromiumDevelopmentTools implements BrowserClient {
   private readonly connectLock = new Lock();
 
   /**
+   * Indicates if all options are correctly set for connection
+   */
+  private areClientOptionsValid = false;
+
+  /**
    * @inheritdoc
    */
   constructor(private readonly options: Record<string, any>) {}
@@ -208,11 +213,13 @@ export class ChromiumDevelopmentTools implements BrowserClient {
         const port = argument.split('=')[1].trim();
         options.port = Number(port);
         foundPort = true;
-        Logger.info('Port for Chromium found', port);
       }
     }
 
-    if (!foundPort) {
+    if (!this.areClientOptionsValid && foundPort) {
+      Logger.info('Port for Chromium found', options.port);
+      this.areClientOptionsValid = true;
+    } else if (!this.areClientOptionsValid && !foundPort) {
       Logger.error('Port for Chromium not found. Metrics fetch will not work!');
     }
 
