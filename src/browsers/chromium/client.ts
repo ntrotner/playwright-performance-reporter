@@ -8,7 +8,10 @@ import {
   type HookOrder,
   type TargetMetric,
 } from '../../types/index.js';
-import {Lock} from '../../helpers/index.js';
+import {
+  Lock,
+  Logger,
+} from '../../helpers/index.js';
 import {
   AllPerformanceMetrics,
   HeapDump,
@@ -199,11 +202,18 @@ export class ChromiumDevelopmentTools implements BrowserClient {
       port: 9222,
     };
 
+    let foundPort = false;
     for (const argument of ((this.options.launchOptions?.args ?? []) as string[])) {
       if (argument.includes('--remote-debugging-port')) {
         const port = argument.split('=')[1].trim();
         options.port = Number(port);
+        foundPort = true;
+        Logger.info('Port for Chromium found', port);
       }
+    }
+
+    if (!foundPort) {
+      Logger.error('Port for Chromium not found. Metrics fetch will not work!');
     }
 
     if (targetId) {

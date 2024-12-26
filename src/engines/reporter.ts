@@ -18,12 +18,14 @@ import {
   testCaseParent,
   type Metrics,
   type ResultAccumulator,
+  type JsonWriter,
 } from '../types/index.js';
 import {
   buildTestCaseIdentifier,
   buildTestPerformance,
   buildTestStepIdentifier,
   JsonChunkWriter,
+  Logger,
 } from '../helpers/index.js';
 import {MetricsEngine} from './index.js';
 
@@ -38,7 +40,10 @@ export class PerformanceReporter implements Reporter {
    */
   private readonly metricsEngine: MetricsEngine;
 
-  private readonly jsonChunkWriter: JsonChunkWriter;
+  /**
+   * Writer to stream json chunks
+   */
+  private readonly jsonChunkWriter: JsonWriter;
 
   /**
    * Reference to the unsubscribe function for a hook and test id
@@ -50,7 +55,8 @@ export class PerformanceReporter implements Reporter {
 
   constructor(private readonly options: Options) {
     this.metricsEngine = new MetricsEngine();
-    this.jsonChunkWriter = new JsonChunkWriter(this.options);
+    this.jsonChunkWriter = options.customJsonWriter ? options.customJsonWriter : new JsonChunkWriter();
+    this.jsonChunkWriter.initialize(this.options);
   }
 
   onBegin(config: FullConfig, suite: Suite) {}
@@ -59,20 +65,23 @@ export class PerformanceReporter implements Reporter {
     try {
       this.jsonChunkWriter.close();
     } catch (error) {
-      console.log(`Error writing json report:, ${String(error)}`);
+      Logger.error(
+        'Error writing json report',
+        String(error),
+      );
       return;
     }
 
     if (result.status !== 'passed' && this.options.deleteOnFailure) {
       this.jsonChunkWriter.delete();
-      console.log(
-        'Playwright-Performance-Reporter: test failed and file deleted %s/%s',
+      Logger.info(
+        'Test failed and file deleted',
         this.options.outputDir,
         this.options.outputFile,
       );
     } else {
-      console.log(
-        'Playwright-Performance-Reporter: successfully written json to %s/%s',
+      Logger.info(
+        'Successfully written to json',
         this.options.outputDir,
         this.options.outputFile,
       );
@@ -217,10 +226,19 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
+    if (this.options.browsers[browser]?.[hook]?.metrics.length) {
+      Logger.info('Fetching predefined metrics', ...this.options.browsers[browser][hook].metrics);
+    }
+
     const startOfTrigger = Date.now();
     const metrics = Promise.all(
       this.options.browsers[browser]?.[hook]?.metrics.map(async metric => this.metricsEngine.getMetric(metric, hookOrder)) ?? [],
     );
+
+    if (this.options.browsers[browser]?.[hook]?.customMetrics) {
+      Logger.info('Fetching custom metrics', ...Object.values(this.options.browsers[browser][hook].customMetrics).map(({name}) => name));
+    }
+
     const customMetrics = Promise.all(
       Object.values(this.options.browsers[browser]?.[hook]?.customMetrics ?? {})
         .map(async customMetric =>

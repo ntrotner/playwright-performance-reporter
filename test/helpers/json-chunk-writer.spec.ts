@@ -14,7 +14,8 @@ describe('Json chunk writer helpers', () => {
       try {
         fs.rmSync(path.join(options.outputDir, options.outputFile));
       } catch {}
-      jsonChunkWriter = new JsonChunkWriter(options);
+      jsonChunkWriter = new JsonChunkWriter();
+      jsonChunkWriter.initialize(options);
     });
 
     it('should write to file', () => {
