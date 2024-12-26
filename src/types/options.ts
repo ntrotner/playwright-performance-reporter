@@ -62,6 +62,37 @@ export const browsersSupportingMetrics = {
 } as const;
 export type ChromiumSupportedMetrics = typeof browsersSupportingMetrics.chromium[number] & Metrics;
 
+export type OptionsFileWrite = {
+  outputDir: string;
+  outputFile: string;
+};
+
+export type JsonWriter = {
+  /**
+   * Initialize writer
+   *
+   * @param options defines target output
+   */
+  initialize(options: OptionsFileWrite): void;
+
+  /**
+   * Create new entry of an object
+   *
+   * @param content
+   */
+  write(content: Record<any, any>): boolean;
+
+  /**
+   * Finish json stream
+   */
+  close(): void;
+
+  /**
+   * Delete created target
+   */
+  delete(): boolean;
+};
+
 /**
  * Customize the reporter with desired browser and (custom) metrics
  */
@@ -69,6 +100,7 @@ export type Options = {
   outputDir: string;
   outputFile: string;
   deleteOnFailure: boolean;
+  customJsonWriter?: JsonWriter;
   browsers: {
     [browser in SupportedBrowsers]?: {
       [hook in Hooks]?: {

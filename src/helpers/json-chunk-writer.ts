@@ -1,20 +1,20 @@
 import path from 'node:path';
 import fs, {type WriteStream} from 'node:fs';
 import JSONStream from 'JSONStream';
-
-type OptionsFileWrite = {
-  outputDir: string;
-  outputFile: string;
-};
+import {
+  type JsonWriter,
+  type OptionsFileWrite,
+} from '../types/index.js';
+import {Logger} from './logger.js';
 
 /**
  * Write JSON chunks in an array of entries
  */
-export class JsonChunkWriter {
+export class JsonChunkWriter implements JsonWriter {
   /**
    * Locator where to store the output
    */
-  private readonly filePath: string;
+  private filePath: string | undefined;
 
   /**
    * Status whether writer is usable
@@ -24,14 +24,19 @@ export class JsonChunkWriter {
   /**
    * File writer
    */
-  private readonly fileStream: WriteStream;
+  private fileStream: WriteStream | undefined;
 
   /**
    * JSON chunk writer
    */
   private readonly jsonStream = JSONStream.stringify('[', ',', ']');
 
-  constructor(options: OptionsFileWrite) {
+  /**
+   * Initialize writer
+   *
+   * @param options defines target output
+   */
+  initialize(options: OptionsFileWrite): void {
     this.filePath = path.join(options.outputDir, options.outputFile);
     this.fileStream = fs.createWriteStream(this.filePath, {flags: 'w'});
     this.jsonStream.pipe(this.fileStream);
@@ -51,7 +56,10 @@ export class JsonChunkWriter {
       // @ts-expect-error: writer is able to handle more types
       return this.jsonStream.write(content);
     } catch (error) {
-      console.log('JSONChunkWriter write failed:', error);
+      Logger.error(
+        'JSONChunkWriter write operation failed',
+        String(error),
+      );
       return false;
     }
   }
@@ -62,7 +70,7 @@ export class JsonChunkWriter {
   public close() {
     this.isClosed = true;
     this.jsonStream.end();
-    this.fileStream.end();
+    this.fileStream?.end();
   }
 
   /**
@@ -75,7 +83,11 @@ export class JsonChunkWriter {
       return false;
     }
 
-    fs.rmSync(this.filePath, {maxRetries: 5, retryDelay: 500});
-    return true;
+    if (this.filePath) {
+      fs.rmSync(this.filePath, {maxRetries: 5, retryDelay: 500});
+      return true;
+    }
+
+    return false;
   }
 }

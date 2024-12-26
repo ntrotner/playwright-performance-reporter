@@ -46,6 +46,7 @@ import type { CDP, Options, Metric } from 'playwright-performance-reporter';
 const PlaywrightPerformanceReporterOptions: Options = {
   outputDir: '/your/path/to/dir',
   outputFile: `${Date.now()}.json`,
+  deleteOnFailure: false,
   browsers: {
     chromium: {
       onTestStep: {
@@ -155,6 +156,30 @@ const PlaywrightPerformanceReporterOptions: Options = {
   }
 }
 ```
+
+### Custom JSON Writer
+The output is sent in chunks to the output file one defined in the options.
+If there is a need to provide a custom writer, then the `customJsonWriter` is of help to customize how the chunks are handled.
+In the beginning the `initialize` function is called with the options dedicated for the writer.
+Every new entry is sent to the `write` function. Once the test is complete `close` is called.
+In case the test failed and `deleteOnFailure === true`, then the `delete` function is called.
+
+```ts
+import type { JsonWriter } from 'playwright-performance-reporter';
+
+class CustomJsonWriter implements JsonWriter {
+  ...
+}
+
+const PlaywrightPerformanceReporterOptions: Options = {
+  outputDir: '/your/path/to/dir',
+  outputFile: 'output.json',
+  deleteOnFailure: true,
+  customJsonWriter: new CustomJsonWriter(),
+  ...
+}
+```
+
 
 ## Output
 
