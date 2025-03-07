@@ -221,7 +221,7 @@ describe('Chromium client', () => {
     const executedCommands: string[] = [];
     mockClient.send.mockImplementation((command, callback) => {
       executedCommands.push(command);
-      if (['HeapProfiler.enable'].includes(command)) {
+      if (['HeapProfiler.enable', 'HeapProfiler.collectGarbage'].includes(command)) {
         callback(true);
       }
     });
@@ -247,7 +247,8 @@ describe('Chromium client', () => {
       })
     const responseStart = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStart');
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
-    expect(executedCommands[1]).toEqual('HeapProfiler.enable');
+    expect(executedCommands[1]).toEqual('HeapProfiler.collectGarbage');
+    expect(executedCommands[2]).toEqual('HeapProfiler.enable');
     expect(responseStart).toEqual([{metric: {heap: 'test2'}}]);
   });
 

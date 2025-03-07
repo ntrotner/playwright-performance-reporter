@@ -263,9 +263,13 @@ export class ChromiumDevelopmentTools implements BrowserClient {
       return;
     }
 
-    return Promise.allSettled(
-      metric.plugins.map(async plugin => plugin(client)),
-    );
+    for (const plugin of metric.plugins) {
+      try {
+        // Plugins can depend on the execution order
+        // eslint-disable-next-line no-await-in-loop
+        await plugin(client);
+      } catch {}
+    }
   }
 
   /**
