@@ -85,6 +85,8 @@ const mockTestCase: TestCase = {
 };
 
 const mockTestStep: TestStep = {
+  annotations: [],
+  attachments: [],
   titlePath(): string[] {
     return ['file', 'path'];
   },
@@ -96,6 +98,8 @@ const mockTestStep: TestStep = {
 };
 
 const mockTestStepEmptyStepName: TestStep = {
+  annotations: [],
+  attachments: [],
   titlePath(): string[] {
     return ['file', 'path'];
   },
@@ -107,6 +111,7 @@ const mockTestStepEmptyStepName: TestStep = {
 };
 
 const mockTestResult: TestResult = {
+  annotations: [],
   attachments: [],
   duration: 0,
   errors: [],
