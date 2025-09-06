@@ -110,8 +110,10 @@ export class PerformanceReporter implements Reporter {
 
     const results = this.createTestPerformance(id, testCaseParent, name);
     await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onStart', browserName);
-    await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onSampling', browserName);
     this.jsonChunkWriter.write(results);
+
+    const samplingResults = this.createTestPerformance(id, testCaseParent, name);
+    await this.executeMetrics(samplingResults, id, testCaseParent, 'onTest', 'onSampling', browserName);
   }
 
   async onTestEnd(test: TestCase, result: TestResult) {
@@ -154,8 +156,10 @@ export class PerformanceReporter implements Reporter {
 
     const results = this.createTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
     await this.executeMetrics(results, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStart', browserName);
-    await this.executeMetrics(results, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onSampling', browserName);
     this.jsonChunkWriter.write(results);
+
+    const samplingResults = this.createTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
+    await this.executeMetrics(samplingResults, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onSampling', browserName);
   }
 
   async onStepEnd(test: TestCase, result: TestResult, step: TestStep) {
@@ -285,7 +289,9 @@ export class PerformanceReporter implements Reporter {
             const metricsResponse = await this.metricsEngine.getMetric(metricName as Metrics, 'onSampling');
 
             if (metricsResponse) {
-              results[caseId][stepId].samplingMetrics.push(...metricsResponse);
+              const clonedResults = structuredClone(results);
+              clonedResults[caseId][stepId].samplingMetrics.push(...metricsResponse);
+              this.jsonChunkWriter.write(clonedResults);
             }
           },
           metricSampling.samplingTimeoutInMilliseconds,
@@ -298,7 +304,9 @@ export class PerformanceReporter implements Reporter {
             const metricsResponse = await this.metricsEngine.runCustomMetric(customMetrics[metricName], 'onSampling');
 
             if (metricsResponse) {
-              results[caseId][stepId].samplingMetrics.push(...metricsResponse);
+              const clonedResults = structuredClone(results);
+              clonedResults[caseId][stepId].samplingMetrics.push(...metricsResponse);
+              this.jsonChunkWriter.write(clonedResults);
             }
           },
           metricSampling.samplingTimeoutInMilliseconds,
