@@ -207,4 +207,6 @@ even though Playwright instructed the browser to continue to the next step. This
 To check if the output is invalid, the values `startMeasurementOffset` and `endMeasurementOffset` are provided, which measure
 the time delta in milliseconds between the request until the browser provides all metrics.
 
-See [example/output.json](example/output.json) for detailed reporter output.
+Check [example/](example/) for the real-world setup.
+
+See [example/example-output.json](example/example-output.json) for detailed reporter output.
