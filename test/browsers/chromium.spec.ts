@@ -4,6 +4,7 @@ import {
   TotalJsHeapSize,
   UsedJsHeapSize,
   HeapDump,
+  HeapDumpSampling,
 } from '../../src/browsers/chromium/observers/index.js';
 import {
   type ChromiumSupportedMetrics,
@@ -250,6 +251,35 @@ describe('Chromium client', () => {
     expect(executedCommands[1]).toEqual('HeapProfiler.collectGarbage');
     expect(executedCommands[2]).toEqual('HeapProfiler.enable');
     expect(responseStart).toEqual([{metric: {heap: 'test2'}}]);
+  });
+
+  it('should activate multiple domains and return the requested metric for HeapDumpSampling', async () => {
+    const testObserver = new HeapDumpSampling();
+    const executedCommands: string[] = [];
+    mockClient.send.mockImplementation((command, callback) => {
+      executedCommands.push(command);
+      if (['HeapProfiler.enable', 'HeapProfiler.collectGarbage'].includes(command)) {
+        callback(true);
+      }
+    });
+    mockClient.HeapProfiler.stopSampling = jest.fn().mockReturnValue(Promise.resolve({profile: {}}));
+    const responseSampling = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onSampling');
+    expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
+    expect(executedCommands[0]).toEqual('HeapProfiler.enable');
+    expect(executedCommands[1]).toEqual('HeapProfiler.collectGarbage');
+    expect(responseSampling).toEqual([{metric: {}}]);
+
+    const responseStart = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStart');
+    expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
+    expect(executedCommands[2]).toEqual('HeapProfiler.enable');
+    expect(executedCommands[3]).toEqual('HeapProfiler.collectGarbage');
+    expect(responseStart).toEqual([{metric: {}}]);
+
+    const responseStop = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStop');
+    expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
+    expect(executedCommands[4]).toEqual('HeapProfiler.enable');
+    expect(executedCommands[5]).toEqual('HeapProfiler.collectGarbage');
+    expect(responseStop).toEqual([{metric: {heapSampling: '{}'}}]);
   });
 
   it('should run a custom observer', async () => {
