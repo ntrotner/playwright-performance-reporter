@@ -61,7 +61,7 @@ export class PerformanceReporter implements Reporter {
 
   onBegin(config: FullConfig, suite: Suite) {}
 
-  onEnd(result: FullResult) {
+  async onEnd(result: FullResult) {
     try {
       this.jsonChunkWriter.close();
     } catch (error) {
@@ -73,7 +73,7 @@ export class PerformanceReporter implements Reporter {
     }
 
     if (result.status !== 'passed' && this.options.deleteOnFailure) {
-      this.jsonChunkWriter.delete();
+      await this.jsonChunkWriter.delete();
       Logger.info(
         'Test failed and file deleted',
         this.options.outputDir,
@@ -110,7 +110,7 @@ export class PerformanceReporter implements Reporter {
 
     const results = this.createTestPerformance(id, testCaseParent, name);
     await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onStart', browserName);
-    this.jsonChunkWriter.write(results);
+    await this.jsonChunkWriter.write(results);
 
     const samplingResults = this.createTestPerformance(id, testCaseParent, name);
     await this.executeMetrics(samplingResults, id, testCaseParent, 'onTest', 'onSampling', browserName);
@@ -133,7 +133,7 @@ export class PerformanceReporter implements Reporter {
     const results = this.createTestPerformance(id, testCaseParent, name);
     await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onStop', browserName);
     this.metricsEngine.destroy();
-    this.jsonChunkWriter.write(results);
+    await this.jsonChunkWriter.write(results);
   }
 
   async onStepBegin(test: TestCase, result: TestResult, step: TestStep) {
@@ -156,7 +156,7 @@ export class PerformanceReporter implements Reporter {
 
     const results = this.createTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
     await this.executeMetrics(results, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStart', browserName);
-    this.jsonChunkWriter.write(results);
+    await this.jsonChunkWriter.write(results);
 
     const samplingResults = this.createTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
     await this.executeMetrics(samplingResults, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onSampling', browserName);
@@ -183,7 +183,7 @@ export class PerformanceReporter implements Reporter {
     this.destroySamplingRunner(caseIdentifier.id, stepIdentifier.id, 'onTestStep');
     const results = this.createTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
     await this.executeMetrics(results, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStop', browserName);
-    this.jsonChunkWriter.write(results);
+    await this.jsonChunkWriter.write(results);
   }
 
   /**
@@ -291,7 +291,7 @@ export class PerformanceReporter implements Reporter {
             if (metricsResponse) {
               const clonedResults = structuredClone(results);
               clonedResults[caseId][stepId].samplingMetrics.push(...metricsResponse);
-              this.jsonChunkWriter.write(clonedResults);
+              await this.jsonChunkWriter.write(clonedResults);
             }
           },
           metricSampling.samplingTimeoutInMilliseconds,
@@ -306,7 +306,7 @@ export class PerformanceReporter implements Reporter {
             if (metricsResponse) {
               const clonedResults = structuredClone(results);
               clonedResults[caseId][stepId].samplingMetrics.push(...metricsResponse);
-              this.jsonChunkWriter.write(clonedResults);
+              await this.jsonChunkWriter.write(clonedResults);
             }
           },
           metricSampling.samplingTimeoutInMilliseconds,
