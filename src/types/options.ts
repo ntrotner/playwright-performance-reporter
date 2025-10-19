@@ -81,7 +81,7 @@ export type JsonWriter = {
    *
    * @param content
    */
-  write(content: Record<any, any>): boolean;
+  write(content: Record<any, any>): Promise<boolean>;
 
   /**
    * Finish json stream
@@ -91,7 +91,7 @@ export type JsonWriter = {
   /**
    * Delete created target
    */
-  delete(): boolean;
+  delete(): Promise<boolean>;
 };
 
 /**

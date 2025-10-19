@@ -47,38 +47,53 @@ export class JsonChunkWriter implements JsonWriter {
    *
    * @param content
    */
-  public write(content: Record<any, any>): boolean {
+  public async write(content: Record<any, any>): Promise<boolean> {
     if (this.isClosed) {
       return false;
     }
 
-    try {
-      // @ts-expect-error: writer is able to handle more types
-      return this.jsonStream.write(content);
-    } catch (error) {
-      Logger.error(
-        'JSONChunkWriter write operation failed',
-        String(error),
-      );
-      return false;
-    }
+    return new Promise(resolve => {
+      try {
+        // @ts-expect-error: writer is able to handle more types
+        if (this.jsonStream.write(content)) {
+          resolve(true);
+        } else {
+          this.fileStream?.once('drain', () => {
+            resolve(true);
+          });
+        }
+      } catch (error) {
+        Logger.error(String(error));
+        resolve(false);
+      }
+    });
   }
 
   /**
    * Finish json stream
    */
-  public close() {
+  public async close(): Promise<boolean> {
     this.isClosed = true;
-    this.jsonStream.end();
-    this.fileStream?.end();
+    return new Promise(resolve => {
+      try {
+        this.jsonStream.end();
+        this.fileStream?.end();
+        this.fileStream?.once('finish', () => {
+          resolve(true);
+        });
+      } catch (error) {
+        Logger.error(String(error));
+        resolve(false);
+      }
+    });
   }
 
   /**
    * Delete created file
    */
-  public delete(): boolean {
+  public async delete(): Promise<boolean> {
     try {
-      this.close();
+      await this.close();
     } catch {
       return false;
     }

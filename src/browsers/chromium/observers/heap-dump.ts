@@ -44,7 +44,9 @@ export class HeapDump implements MetricObserver {
   /**
    * @inheritdoc
    */
-  async onStop(accumulator: Metric, developmentTools: CDP.Client): Promise<void> {}
+  async onStop(accumulator: Metric, developmentTools: CDP.Client): Promise<void> {
+    await this.common(accumulator, developmentTools);
+  }
 
   /**
    * Common function for onStart and onStop hook
