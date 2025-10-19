@@ -15,7 +15,7 @@ import {
 import {
   AllPerformanceMetrics,
   HeapDump,
-  HeapDumpSampling,
+  HeapProfilerSampling,
   TotalJsHeapSize,
   UsedJsHeapSize,
 } from './observers/index.js';
@@ -296,8 +296,8 @@ export class ChromiumDevelopmentTools implements BrowserClient {
         return new HeapDump();
       }
 
-      case 'heapDumpSampling': {
-        return new HeapDumpSampling();
+      case 'heapProfilerSampling': {
+        return new HeapProfilerSampling();
       }
     }
   }

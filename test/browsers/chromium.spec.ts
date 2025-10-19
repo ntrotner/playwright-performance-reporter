@@ -4,7 +4,7 @@ import {
   TotalJsHeapSize,
   UsedJsHeapSize,
   HeapDump,
-  HeapDumpSampling,
+  HeapProfilerSampling,
 } from '../../src/browsers/chromium/observers/index.js';
 import {
   type ChromiumSupportedMetrics,
@@ -253,8 +253,8 @@ describe('Chromium client', () => {
     expect(responseStart).toEqual([{metric: {heap: 'test2'}}]);
   });
 
-  it('should activate multiple domains and return the requested metric for HeapDumpSampling', async () => {
-    const testObserver = new HeapDumpSampling();
+  it('should activate multiple domains and return the requested metric for HeapProfilerSampling', async () => {
+    const testObserver = new HeapProfilerSampling();
     const executedCommands: string[] = [];
     mockClient.send.mockImplementation((command, callback) => {
       executedCommands.push(command);
@@ -279,7 +279,7 @@ describe('Chromium client', () => {
     expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
     expect(executedCommands[4]).toEqual('HeapProfiler.enable');
     expect(executedCommands[5]).toEqual('HeapProfiler.collectGarbage');
-    expect(responseStop).toEqual([{metric: {heapSampling: '{}'}}]);
+    expect(responseStop).toEqual([{metric: {heapProfilerSampling: '{}'}}]);
   });
 
   it('should run a custom observer', async () => {

@@ -8,8 +8,8 @@ import {
   heapProfilerDomainPlugin,
 } from '../plugins/index.js';
 
-export class HeapDumpSampling implements MetricObserver {
-  public readonly name = 'heapDumpSampling';
+export class HeapProfilerSampling implements MetricObserver {
+  public readonly name = 'heapProfilerSampling';
   public readonly plugins = [
     heapProfilerDomainPlugin,
     heapGarbageCollectorPlugin,
@@ -42,7 +42,7 @@ export class HeapDumpSampling implements MetricObserver {
     return new Promise(async (resolve, reject) => {
       try {
         const stopSamplingResponse = await developmentTools.HeapProfiler.stopSampling();
-        accumulator.heapSampling = JSON.stringify(stopSamplingResponse.profile);
+        accumulator.heapProfilerSampling = JSON.stringify(stopSamplingResponse.profile);
       } catch {
         reject(new Error('HeapProfiler.stopSampling command failed'));
       }

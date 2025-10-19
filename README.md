@@ -72,6 +72,7 @@ Following metrics are supported out of the box:
 - totalJsHeapSize
 - allPerformanceMetrics
 - heapDump
+- heapProfilerSampling
 
 The `MetricsEngine` relies on the [Chrome DevTool Protocol (CDP)](https://chromedevtools.github.io/devtools-protocol/),
 which can be accessed through HTTP and WebSocket. To allow for a connection, make sure to expose a port for the remote debugging.
