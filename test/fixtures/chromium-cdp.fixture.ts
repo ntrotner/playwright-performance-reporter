@@ -10,6 +10,8 @@ export class ChromiumCDPFixture {
     takeHeapSnapshot: jest.fn().mockReturnValue(Promise.resolve(true)),
     reportHeapSnapshotProgress: jest.fn().mockReturnValue(() => {}),
     startSampling: jest.fn().mockReturnValue(Promise.resolve({})),
-    stopSampling: jest.fn().mockReturnValue(Promise.resolve({profile: {}}))
+    stopSampling: jest.fn().mockReturnValue(Promise.resolve({profile: {}})),
+    startTrackingHeapObjects: jest.fn().mockReturnValue(Promise.resolve({})),
+    stopTrackingHeapObjects: jest.fn().mockReturnValue(Promise.resolve({}))
   }
 }

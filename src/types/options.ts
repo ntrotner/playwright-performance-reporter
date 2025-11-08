@@ -25,6 +25,7 @@ export const metrics = [
   'allPerformanceMetrics',
   'heapDump',
   'heapProfilerSampling',
+  'heapObjectsTracking',
 ] as const;
 export type Metrics = typeof metrics[number];
 
@@ -57,7 +58,14 @@ export type SupportedBrowsers = typeof supportedBrowsers[number];
  * don't support extraction at all
  */
 export const browsersSupportingMetrics = {
-  chromium: ['usedJsHeapSize', 'totalJsHeapSize', 'allPerformanceMetrics', 'heapDump', 'heapProfilerSampling'],
+  chromium: [
+    'usedJsHeapSize',
+    'totalJsHeapSize',
+    'allPerformanceMetrics',
+    'heapDump',
+    'heapProfilerSampling',
+    'heapObjectsTracking',
+  ],
   firefox: [],
   webkit: [],
 } as const;

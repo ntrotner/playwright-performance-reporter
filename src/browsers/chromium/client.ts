@@ -15,6 +15,7 @@ import {
 import {
   AllPerformanceMetrics,
   HeapDump,
+  HeapObjectsTracking,
   HeapProfilerSampling,
   TotalJsHeapSize,
   UsedJsHeapSize,
@@ -298,6 +299,10 @@ export class ChromiumDevelopmentTools implements BrowserClient {
 
       case 'heapProfilerSampling': {
         return new HeapProfilerSampling();
+      }
+
+      case 'heapObjectsTracking': {
+        return new HeapObjectsTracking();
       }
     }
   }

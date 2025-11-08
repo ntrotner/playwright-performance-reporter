@@ -5,6 +5,7 @@ import {
   UsedJsHeapSize,
   HeapDump,
   HeapProfilerSampling,
+  HeapObjectsTracking,
 } from '../../src/browsers/chromium/observers/index.js';
 import {
   type ChromiumSupportedMetrics,
@@ -280,6 +281,40 @@ describe('Chromium client', () => {
     expect(executedCommands[4]).toEqual('HeapProfiler.enable');
     expect(executedCommands[5]).toEqual('HeapProfiler.collectGarbage');
     expect(responseStop).toEqual([{metric: {heapProfilerSampling: '{}'}}]);
+  });
+
+  it('should activate multiple domains and return the requested metric for HeapObjectsTracking', async () => {
+    const testObserver = new HeapObjectsTracking();
+    const executedCommands: string[] = [];
+    mockClient.send.mockImplementation((command, callback) => {
+      executedCommands.push(command);
+      if (['HeapProfiler.enable', 'HeapProfiler.collectGarbage'].includes(command)) {
+        callback(true);
+      }
+    });
+    mockClient.HeapProfiler.addHeapSnapshotChunk = jest.fn()
+      .mockImplementation((callback) => {
+        setTimeout(() => callback({chunk: 'test'}), 1);
+        return () => {};
+      });
+    mockClient.HeapProfiler.reportHeapSnapshotProgress = jest.fn()
+      .mockImplementation((callback) => {
+        setTimeout(() => callback({finished: true}), 1);
+        return () => {};
+      });
+    mockClient.HeapProfiler.startTrackingHeapObjects = jest.fn().mockReturnValue(Promise.resolve({profile: {}}));
+    mockClient.HeapProfiler.stopTrackingHeapObjects = jest.fn().mockReturnValue(Promise.resolve({profile: {}}));
+    await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStart');
+    const responseStop = await chromiumDevelopmentTools.getMetric(testObserver.name, 'onStop');
+    expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
+    expect(executedCommands[0]).toEqual('HeapProfiler.enable');
+    expect(responseStop).toEqual([{metric: {heapObjectsTracking: ''}}]);
+
+    mockClient.HeapProfiler.addHeapSnapshotChunk = jest.fn()
+      .mockImplementation((callback) => {
+        setTimeout(() => callback({chunk: 'test2'}), 1);
+        return () => {};
+      })
   });
 
   it('should run a custom observer', async () => {

@@ -16,7 +16,7 @@ const PlaywrightPerformanceReporterOptions: Options = {
         }
       },
       onTestStep: {
-        metrics: ['allPerformanceMetrics', 'heapDumpSampling'],
+        metrics: ['allPerformanceMetrics', 'heapObjectsTracking'],
         sampleMetrics: {
           allPerformanceMetrics: {
             samplingTimeoutInMilliseconds: 1000,
