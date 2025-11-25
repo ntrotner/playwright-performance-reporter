@@ -12,10 +12,9 @@ export class HealthStatePage {
     
     await this.page.getByRole('button', { name: /create|add|new/i }).click();
     
+    // Fill the name field - it should be visible for creating a health state
     const nameField = this.page.getByRole('textbox', { name: /name|state name/i });
-    if (await nameField.isVisible()) {
-      await nameField.fill(name);
-    }
+    await nameField.fill(name);
   }
 
   async submitForm(): Promise<void> {

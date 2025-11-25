@@ -9,7 +9,8 @@ export class CreateAccountPage {
     const password: string = config.credentials.generateRandomPassword();
 
     await this.page.getByRole('textbox', { name: /email/i }).fill(email);
-    await this.page.getByRole('textbox', { name: /password/i }).first().fill(password);
+    // Use exact match for password field, excluding confirm password
+    await this.page.getByRole('textbox', { name: /^password$/i }).fill(password);
     
     const confirmPassword = this.page.getByRole('textbox', { name: /confirm password/i });
     if (await confirmPassword.isVisible()) {

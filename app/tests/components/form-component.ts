@@ -4,9 +4,10 @@ export class FormComponent {
   readonly formContainer: Locator;
 
   constructor(readonly page: Page, formSelector?: string) {
+    // Default to the first form on the page when no specific selector is provided
     this.formContainer = formSelector 
       ? page.locator(formSelector) 
-      : page.locator('form');
+      : page.locator('form').first();
   }
 
   async fillField(fieldName: string, value: string): Promise<void> {

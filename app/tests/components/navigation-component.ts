@@ -4,7 +4,8 @@ export class NavigationComponent {
   readonly navContainer: Locator;
 
   constructor(readonly page: Page) {
-    this.navContainer = page.locator('nav, header, [role="navigation"]');
+    // Prioritize the nav element, then fall back to header or ARIA navigation
+    this.navContainer = page.locator('nav').first();
   }
 
   async navigateTo(linkText: string): Promise<void> {
