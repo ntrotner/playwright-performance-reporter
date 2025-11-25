@@ -1,0 +1,18 @@
+{
+  "name": "playwright-performance-reporter-app",
+  "version": "1.0.0",
+  "description": "Playwright test suite for heap-insight app",
+  "scripts": {
+    "test": "cd .. && npm install && npm run build && cd app && playwright test"
+  },
+  "author": {
+    "name": "Nikita Trotner",
+    "email": "ntrotner@users.noreply.github.com",
+    "url": "https://github.com/ntrotner"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.3.1"
+  }
+}

@@ -71,7 +71,7 @@
     }
   },
   "lint-staged": {
-    "!(test/**/*|example/**/*)*.ts": "xo ./src/ --fix"
+    "!(test/**/*|example/**/*|app/**/*)*.ts": "xo ./src/ --fix"
   },
   "release": {
     "branches": [
