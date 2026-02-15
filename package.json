@@ -133,7 +133,7 @@
     "rules": {
       "new-cap": 0,
       "no-async-promise-executor": 0,
-      "import-newlines/enforce": ["error", { "items": 1 }],
+      "import-newlines/enforce": ["error", { "items": 0 }],
       "unicorn/prefer-logical-operator-over-ternary": 0,
       "@typescript-eslint/no-empty-function": 0,
       "@typescript-eslint/class-literal-property-style": 0,

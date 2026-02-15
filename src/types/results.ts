@@ -1,4 +1,6 @@
-import {type PerformanceMetrics} from './index.js';
+import {
+  type PerformanceMetrics,
+} from './index.js';
 
 /**
  * Metrics for a specific test step

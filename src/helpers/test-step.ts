@@ -1,6 +1,12 @@
-import {type TestStep} from '@playwright/test/reporter';
-import {md5} from './hash.js';
-import {sanitizeStringInput} from './index.js';
+import {
+  type TestStep,
+} from '@playwright/test/reporter';
+import {
+  md5,
+} from './hash.js';
+import {
+  sanitizeStringInput,
+} from './index.js';
 
 /**
  * Get id and name from test hierarchy

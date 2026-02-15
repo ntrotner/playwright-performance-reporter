@@ -1,4 +1,6 @@
-import {createHash} from 'node:crypto';
+import {
+  createHash,
+} from 'node:crypto';
 
 /**
  * Transforms string into md5 hash

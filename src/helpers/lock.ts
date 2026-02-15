@@ -1,4 +1,6 @@
-import {Stream} from 'node:stream';
+import {
+  Stream,
+} from 'node:stream';
 
 /**
  * Events for lock status
