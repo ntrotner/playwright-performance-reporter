@@ -129,13 +129,13 @@ const PlaywrightPerformanceReporterOptions: Options = {
 If you want to extend it with custom metrics, you can create a new class that implements the `MetricObserver` interface.
 Please see the example below how to use it, or checkout the [allPerformanceMetrics](src/browsers/chromium/observers/all-performance-metrics.ts) implementation.
 
-For ease of implementation, the passed object can implement the interface `MetricObserver`.
+For ease of implementation, the passed object can implement the interface `ChromiumMetricObserver`, `WebkitMetricObserver` or `FirefoxMetricObserver`.
 By using custom metrics it's possible to make observers stateful and e.g. make the next output dependent on the previous one.
 
 ```ts
-import type { MetricObserver, Options } from 'playwright-performance-reporter';
+import type { ChromiumMetricObserver, Options } from 'playwright-performance-reporter';
 
-class NewMetric implements MetricObserver {
+class NewMetric implements ChromiumMetricObserver {
   ...
 }
 
