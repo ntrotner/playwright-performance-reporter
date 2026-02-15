@@ -16,9 +16,9 @@ import {
   HookOrderToMeasurementOrder,
   HookOrderToMeasurementOffsetOrder,
   testCaseParent,
-  type Metrics,
   type ResultAccumulator,
   type JsonWriter,
+  type MetricObserver,
 } from '../types/index.js';
 import {
   buildTestCaseIdentifier,
@@ -27,7 +27,9 @@ import {
   JsonChunkWriter,
   Logger,
 } from '../helpers/index.js';
-import {MetricsEngine} from './index.js';
+import {
+  MetricsEngine,
+} from './index.js';
 
 export class PerformanceReporter implements Reporter {
   /**
@@ -215,7 +217,7 @@ export class PerformanceReporter implements Reporter {
   }
 
   /**
-   * Execute metrics gathering for existing metrics and custom metrics
+   * Execute metrics gathering for metrics
    *
    * @param results result accumulator
    * @param caseId identifier for case
@@ -230,40 +232,28 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    if (this.options.browsers[browser]?.[hook]?.metrics.length) {
-      Logger.info('Fetching predefined metrics', ...this.options.browsers[browser][hook].metrics);
+    const metrics = this.options.browsers[browser]?.[hook]?.metrics ?? [];
+    if (metrics.length > 0) {
+      Logger.info('Fetching metrics', ...metrics.map(m => m.name));
     }
 
     const startOfTrigger = Date.now();
-    const metrics = Promise.all(
-      this.options.browsers[browser]?.[hook]?.metrics.map(async metric => this.metricsEngine.getMetric(metric, hookOrder)) ?? [],
+    const metricsPromises = metrics.map(async (metric: MetricObserver) =>
+      this.metricsEngine.getMetric(metric, hookOrder),
     );
 
-    if (this.options.browsers[browser]?.[hook]?.customMetrics) {
-      Logger.info('Fetching custom metrics', ...Object.values(this.options.browsers[browser][hook].customMetrics).map(({name}) => name));
-    }
-
-    const customMetrics = Promise.all(
-      Object.values(this.options.browsers[browser]?.[hook]?.customMetrics ?? {})
-        .map(async customMetric =>
-          this.metricsEngine.runCustomMetric(customMetric, hookOrder),
-        ) || [],
-    );
-
-    const resolvedMetrics = await metrics;
-    const resolvedCustomMetrics = await customMetrics;
+    const resolvedMetrics = await Promise.all(metricsPromises);
     const endOfTrigger = Date.now();
 
     results[caseId][stepId][HookOrderToMeasurementOrder[hookOrder]] = endOfTrigger;
     results[caseId][stepId][HookOrderToMeasurementOffsetOrder[hookOrder]] = endOfTrigger - startOfTrigger;
     results[caseId][stepId][HookOrderToMetricOrder[hookOrder]].push(
       ...resolvedMetrics.filter(m => m !== undefined).flat(),
-      ...resolvedCustomMetrics.filter(m => m !== undefined).flat(),
     );
   }
 
   /**
-   * Setup sampling for existing metrics and custom metrics
+   * Setup sampling for metrics
    *
    * @param results result accumulator
    * @param caseId identifier for case
@@ -272,56 +262,30 @@ export class PerformanceReporter implements Reporter {
    * @param browser which settings and metrics to use
    */
   private async executeSamplingMetrics(results: ResultAccumulator, caseId: string, stepId: string, hook: Hooks, browser: SupportedBrowsers) {
-    const sampleMetrics = this.options.browsers[browser]?.[hook]?.sampleMetrics;
-    if (!sampleMetrics) {
+    const samplingConfig = this.options.browsers[browser]?.sampling?.metrics;
+    if (!samplingConfig) {
       return;
     }
 
-    const samplingArguments: Array<[() => Promise<void>, number] | undefined> = Object.entries(sampleMetrics).map(([metricName, metricSampling]) => {
-      const registeredMetrics = this.options.browsers[browser]?.[hook]?.metrics;
-      const customMetrics = this.options.browsers[browser]?.[hook]?.customMetrics;
-      const isPredefinedMetric = (registeredMetrics ?? []).find(registeredMetric => registeredMetric === metricName);
-      const isCustomMetric = Object.values(customMetrics ?? {}).find(value => value.name === metricName);
+    const samplingArguments: Array<{callback: () => Promise<void>; delay: number}> = samplingConfig.map(samplingItem => ({
+      callback: async () => {
+        const metricsResponse = await this.metricsEngine.getMetric(samplingItem.metric, 'onSampling');
 
-      if (registeredMetrics && isPredefinedMetric) {
-        return [
-          async () => {
-            const metricsResponse = await this.metricsEngine.getMetric(metricName as Metrics, 'onSampling');
-
-            if (metricsResponse) {
-              const clonedResults = structuredClone(results);
-              clonedResults[caseId][stepId].samplingMetrics.push(...metricsResponse);
-              await this.jsonChunkWriter.write(clonedResults);
-            }
-          },
-          metricSampling.samplingTimeoutInMilliseconds,
-        ];
-      }
-
-      if (customMetrics && isCustomMetric) {
-        return [
-          async () => {
-            const metricsResponse = await this.metricsEngine.runCustomMetric(customMetrics[metricName], 'onSampling');
-
-            if (metricsResponse) {
-              const clonedResults = structuredClone(results);
-              clonedResults[caseId][stepId].samplingMetrics.push(...metricsResponse);
-              await this.jsonChunkWriter.write(clonedResults);
-            }
-          },
-          metricSampling.samplingTimeoutInMilliseconds,
-        ];
-      }
-
-      return undefined;
-    });
+        if (metricsResponse) {
+          const clonedResults = structuredClone(results);
+          clonedResults[caseId][stepId].samplingMetrics.push(...metricsResponse);
+          await this.jsonChunkWriter.write(clonedResults);
+        }
+      },
+      delay: samplingItem.samplingTimeoutInMilliseconds,
+    }));
 
     for (const sampling of samplingArguments) {
       if (!sampling) {
         continue;
       }
 
-      const interval = setInterval(...sampling);
+      const interval = setInterval(sampling.callback, sampling.delay);
       this.samplingRunner.get(hook)?.set(caseId + stepId, () => {
         clearInterval(interval);
       });

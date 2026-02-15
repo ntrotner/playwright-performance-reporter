@@ -1,3 +1,15 @@
-export * from './performance-domain.js';
-export * from './heap-garbage-collect.js';
-export * from './heap-profiler-domain.js';
+import {
+  heapGarbageCollectorPlugin,
+} from './heap-garbage-collect.js';
+import {
+  heapProfilerDomainPlugin,
+} from './heap-profiler-domain.js';
+import {
+  performanceDomainPlugin,
+} from './performance-domain.js';
+
+export const nativeChromiumPlugins = {
+  heapGarbageCollectorPlugin,
+  heapProfilerDomainPlugin,
+  performanceDomainPlugin,
+} as const;

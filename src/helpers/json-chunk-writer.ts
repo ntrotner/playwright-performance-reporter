@@ -1,11 +1,15 @@
 import path from 'node:path';
-import fs, {type WriteStream} from 'node:fs';
+import fs, {
+  type WriteStream,
+} from 'node:fs';
 import JSONStream from 'JSONStream';
 import {
   type JsonWriter,
   type OptionsFileWrite,
 } from '../types/index.js';
-import {Logger} from './logger.js';
+import {
+  Logger,
+} from './logger.js';
 
 /**
  * Write JSON chunks in an array of entries

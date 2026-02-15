@@ -1,9 +1,16 @@
-import {ChromiumDevelopmentTools} from '../browsers/chromium/index.js';
-import {type BrowserClient} from '../browsers/client.js';
-import {FirefoxDevelopmentTools} from '../browsers/firefox/index.js';
-import {WebkitDevelopmentTools} from '../browsers/webkit/index.js';
 import {
-  type Metrics,
+  ChromiumDevelopmentTools,
+} from '../browsers/chromium/index.js';
+import {
+  type BrowserClient,
+} from '../browsers/client.js';
+import {
+  FirefoxDevelopmentTools,
+} from '../browsers/firefox/index.js';
+import {
+  WebkitDevelopmentTools,
+} from '../browsers/webkit/index.js';
+import {
   type SupportedBrowsers,
   type HookOrder,
   type TargetMetric,
@@ -76,23 +83,9 @@ export class MetricsEngine {
    * @param metric which metric to measure
    * @param hookOrder step to run
    */
-  public async getMetric(metric: Metrics, hookOrder: HookOrder): Promise<TargetMetric[] | undefined> {
+  public async getMetric(metric: MetricObserver, hookOrder: HookOrder): Promise<TargetMetric[] | undefined> {
     try {
       return await this.browser?.getMetric(metric, hookOrder);
-    } catch {}
-
-    return undefined;
-  }
-
-  /**
-   * Dispatches custom metric fetch from browser and return metric
-   *
-   * @param customMetric user defined fetch function
-   * @param hookOrder step to run
-   */
-  public async runCustomMetric(customMetric: MetricObserver, hookOrder: HookOrder): Promise<TargetMetric[] | undefined> {
-    try {
-      return await this.browser?.runCustomObserver(customMetric, hookOrder);
     } catch {}
 
     return undefined;

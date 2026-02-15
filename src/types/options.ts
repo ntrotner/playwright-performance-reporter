@@ -1,4 +1,7 @@
 import {
+  nativeChromiumObservers,
+} from '../browsers/chromium/observers/index.js';
+import {
   type MeasurePlugin,
   type OnSamplingMeasure,
   type OnStartMeasure,
@@ -13,21 +16,6 @@ export type Hooks = typeof hooks[number];
 
 export const hookOrder = ['onStart', 'onSampling', 'onStop'] as const;
 export type HookOrder = typeof hookOrder[number];
-
-/**
- * All metrics implemented in the reporter
- */
-export const metrics = [
-  'usedJsHeapSize',
-  'totalJsHeapSize',
-  'jsHeapSizeLimit',
-  'powerInWatts',
-  'allPerformanceMetrics',
-  'heapDump',
-  'heapProfilerSampling',
-  'heapObjectsTracking',
-] as const;
-export type Metrics = typeof metrics[number];
 
 /**
  * Common interface to define procedures to observe metrics
@@ -45,6 +33,7 @@ export type MetricObserver = {
  */
 export type MetricSampling = {
   samplingTimeoutInMilliseconds: number;
+  metric: MetricObserver;
 };
 
 /**
@@ -52,24 +41,6 @@ export type MetricSampling = {
  */
 export const supportedBrowsers = ['chromium', 'webkit', 'firefox'] as const;
 export type SupportedBrowsers = typeof supportedBrowsers[number];
-
-/**
- * Restrict metrics to browsers as some don't expose APIs or
- * don't support extraction at all
- */
-export const browsersSupportingMetrics = {
-  chromium: [
-    'usedJsHeapSize',
-    'totalJsHeapSize',
-    'allPerformanceMetrics',
-    'heapDump',
-    'heapProfilerSampling',
-    'heapObjectsTracking',
-  ],
-  firefox: [],
-  webkit: [],
-} as const;
-export type ChromiumSupportedMetrics = typeof browsersSupportingMetrics.chromium[number] & Metrics;
 
 export type OptionsFileWrite = {
   outputDir: string;
@@ -102,6 +73,18 @@ export type JsonWriter = {
   delete(): Promise<boolean>;
 };
 
+type BrowserOptions = {
+  [browser in SupportedBrowsers]?: {
+    [hook in Hooks]?: {
+      metrics: MetricObserver[];
+    };
+  } & {
+    sampling?: {
+      metrics: MetricSampling[];
+    };
+  };
+};
+
 /**
  * Customize the reporter with desired browser and (custom) metrics
  */
@@ -110,15 +93,7 @@ export type Options = {
   outputFile: string;
   deleteOnFailure: boolean;
   customJsonWriter?: JsonWriter;
-  browsers: {
-    [browser in SupportedBrowsers]?: {
-      [hook in Hooks]?: {
-        metrics: Array<typeof browsersSupportingMetrics[browser][number] & Metrics>;
-        customMetrics?: Record<string, MetricObserver>;
-        sampleMetrics?: Record<string, MetricSampling>;
-      }
-    }
-  };
+  browsers: BrowserOptions;
 };
 
 export const defaultOptions: Options = {
@@ -128,7 +103,15 @@ export const defaultOptions: Options = {
   browsers: {
     chromium: {
       onTest: {
-        metrics: ['usedJsHeapSize'],
+        metrics: [new nativeChromiumObservers.allPerformanceMetrics()],
+      },
+      sampling: {
+        metrics: [
+          {
+            samplingTimeoutInMilliseconds: 1000,
+            metric: new nativeChromiumObservers.usedJsHeapSize(),
+          },
+        ],
       },
     },
   },

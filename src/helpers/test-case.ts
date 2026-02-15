@@ -1,6 +1,12 @@
-import {type TestCase} from '@playwright/test/reporter';
-import {type TestPerformance} from '../types/index.js';
-import {sanitizeStringInput} from './index.js';
+import {
+  type TestCase,
+} from '@playwright/test/reporter';
+import {
+  type TestPerformance,
+} from '../types/index.js';
+import {
+  sanitizeStringInput,
+} from './index.js';
 
 /**
  * Create generic `TestPerformance` object to fill during measurements

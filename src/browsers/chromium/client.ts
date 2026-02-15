@@ -1,9 +1,9 @@
 import CDP from 'chrome-remote-interface';
-import {type BrowserClient} from '../client.js';
 import {
-  type Metrics,
+  type BrowserClient,
+} from '../client.js';
+import {
   type SupportedBrowsers,
-  type ChromiumSupportedMetrics,
   type MetricObserver,
   type HookOrder,
   type TargetMetric,
@@ -12,14 +12,6 @@ import {
   Lock,
   Logger,
 } from '../../helpers/index.js';
-import {
-  AllPerformanceMetrics,
-  HeapDump,
-  HeapObjectsTracking,
-  HeapProfilerSampling,
-  TotalJsHeapSize,
-  UsedJsHeapSize,
-} from './observers/index.js';
 
 export class ChromiumDevelopmentTools implements BrowserClient {
   /**
@@ -68,7 +60,7 @@ export class ChromiumDevelopmentTools implements BrowserClient {
   /**
    * @inheritdoc
    */
-  public async getMetric(metric: ChromiumSupportedMetrics, hookOrder: HookOrder): Promise<TargetMetric[]> {
+  public async getMetric(metric: MetricObserver, hookOrder: HookOrder): Promise<TargetMetric[]> {
     return new Promise(async resolve => {
       let newConnectionRequests: Promise<void> | undefined;
       if (this.connectLock.isLocked()) {
@@ -102,36 +94,6 @@ export class ChromiumDevelopmentTools implements BrowserClient {
       }
 
       resolve(Object.values(targetMetric));
-    });
-  }
-
-  /**
-   * @inheritdoc
-   */
-  public async runCustomObserver(customMetric: MetricObserver, hookOrder: HookOrder): Promise<TargetMetric[]> {
-    return new Promise(async resolve => {
-      const targetMetric: TargetMetric[] = [];
-      await this.connect();
-
-      await Promise.allSettled(
-        Object.keys(this.clients).map(async targetId => {
-          const newTargetMetric: TargetMetric = {
-            ...this.targets[targetId],
-            metric: {},
-          };
-
-          const client = this.clients[targetId];
-          if (!client) {
-            return;
-          }
-
-          await this.runPlugins(targetId, customMetric);
-          await customMetric[hookOrder](newTargetMetric.metric, client);
-          targetMetric.push(newTargetMetric);
-        }),
-      );
-
-      resolve(targetMetric);
     });
   }
 
@@ -179,22 +141,21 @@ export class ChromiumDevelopmentTools implements BrowserClient {
    *
    * @param targetId target to fill
    * @param targetMetric mapping of all targets
-   * @param metric type of metric
+   * @param metric type of metric or observer
    * @param hookOrder hook order
    */
-  private async runPredefinedMetricFetch(targetId: string, targetMetric: Record<string, TargetMetric>, metric: ChromiumSupportedMetrics, hookOrder: HookOrder): Promise<void> {
+  private async runPredefinedMetricFetch(targetId: string, targetMetric: Record<string, TargetMetric>, metric: MetricObserver, hookOrder: HookOrder): Promise<void> {
     const newTargetMetric: TargetMetric = {
       metric: {},
     };
 
-    const mapping = this.mapMetric(metric);
     const client = this.clients[targetId];
-    if (!mapping || !client) {
+    if (!client) {
       return;
     }
 
-    await this.runPlugins(targetId, mapping);
-    await mapping[hookOrder](newTargetMetric.metric, client);
+    await this.runPlugins(targetId, metric);
+    await metric[hookOrder](newTargetMetric.metric, client);
     targetMetric[targetId] = newTargetMetric;
   }
 
@@ -271,39 +232,6 @@ export class ChromiumDevelopmentTools implements BrowserClient {
         // eslint-disable-next-line no-await-in-loop
         await plugin(client);
       } catch {}
-    }
-  }
-
-  /**
-   * Provide observer to collect metric
-   *
-   * @param metric observer to create
-   */
-  private mapMetric(metric: Metrics & ChromiumSupportedMetrics): MetricObserver | undefined {
-    switch (metric) {
-      case 'usedJsHeapSize': {
-        return new UsedJsHeapSize();
-      }
-
-      case 'totalJsHeapSize': {
-        return new TotalJsHeapSize();
-      }
-
-      case 'allPerformanceMetrics': {
-        return new AllPerformanceMetrics();
-      }
-
-      case 'heapDump': {
-        return new HeapDump();
-      }
-
-      case 'heapProfilerSampling': {
-        return new HeapProfilerSampling();
-      }
-
-      case 'heapObjectsTracking': {
-        return new HeapObjectsTracking();
-      }
     }
   }
 }

@@ -1,5 +1,6 @@
 import {defineConfig, devices} from '@playwright/test';
 import type {Options} from '../lib';
+import {nativeChromiumObservers} from '../lib';
 
 const PlaywrightPerformanceReporterOptions: Options = {
   outputDir: './',
@@ -8,20 +9,18 @@ const PlaywrightPerformanceReporterOptions: Options = {
   browsers: {
     chromium: {
       onTest: {
-        metrics: ['allPerformanceMetrics'],
-        sampleMetrics: {
-          allPerformanceMetrics: {
-            samplingTimeoutInMilliseconds: 1000,
-          }
-        }
+        metrics: [new nativeChromiumObservers.allPerformanceMetrics()],
       },
       onTestStep: {
-        metrics: ['allPerformanceMetrics', 'heapObjectsTracking'],
-        sampleMetrics: {
-          allPerformanceMetrics: {
+        metrics: [new nativeChromiumObservers.allPerformanceMetrics()],
+      },
+      sampling: {
+        metrics: [
+          {
             samplingTimeoutInMilliseconds: 1000,
+            metric: new nativeChromiumObservers.allPerformanceMetrics(),
           }
-        }
+        ]
       }
     }
   }
