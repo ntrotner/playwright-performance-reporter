@@ -5,7 +5,7 @@ import {
   type TestResult,
   type TestStep,
 } from '@playwright/test/reporter';
-import PlaywrightPerformanceReporter from '../src/index.js';
+import PlaywrightPerformanceReporter, {nativeChromiumObservers} from '../src/index.js';
 import {type Options} from '../src/types/options.js';
 import {MetricsEngineFixture} from './fixtures/metrics.fixture.js';
 
@@ -141,12 +141,12 @@ describe('Playwright Performance Reporter', () => {
       browsers: {
         chromium: {
           onTest: {
-            metrics: ['usedJsHeapSize', 'totalJsHeapSize'],
+            metrics: [new nativeChromiumObservers.usedJsHeapSize(), new nativeChromiumObservers.totalJsHeapSize()],
           },
         },
       },
     };
-    playwrightPerformanceReporter = new PlaywrightPerformanceReporter(structuredClone(options));
+    playwrightPerformanceReporter = new PlaywrightPerformanceReporter(options);
     mockMetricsEngine = new MetricsEngineFixture();
     (playwrightPerformanceReporter as any).metricsEngine = mockMetricsEngine;
   });
@@ -292,7 +292,7 @@ describe('Playwright Performance Reporter', () => {
 
   describe('executeMetrics', () => {
     afterEach(() => {
-      (playwrightPerformanceReporter as any).options = structuredClone(options);
+      (playwrightPerformanceReporter as any).options = options;
     });
 
     it('should propagate metrics to the metricsEngine', async () => {
@@ -306,48 +306,6 @@ describe('Playwright Performance Reporter', () => {
       expect(mockMetricsEngine.getMetric).toHaveBeenCalledWith(options.browsers.chromium?.onTest?.metrics[0], 'onStart');
       expect(mockMetricsEngine.getMetric).toHaveBeenCalledWith(options.browsers.chromium?.onTest?.metrics[1], 'onStart');
       expect(results[pivot][customTest].startMetrics.length).toEqual(2);
-    });
-
-    it('should propagate custom metrics to the metricsEngine', async () => {
-      const pivot = 'Test';
-      const customTest = 'Test - Case';
-      const customName = 'customName';
-
-      const optionsWithCustomMetrics = {
-        ...options,
-        browsers: {
-          ...options.browsers,
-          chromium: {
-            ...options.browsers.chromium,
-            onTest: {
-              metrics: options.browsers.chromium?.onTest?.metrics,
-              customMetrics: {
-                metric1: {
-                  name: 'metric1',
-                  plugins: [],
-                  async onStart(accumulator) {
-                    Object.assign(accumulator, {metric: 123});
-                  },
-                  async onSampling(accumulator) {
-                    Object.assign(accumulator, {metric: 123});
-                  },
-                  async onStop(accumulator) {
-                    Object.assign(accumulator, {metric: 456});
-                  },
-                },
-              },
-            },
-          },
-        },
-      } as Options;
-      (playwrightPerformanceReporter as any).options = optionsWithCustomMetrics;
-      const results = (playwrightPerformanceReporter as any).createTestPerformance(pivot, customTest, customName);
-      await (playwrightPerformanceReporter as any).executeMetrics(results, pivot, customTest, 'onTest', 'onStart', 'chromium');
-      await (playwrightPerformanceReporter as any).executeMetrics(results, pivot, customTest, 'onTest', 'onStop', 'chromium');
-
-      expect(mockMetricsEngine.runCustomMetric).toHaveBeenCalledTimes(2);
-      expect(mockMetricsEngine.runCustomMetric).toHaveBeenCalledWith(optionsWithCustomMetrics.browsers.chromium?.onTest?.customMetrics?.metric1, 'onStart');
-      expect(mockMetricsEngine.runCustomMetric).toHaveBeenCalledWith(optionsWithCustomMetrics.browsers.chromium?.onTest?.customMetrics?.metric1, 'onStop');
     });
 
     it('should ignore customMetrics if none are provided', async () => {
@@ -372,17 +330,17 @@ describe('Playwright Performance Reporter', () => {
           ...options.browsers,
           chromium: {
             ...options.browsers.chromium,
-            onTest: {
-              metrics: ['allPerformanceMetrics'],
-              sampleMetrics: {
-                allPerformanceMetrics: {
-                  samplingTimeoutInMilliseconds: 10
-                }
-              }
+            sampling: {
+              metrics: [
+                {
+                  samplingTimeoutInMilliseconds: 10,
+                  metric: new nativeChromiumObservers.usedJsHeapSize(),
+                },
+              ],
             },
           },
         },
-      } as Options;
+      };
       (playwrightPerformanceReporter as any).options = optionsWithSamplingMetrics;
       mockMetricsEngine.getMetric.mockReturnValue(Promise.resolve([{metric1: 123}]));
       const results = (playwrightPerformanceReporter as any).createTestPerformance(pivot, customTest, customName);

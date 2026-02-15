@@ -1,5 +1,5 @@
 export class LockFixture {
-  public lock = jest.fn();
-  public isLocked = jest.fn();
-  public notifyOnUnlock = jest.fn();
+  public lock = jest.fn(() => () => {});
+  public isLocked = jest.fn(() => false);
+  public notifyOnUnlock = jest.fn(() => Promise.resolve());
 }

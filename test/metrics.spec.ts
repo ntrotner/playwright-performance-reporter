@@ -1,6 +1,7 @@
 import {MetricsEngine} from '../src/engines/index.js';
 import {type OnStartMeasure} from '../src/types/index.js';
 import {BrowserClientFixture} from './fixtures/index.js';
+import {nativeChromiumObservers} from "../src";
 
 describe('Metrics engine', () => {
   let metricsEngine: MetricsEngine;
@@ -38,49 +39,25 @@ describe('Metrics engine', () => {
 
   it('should propagate metric to collect', async () => {
     (metricsEngine as any).browser = mockBrowserClient;
-    await metricsEngine.getMetric('usedJsHeapSize', 'onStart');
-    expect(mockBrowserClient.getMetric).toHaveBeenCalledWith('usedJsHeapSize', 'onStart');
+    const metricObserver = new nativeChromiumObservers.usedJsHeapSize();
+    await metricsEngine.getMetric(metricObserver, 'onStart');
+    expect(mockBrowserClient.getMetric).toHaveBeenCalledWith(metricObserver, 'onStart');
   });
 
   it('should return undefined when getMetric failed in browser', async () => {
     (metricsEngine as any).browser = mockBrowserClient;
     (metricsEngine as any).browser.getMetric = () => {throw new Error('error')};
-    const response = await metricsEngine.getMetric('usedJsHeapSize', 'onStart');
-    expect(response).toEqual(undefined);
-  });
-
-  it('should return undefined when runCustomMetric failed in browser', async () => {
-    (metricsEngine as any).browser = mockBrowserClient;
-    (metricsEngine as any).browser.runCustomObserver = () => {throw new Error('error')};
-    const onStart: OnStartMeasure = async () => {};
-    const response = await metricsEngine.runCustomMetric({onStart} as any, 'onStart');
+    const metricObserver = new nativeChromiumObservers.usedJsHeapSize();
+    const response = await metricsEngine.getMetric(metricObserver, 'onStart');
     expect(response).toEqual(undefined);
   });
 
   it('should collect all metric by browser', async () => {
     (metricsEngine as any).browser = mockBrowserClient;
     (metricsEngine as any).browser.getMetric.mockResolvedValue(Promise.resolve([{metric1: 123}, {metric2: 456}]));
-    const metric = await metricsEngine.getMetric('jsHeapSizeLimit', 'onStop');
+    const metricObserver = new nativeChromiumObservers.usedJsHeapSize();
+    const metric = await metricsEngine.getMetric(metricObserver, 'onStop');
 
     expect(metric).toEqual([{metric1: 123}, {metric2: 456}]);
-  });
-
-  it('should skip custom metric in browser client', async () => {
-    const onStart: OnStartMeasure = async () => {};
-    const metric = await metricsEngine.runCustomMetric({onStart} as any, 'onStart');
-
-    expect(metric).toEqual(undefined);
-  });
-
-  it('should run custom metric in browser client', async () => {
-    (metricsEngine as any).browser = mockBrowserClient;
-    const onStart: OnStartMeasure = async (accumulator, _) => {
-      Object.assign(accumulator, {metric: 123});
-    };
-
-    mockBrowserClient.runCustomObserver.mockResolvedValue([{metric: 123}]);
-    const metric = await metricsEngine.runCustomMetric({onStart} as any, 'onStart');
-
-    expect(metric).toEqual([{metric: 123}]);
   });
 });
