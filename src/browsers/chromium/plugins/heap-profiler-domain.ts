@@ -1,4 +1,6 @@
-import {type MeasurePlugin} from '../../../types/index.js';
+import {
+  type MeasurePlugin,
+} from '../../../types/index.js';
 
 /**
  * Activates the `HeapProfiler.*` domain in CDP

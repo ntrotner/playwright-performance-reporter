@@ -42,6 +42,7 @@ Please see the subsections for more details about browser specific cases and adv
 
 ```ts
 import type { CDP, Options, Metric } from 'playwright-performance-reporter';
+import { nativeChromiumObservers } from 'playwright-performance-reporter';
 
 const PlaywrightPerformanceReporterOptions: Options = {
   outputDir: '/your/path/to/dir',
@@ -50,7 +51,7 @@ const PlaywrightPerformanceReporterOptions: Options = {
   browsers: {
     chromium: {
       onTestStep: {
-        metrics: ['allPerformanceMetrics'],
+        metrics: [new nativeChromiumObservers.allPerformanceMetrics()],
       }
     }
   }
@@ -61,7 +62,7 @@ export default defineConfig({
   reporter: [
     ['playwright-performance-reporter', PlaywrightPerformanceReporterOptions]
   ],
- ...
+  ...
 });
 ```
 
@@ -100,28 +101,24 @@ Relying solely on the start and stop metric in a long running step leads to inac
 requires a large set of runs to have a meaningful amount of metrics.
 By registering a metric to be collected every `samplingTimeoutInMilliseconds` the sampling output will
 be written to `samplingMetrics`, similar to `startMetrics` or `startMetrics`.
-Make sure to use the unique name of the metric to register the sampling.
 
 ```ts
+import { nativeChromiumObservers } from 'playwright-performance-reporter';
+
 const PlaywrightPerformanceReporterOptions: Options = {
   ...
   browsers: {
     chromium: {
       onTestStep: {
-        metrics: ['usedJsHeapSize', 'totalJsHeapSize'],
-        customMetrics: {
-          someMetric: {
-            ...
+        metrics: [new nativeChromiumObservers.usedJsHeapSize(), new nativeChromiumObservers.totalJsHeapSize()],
+      },
+      sampling: {
+        metrics: [
+          {
+            samplingTimeoutInMilliseconds: 1000,
+            metric: new nativeChromiumObservers.totalJsHeapSize()
           }
-        },
-        sampleMetrics: {
-          totalJsHeapSize: {
-            samplingTimeoutInMilliseconds: 1000
-          },
-          someMetric: {
-            samplingTimeoutInMilliseconds: 5000
-          }
-        }
+        ]
       }
     }
   }
@@ -129,8 +126,8 @@ const PlaywrightPerformanceReporterOptions: Options = {
 ```
 
 ### Custom Metric Observer
-If you want to extend it with custom metrics, an entry exists for `customMetrics`, where the callback will get
-the accumulator and CDP client. Please see the example below how to use it, or checkout the [allPerformanceMetrics](src/browsers/chromium/observers/all-performance-metrics.ts) implementation.
+If you want to extend it with custom metrics, you can create a new class that implements the `MetricObserver` interface.
+Please see the example below how to use it, or checkout the [allPerformanceMetrics](src/browsers/chromium/observers/all-performance-metrics.ts) implementation.
 
 For ease of implementation, the passed object can implement the interface `MetricObserver`.
 By using custom metrics it's possible to make observers stateful and e.g. make the next output dependent on the previous one.
@@ -149,9 +146,7 @@ const PlaywrightPerformanceReporterOptions: Options = {
   browsers: {
     chromium: {
       onTestStep: {
-        customMetrics: {
-          newMetric: new NewMetric()
-        }
+        metrics: [new NewMetric()]
       }
     }
   }

@@ -4,15 +4,14 @@ import {
   type MetricObserver,
 } from '../../../types/index.js';
 import {
-  heapGarbageCollectorPlugin,
-  heapProfilerDomainPlugin,
+  nativeChromiumPlugins,
 } from '../plugins/index.js';
 
 export class HeapProfilerSampling implements MetricObserver {
   public readonly name = 'heapProfilerSampling';
   public readonly plugins = [
-    heapProfilerDomainPlugin,
-    heapGarbageCollectorPlugin,
+    nativeChromiumPlugins.heapProfilerDomainPlugin,
+    nativeChromiumPlugins.heapGarbageCollectorPlugin,
   ];
 
   /**

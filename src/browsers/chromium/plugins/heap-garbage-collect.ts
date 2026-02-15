@@ -1,4 +1,6 @@
-import {type MeasurePlugin} from '../../../types/index.js';
+import {
+  type MeasurePlugin,
+} from '../../../types/index.js';
 
 /**
  * Triggers the heap gargabe collection.
