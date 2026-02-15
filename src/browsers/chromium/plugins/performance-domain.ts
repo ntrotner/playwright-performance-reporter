@@ -1,5 +1,5 @@
 import {
-  type MeasurePlugin,
+  type ChromiumMeasurePlugin,
 } from '../../../types/index.js';
 
 /**
@@ -7,7 +7,7 @@ import {
  *
  * @param developmentTools client for CDP
  */
-export const performanceDomainPlugin: MeasurePlugin = async developmentTools => new Promise(resolve => {
+export const performanceDomainPlugin: ChromiumMeasurePlugin = async developmentTools => new Promise(resolve => {
   developmentTools.send('Performance.enable', error => {
     resolve(Boolean(error));
   });

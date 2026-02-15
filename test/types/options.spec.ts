@@ -80,7 +80,7 @@ describe('Options Type', () => {
 
   describe('MetricSampling type', () => {
     it('should require metric property of type MetricObserver', () => {
-      const sampling: MetricSampling = {
+      const sampling: MetricSampling<any> = {
         samplingTimeoutInMilliseconds: 1000,
         metric: new nativeChromiumObservers.usedJsHeapSize(),
       };
@@ -88,11 +88,11 @@ describe('Options Type', () => {
     });
 
     it('should accept different MetricObserver instances', () => {
-      const sampling1: MetricSampling = {
+      const sampling1: MetricSampling<any> = {
         samplingTimeoutInMilliseconds: 1000,
         metric: new nativeChromiumObservers.usedJsHeapSize(),
       };
-      const sampling2: MetricSampling = {
+      const sampling2: MetricSampling<any> = {
         samplingTimeoutInMilliseconds: 2000,
         metric: new nativeChromiumObservers.totalJsHeapSize(),
       };

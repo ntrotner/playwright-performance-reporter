@@ -1,7 +1,6 @@
 import {MetricsEngine} from '../src/engines/index.js';
-import {type OnStartMeasure} from '../src/types/index.js';
 import {BrowserClientFixture} from './fixtures/index.js';
-import {nativeChromiumObservers} from "../src";
+import {BrowserDeveloperToolsClient, MetricObserver, nativeChromiumObservers, SupportedBrowsers} from "../src/index.js";
 
 describe('Metrics engine', () => {
   let metricsEngine: MetricsEngine;
@@ -39,7 +38,7 @@ describe('Metrics engine', () => {
 
   it('should propagate metric to collect', async () => {
     (metricsEngine as any).browser = mockBrowserClient;
-    const metricObserver = new nativeChromiumObservers.usedJsHeapSize();
+    const metricObserver = new nativeChromiumObservers.usedJsHeapSize() as MetricObserver<BrowserDeveloperToolsClient[SupportedBrowsers]>;
     await metricsEngine.getMetric(metricObserver, 'onStart');
     expect(mockBrowserClient.getMetric).toHaveBeenCalledWith(metricObserver, 'onStart');
   });
@@ -47,7 +46,7 @@ describe('Metrics engine', () => {
   it('should return undefined when getMetric failed in browser', async () => {
     (metricsEngine as any).browser = mockBrowserClient;
     (metricsEngine as any).browser.getMetric = () => {throw new Error('error')};
-    const metricObserver = new nativeChromiumObservers.usedJsHeapSize();
+    const metricObserver = new nativeChromiumObservers.usedJsHeapSize() as MetricObserver<BrowserDeveloperToolsClient[SupportedBrowsers]>;
     const response = await metricsEngine.getMetric(metricObserver, 'onStart');
     expect(response).toEqual(undefined);
   });
@@ -55,7 +54,7 @@ describe('Metrics engine', () => {
   it('should collect all metric by browser', async () => {
     (metricsEngine as any).browser = mockBrowserClient;
     (metricsEngine as any).browser.getMetric.mockResolvedValue(Promise.resolve([{metric1: 123}, {metric2: 456}]));
-    const metricObserver = new nativeChromiumObservers.usedJsHeapSize();
+    const metricObserver = new nativeChromiumObservers.usedJsHeapSize() as MetricObserver<BrowserDeveloperToolsClient[SupportedBrowsers]>;
     const metric = await metricsEngine.getMetric(metricObserver, 'onStop');
 
     expect(metric).toEqual([{metric1: 123}, {metric2: 456}]);

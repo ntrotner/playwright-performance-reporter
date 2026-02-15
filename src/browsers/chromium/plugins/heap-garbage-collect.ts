@@ -1,5 +1,5 @@
 import {
-  type MeasurePlugin,
+  type ChromiumMeasurePlugin,
 } from '../../../types/index.js';
 
 /**
@@ -8,7 +8,7 @@ import {
  *
  * @param developmentTools client for CDP
  */
-export const heapGarbageCollectorPlugin: MeasurePlugin = async developmentTools => new Promise(resolve => {
+export const heapGarbageCollectorPlugin: ChromiumMeasurePlugin = async developmentTools => new Promise(resolve => {
   developmentTools.send('HeapProfiler.collectGarbage', error => {
     resolve(Boolean(error));
   });

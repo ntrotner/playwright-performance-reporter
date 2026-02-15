@@ -1,13 +1,13 @@
 import type CDP from 'chrome-remote-interface';
 import {
+  type ChromiumMetricObserver,
   type Metric,
-  type MetricObserver,
 } from '../../../types/index.js';
 import {
   nativeChromiumPlugins,
 } from '../plugins/index.js';
 
-export class HeapProfilerSampling implements MetricObserver {
+export class HeapProfilerSampling implements ChromiumMetricObserver {
   public readonly name = 'heapProfilerSampling';
   public readonly plugins = [
     nativeChromiumPlugins.heapProfilerDomainPlugin,

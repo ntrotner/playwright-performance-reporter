@@ -1,7 +1,7 @@
 import {
   type SupportedBrowsers,
   type TargetMetric,
-  type MetricObserver,
+  type FirefoxMetricObserver,
 } from '../../types/index.js';
 import {
   type BrowserClient,
@@ -21,7 +21,7 @@ export class FirefoxDevelopmentTools implements BrowserClient {
   /**
    * @inheritdoc
    */
-  async getMetric(metric: MetricObserver): Promise<TargetMetric[]> {
+  async getMetric(metric: FirefoxMetricObserver): Promise<TargetMetric[]> {
     return [];
   }
 

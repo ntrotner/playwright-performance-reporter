@@ -6,8 +6,8 @@ import {
 import {ChromiumCDPFixture} from '../fixtures/chromium-cdp.fixture.js';
 import {LockFixture} from '../fixtures/index.js';
 
-const customObserver: OnStartMeasure = async (accumulator, client) => new Promise(resolve => {
-  client.send('Custom.Protocol.Command' as any, (error, response) => {
+const customObserver: OnStartMeasure<any> = async (accumulator, client) => new Promise(resolve => {
+  client.send('Custom.Protocol.Command' as any, (error: any, response: any) => {
     if (!error) {
       Object.assign(accumulator, response);
     }

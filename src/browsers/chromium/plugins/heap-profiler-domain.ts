@@ -1,5 +1,5 @@
 import {
-  type MeasurePlugin,
+  type ChromiumMeasurePlugin,
 } from '../../../types/index.js';
 
 /**
@@ -7,7 +7,7 @@ import {
  *
  * @param developmentTools client for CDP
  */
-export const heapProfilerDomainPlugin: MeasurePlugin = async developmentTools => new Promise(resolve => {
+export const heapProfilerDomainPlugin: ChromiumMeasurePlugin = async developmentTools => new Promise(resolve => {
   developmentTools.send('HeapProfiler.enable', error => {
     resolve(Boolean(error));
   });

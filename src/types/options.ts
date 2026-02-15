@@ -1,3 +1,4 @@
+import type CDP from 'chrome-remote-interface';
 import {
   nativeChromiumObservers,
 } from '../browsers/chromium/observers/index.js';
@@ -20,20 +21,29 @@ export type HookOrder = typeof hookOrder[number];
 /**
  * Common interface to define procedures to observe metrics
  */
-export type MetricObserver = {
+export type MetricObserver<T> = {
   name: string;
-  plugins: MeasurePlugin[];
-  onStart: OnStartMeasure;
-  onSampling: OnSamplingMeasure;
-  onStop: OnStopMeasure;
+  plugins: Array<MeasurePlugin<T>>;
+  onStart: OnStartMeasure<T>;
+  onSampling: OnSamplingMeasure<T>;
+  onStop: OnStopMeasure<T>;
 };
 
 /**
  * Define which metric should regularly be requested
  */
-export type MetricSampling = {
+export type MetricSampling<T> = {
   samplingTimeoutInMilliseconds: number;
-  metric: MetricObserver;
+  metric: MetricObserver<T>;
+};
+
+/**
+ * Supported browser dev tool clients
+ */
+export type BrowserDeveloperToolsClient = {
+  'chromium': CDP.Client;
+  'webkit': Record<string, unknown>;
+  'firefox': Record<string, unknown>;
 };
 
 /**
@@ -42,9 +52,42 @@ export type MetricSampling = {
 export const supportedBrowsers = ['chromium', 'webkit', 'firefox'] as const;
 export type SupportedBrowsers = typeof supportedBrowsers[number];
 
+/**
+ * Chromium specific metric observer and measure plugin
+ */
+export type ChromiumMetricObserver = MetricObserver<BrowserDeveloperToolsClient['chromium']>;
+export type ChromiumMeasurePlugin = MeasurePlugin<BrowserDeveloperToolsClient['chromium']>;
+
+/**
+ * Firefox specific metric observer and measure plugin.
+ */
+export type FirefoxMetricObserver = MetricObserver<BrowserDeveloperToolsClient['firefox']>;
+export type FirefoxMeasurePlugin = MeasurePlugin<BrowserDeveloperToolsClient['firefox']>;
+
+/**
+ * Webkit specific metric observer and measure plugin.
+ */
+export type WebkitMetricObserver = MetricObserver<BrowserDeveloperToolsClient['webkit']>;
+export type WebkitMeasurePlugin = MeasurePlugin<BrowserDeveloperToolsClient['webkit']>;
+
 export type OptionsFileWrite = {
   outputDir: string;
   outputFile: string;
+};
+
+/**
+ * Options to customize the reporter for a specific browser.
+ */
+type BrowserOptions = {
+  [browser in SupportedBrowsers]?: {
+    [hook in Hooks]?: {
+      metrics: Array<MetricObserver<BrowserDeveloperToolsClient[browser]>>;
+    };
+  } & {
+    sampling?: {
+      metrics: Array<MetricSampling<BrowserDeveloperToolsClient[browser]>>;
+    };
+  };
 };
 
 export type JsonWriter = {
@@ -71,18 +114,6 @@ export type JsonWriter = {
    * Delete created target
    */
   delete(): Promise<boolean>;
-};
-
-type BrowserOptions = {
-  [browser in SupportedBrowsers]?: {
-    [hook in Hooks]?: {
-      metrics: MetricObserver[];
-    };
-  } & {
-    sampling?: {
-      metrics: MetricSampling[];
-    };
-  };
 };
 
 /**
