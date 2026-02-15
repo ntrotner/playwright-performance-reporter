@@ -1,7 +1,7 @@
 import {
   type SupportedBrowsers,
   type TargetMetric,
-  type MetricObserver,
+  type WebkitMetricObserver,
 } from '../../types/index.js';
 import {
   type BrowserClient,
@@ -21,7 +21,7 @@ export class WebkitDevelopmentTools implements BrowserClient {
   /**
    * @inheritdoc
    */
-  async getMetric(metric: MetricObserver): Promise<TargetMetric[]> {
+  async getMetric(metric: WebkitMetricObserver): Promise<TargetMetric[]> {
     return [];
   }
 

@@ -15,6 +15,7 @@ import {
   type HookOrder,
   type TargetMetric,
   type MetricObserver,
+  type BrowserDeveloperToolsClient,
 } from '../types/index.js';
 
 export class MetricsEngine {
@@ -83,7 +84,7 @@ export class MetricsEngine {
    * @param metric which metric to measure
    * @param hookOrder step to run
    */
-  public async getMetric(metric: MetricObserver, hookOrder: HookOrder): Promise<TargetMetric[] | undefined> {
+  public async getMetric(metric: MetricObserver<BrowserDeveloperToolsClient[SupportedBrowsers]>, hookOrder: HookOrder): Promise<TargetMetric[] | undefined> {
     try {
       return await this.browser?.getMetric(metric, hookOrder);
     } catch {}

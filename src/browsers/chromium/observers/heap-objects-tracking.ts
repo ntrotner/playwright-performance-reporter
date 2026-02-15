@@ -1,14 +1,14 @@
 import type CDP from 'chrome-remote-interface';
 import type Protocol from 'devtools-protocol';
 import {
+  type ChromiumMetricObserver,
   type Metric,
-  type MetricObserver,
 } from '../../../types/index.js';
 import {
   nativeChromiumPlugins,
 } from '../plugins/index.js';
 
-export class HeapObjectsTracking implements MetricObserver {
+export class HeapObjectsTracking implements ChromiumMetricObserver {
   public readonly name = 'heapObjectsTracking';
   public readonly separator = '';
   public readonly plugins = [

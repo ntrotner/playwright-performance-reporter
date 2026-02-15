@@ -4,9 +4,9 @@ import {
 } from '../client.js';
 import {
   type SupportedBrowsers,
-  type MetricObserver,
   type HookOrder,
   type TargetMetric,
+  type ChromiumMetricObserver,
 } from '../../types/index.js';
 import {
   Lock,
@@ -60,7 +60,7 @@ export class ChromiumDevelopmentTools implements BrowserClient {
   /**
    * @inheritdoc
    */
-  public async getMetric(metric: MetricObserver, hookOrder: HookOrder): Promise<TargetMetric[]> {
+  public async getMetric(metric: ChromiumMetricObserver, hookOrder: HookOrder): Promise<TargetMetric[]> {
     return new Promise(async resolve => {
       let newConnectionRequests: Promise<void> | undefined;
       if (this.connectLock.isLocked()) {
@@ -144,7 +144,7 @@ export class ChromiumDevelopmentTools implements BrowserClient {
    * @param metric type of metric or observer
    * @param hookOrder hook order
    */
-  private async runPredefinedMetricFetch(targetId: string, targetMetric: Record<string, TargetMetric>, metric: MetricObserver, hookOrder: HookOrder): Promise<void> {
+  private async runPredefinedMetricFetch(targetId: string, targetMetric: Record<string, TargetMetric>, metric: ChromiumMetricObserver, hookOrder: HookOrder): Promise<void> {
     const newTargetMetric: TargetMetric = {
       metric: {},
     };
@@ -220,7 +220,7 @@ export class ChromiumDevelopmentTools implements BrowserClient {
    * @param targetId target to fill
    * @param metric
    */
-  private async runPlugins(targetId: string, metric: MetricObserver) {
+  private async runPlugins(targetId: string, metric: ChromiumMetricObserver) {
     const client = this.clients[targetId];
     if (!client) {
       return;

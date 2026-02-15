@@ -3,6 +3,7 @@ import {
   type HookOrder,
   type TargetMetric,
   type MetricObserver,
+  type BrowserDeveloperToolsClient,
 } from '../types/index.js';
 
 export type BrowserClient = {
@@ -17,7 +18,7 @@ export type BrowserClient = {
    * @param metric identifier observer
    * @param hookOrder which hook to run
    */
-  getMetric(metric: MetricObserver, hookOrder: HookOrder): Promise<TargetMetric[]>;
+  getMetric(metric: MetricObserver<BrowserDeveloperToolsClient[SupportedBrowsers]>, hookOrder: HookOrder): Promise<TargetMetric[]>;
 
   /**
    * Cleans up client connection
