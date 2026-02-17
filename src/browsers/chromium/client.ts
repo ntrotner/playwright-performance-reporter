@@ -74,17 +74,13 @@ export class ChromiumDevelopmentTools implements BrowserClient {
       const metricRequests = [];
 
       // Get metrics from available targets
-      metricRequests.push(
-        ...currentAvailableTargets.map(async targetId => this.runPredefinedMetricFetch(targetId, targetMetric, metric, hookOrder)),
-      );
+      metricRequests.push(...currentAvailableTargets.map(async targetId => this.runPredefinedMetricFetch(targetId, targetMetric, metric, hookOrder)));
 
       // Check if new targets were yielded from connection
       await newConnectionRequests;
       const newTargets = Object.keys(this.clients).filter(targetId => !currentAvailableTargets.includes(targetId));
       if (newTargets.length > 0) {
-        metricRequests.push(
-          ...newTargets.map(async targetId => this.runPredefinedMetricFetch(targetId, targetMetric, metric, hookOrder)),
-        );
+        metricRequests.push(...newTargets.map(async targetId => this.runPredefinedMetricFetch(targetId, targetMetric, metric, hookOrder)));
       }
 
       // Wait for metric request to be done and fill targets with metadata

@@ -63,7 +63,7 @@
     "ts-jest": "^29.4.6",
     "ts-node": "^10.2.1",
     "typescript": "^5.5.4",
-    "xo": "^0.59.3"
+    "xo": "^1.2.3"
   },
   "config": {
     "commitizen": {
@@ -128,20 +128,5 @@
       "@semantic-release/npm",
       "@semantic-release/github"
     ]
-  },
-  "xo": {
-    "rules": {
-      "new-cap": 0,
-      "no-async-promise-executor": 0,
-      "import-newlines/enforce": ["error", { "items": 0 }],
-      "unicorn/prefer-logical-operator-over-ternary": 0,
-      "@typescript-eslint/no-empty-function": 0,
-      "@typescript-eslint/class-literal-property-style": 0,
-      "@typescript-eslint/no-extraneous-class": 0
-    },
-    "plugins": [
-      "import-newlines"
-    ],
-    "space": true
   }
 }

@@ -53,11 +53,7 @@ export class AllPerformanceMetrics implements ChromiumMetricObserver {
 
         Object.assign(
           accumulator,
-          Object.fromEntries(
-            (cdpResponse as Protocol.Performance.GetMetricsResponse).metrics.map(
-              metric => [metric.name, metric.value],
-            ),
-          ),
+          Object.fromEntries((cdpResponse as Protocol.Performance.GetMetricsResponse).metrics.map(metric => [metric.name, metric.value])),
         );
         resolve(true);
       });
