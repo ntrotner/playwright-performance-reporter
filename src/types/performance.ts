@@ -1,18 +1,18 @@
 import type CDP from 'chrome-remote-interface';
 
 export enum HookOrderToMetricOrder {
-  'onStart' = 'startMetrics',
-  'onStop' = 'stopMetrics',
+  onStart = 'startMetrics',
+  onStop = 'stopMetrics',
 }
 
 export enum HookOrderToMeasurementOrder {
-  'onStart' = 'startMeasurement',
-  'onStop' = 'endMeasurement',
+  onStart = 'startMeasurement',
+  onStop = 'endMeasurement',
 }
 
 export enum HookOrderToMeasurementOffsetOrder {
-  'onStart' = 'startMeasurementOffset',
-  'onStop' = 'endMeasurementOffset',
+  onStart = 'startMeasurementOffset',
+  onStop = 'endMeasurementOffset',
 }
 
 /**

@@ -34,7 +34,7 @@ export class MetricsEngine {
    *
    * @param browser which client to setup
    */
-  public async setupBrowser(browser: SupportedBrowsers | string | undefined, options: Record<string, any>) {
+  public async setupBrowser(browser: SupportedBrowsers | string, options: Record<string, any>) {
     this.browserOptions = options;
 
     switch (browser) {

@@ -41,9 +41,9 @@ export type MetricSampling<T> = {
  * Supported browser dev tool clients
  */
 export type BrowserDeveloperToolsClient = {
-  'chromium': CDP.Client;
-  'webkit': Record<string, unknown>;
-  'firefox': Record<string, unknown>;
+  chromium: CDP.Client;
+  webkit: Record<string, unknown>;
+  firefox: Record<string, unknown>;
 };
 
 /**
@@ -79,11 +79,9 @@ export type OptionsFileWrite = {
  * Options to customize the reporter for a specific browser.
  */
 type BrowserOptions = {
-  [browser in SupportedBrowsers]?: {
-    [hook in Hooks]?: {
-      metrics: Array<MetricObserver<BrowserDeveloperToolsClient[browser]>>;
-    };
-  } & {
+  [browser in SupportedBrowsers]?: Partial<Record<Hooks, {
+    metrics: Array<MetricObserver<BrowserDeveloperToolsClient[browser]>>;
+  }>> & {
     sampling?: {
       metrics: Array<MetricSampling<BrowserDeveloperToolsClient[browser]>>;
     };

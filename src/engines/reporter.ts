@@ -59,7 +59,7 @@ export class PerformanceReporter implements Reporter {
 
   constructor(private readonly options: Options) {
     this.metricsEngine = new MetricsEngine();
-    this.jsonChunkWriter = options.customJsonWriter ? options.customJsonWriter : new JsonChunkWriter();
+    this.jsonChunkWriter = options.customJsonWriter ?? new JsonChunkWriter();
     this.jsonChunkWriter.initialize(this.options);
   }
 
@@ -94,7 +94,7 @@ export class PerformanceReporter implements Reporter {
 
   async onTestBegin(test: TestCase, result: TestResult) {
     const browserDetails = test.parent.project()?.use;
-    if (browserDetails) {
+    if (browserDetails && browserDetails.defaultBrowserType) {
       try {
         await this.metricsEngine.setupBrowser(browserDetails.defaultBrowserType, browserDetails);
       } catch {}
@@ -240,18 +240,14 @@ export class PerformanceReporter implements Reporter {
     }
 
     const startOfTrigger = Date.now();
-    const metricsPromises = metrics.map(async metric =>
-      this.metricsEngine.getMetric(metric, hookOrder),
-    );
+    const metricsPromises = metrics.map(async metric => this.metricsEngine.getMetric(metric, hookOrder));
 
     const resolvedMetrics = await Promise.all(metricsPromises);
     const endOfTrigger = Date.now();
 
     results[caseId][stepId][HookOrderToMeasurementOrder[hookOrder]] = endOfTrigger;
     results[caseId][stepId][HookOrderToMeasurementOffsetOrder[hookOrder]] = endOfTrigger - startOfTrigger;
-    results[caseId][stepId][HookOrderToMetricOrder[hookOrder]].push(
-      ...resolvedMetrics.filter(m => m !== undefined).flat(),
-    );
+    results[caseId][stepId][HookOrderToMetricOrder[hookOrder]].push(...resolvedMetrics.filter(m => m !== undefined).flat());
   }
 
   /**
