@@ -5,8 +5,6 @@ describe('Options Type', () => {
   describe('defaultOptions', () => {
     it('should have correct default structure', () => {
       expect(defaultOptions).toEqual({
-        outputDir: './',
-        outputFile: 'performance-report.json',
         deleteOnFailure: false,
         browsers: {
           chromium: {
@@ -42,8 +40,6 @@ describe('Options Type', () => {
   describe('Options type', () => {
     it('should accept MetricObserver instances in metrics array', () => {
       const options: Options = {
-        outputDir: './',
-        outputFile: 'output.json',
         deleteOnFailure: false,
         browsers: {
           chromium: {
@@ -58,8 +54,6 @@ describe('Options Type', () => {
 
     it('should accept sampling configuration with MetricObserver instances', () => {
       const options: Options = {
-        outputDir: './',
-        outputFile: 'output.json',
         deleteOnFailure: false,
         browsers: {
           chromium: {

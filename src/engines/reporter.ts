@@ -17,7 +17,7 @@ import {
   HookOrderToMeasurementOffsetOrder,
   testCaseParent,
   type ResultAccumulator,
-  type JsonWriter,
+  type PresenterWriter,
   type BrowserDeveloperToolsClient,
   type MetricObserver,
   type MetricSampling,
@@ -26,9 +26,11 @@ import {
   buildTestCaseIdentifier,
   buildTestPerformance,
   buildTestStepIdentifier,
-  JsonChunkWriter,
   Logger,
 } from '../helpers/index.js';
+import {
+  nativePresenters,
+} from '../presenters/index.js';
 import {
   MetricsEngine,
 } from './index.js';
@@ -45,9 +47,9 @@ export class PerformanceReporter implements Reporter {
   private readonly metricsEngine: MetricsEngine;
 
   /**
-   * Writer to stream json chunks
+   * Writers to stream data to different outputs
    */
-  private readonly jsonChunkWriter: JsonWriter;
+  private readonly presenters: PresenterWriter[];
 
   /**
    * Reference to the unsubscribe function for a hook and test id
@@ -59,36 +61,37 @@ export class PerformanceReporter implements Reporter {
 
   constructor(private readonly options: Options) {
     this.metricsEngine = new MetricsEngine();
-    this.jsonChunkWriter = options.customJsonWriter ?? new JsonChunkWriter();
-    this.jsonChunkWriter.initialize(this.options);
+    this.presenters = options.presenters && options.presenters.length > 0
+      ? options.presenters
+      : [
+        new nativePresenters.jsonChunkPresenter({
+          outputDir: './',
+          outputFile: `performance-report-${Date.now()}.json`,
+        }),
+      ];
   }
 
   onBegin(config: FullConfig, suite: Suite) {}
 
   async onEnd(result: FullResult) {
+    let closeStatus: boolean;
+
     try {
-      this.jsonChunkWriter.close();
-    } catch (error) {
-      Logger.error(
-        'Error writing json report',
-        String(error),
-      );
+      closeStatus = await this.closePresenters();
+    } catch {
+      closeStatus = false;
+    }
+
+    if (!closeStatus) {
+      Logger.error('Error writing report');
       return;
     }
 
     if (result.status !== 'passed' && this.options.deleteOnFailure) {
-      await this.jsonChunkWriter.delete();
-      Logger.info(
-        'Test failed and file deleted',
-        this.options.outputDir,
-        this.options.outputFile,
-      );
+      await this.deleteFromPresenters();
+      Logger.info('Test failed and file deleted');
     } else {
-      Logger.info(
-        'Successfully written to json',
-        this.options.outputDir,
-        this.options.outputFile,
-      );
+      Logger.info('Successfully closed presenters');
     }
   }
 
@@ -114,7 +117,7 @@ export class PerformanceReporter implements Reporter {
 
     const results = this.createTestPerformance(id, testCaseParent, name);
     await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onStart', browserName);
-    await this.jsonChunkWriter.write(results);
+    await this.writeToPresenters(results);
 
     const samplingResults = this.createTestPerformance(id, testCaseParent, name);
     await this.executeMetrics(samplingResults, id, testCaseParent, 'onTest', 'onSampling', browserName);
@@ -137,7 +140,7 @@ export class PerformanceReporter implements Reporter {
     const results = this.createTestPerformance(id, testCaseParent, name);
     await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onStop', browserName);
     this.metricsEngine.destroy();
-    await this.jsonChunkWriter.write(results);
+    await this.writeToPresenters(results);
   }
 
   async onStepBegin(test: TestCase, result: TestResult, step: TestStep) {
@@ -160,7 +163,7 @@ export class PerformanceReporter implements Reporter {
 
     const results = this.createTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
     await this.executeMetrics(results, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStart', browserName);
-    await this.jsonChunkWriter.write(results);
+    await this.writeToPresenters(results);
 
     const samplingResults = this.createTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
     await this.executeMetrics(samplingResults, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onSampling', browserName);
@@ -187,7 +190,32 @@ export class PerformanceReporter implements Reporter {
     this.destroySamplingRunner(caseIdentifier.id, stepIdentifier.id, 'onTestStep');
     const results = this.createTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
     await this.executeMetrics(results, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStop', browserName);
-    await this.jsonChunkWriter.write(results);
+    await this.writeToPresenters(results);
+  }
+
+  /**
+   * Write data to all presenters concurrently
+   *
+   * @param content the content to write
+   */
+  private async writeToPresenters(content: ResultAccumulator): Promise<void> {
+    await Promise.allSettled(this.presenters.map(async presenter => presenter.write(content)));
+  }
+
+  /**
+   * Close all presenters
+   */
+  private async closePresenters(): Promise<boolean> {
+    const status = await Promise.allSettled(this.presenters.map(async presenter => presenter.close()));
+
+    return status.every(result => result.status === 'fulfilled');
+  }
+
+  /**
+   * Delete files from all presenters
+   */
+  private async deleteFromPresenters(): Promise<void> {
+    await Promise.allSettled(this.presenters.map(async presenter => presenter.delete()));
   }
 
   /**
@@ -267,12 +295,16 @@ export class PerformanceReporter implements Reporter {
 
     const samplingArguments: Array<{callback: () => Promise<void>; delay: number}> = samplingConfig.map(samplingItem => ({
       callback: async () => {
+        const startOfTrigger = Date.now();
         const metricsResponse = await this.metricsEngine.getMetric(samplingItem.metric, 'onSampling');
+        const endOfTrigger = Date.now();
 
         if (metricsResponse) {
+          results[caseId][stepId][HookOrderToMeasurementOrder.onStop] = endOfTrigger;
+          results[caseId][stepId][HookOrderToMeasurementOffsetOrder.onStop] = endOfTrigger - startOfTrigger;
           const clonedResults = structuredClone(results);
           clonedResults[caseId][stepId].samplingMetrics.push(...metricsResponse);
-          await this.jsonChunkWriter.write(clonedResults);
+          await this.writeToPresenters(clonedResults);
         }
       },
       delay: samplingItem.samplingTimeoutInMilliseconds,

@@ -1,11 +1,13 @@
 import {defineConfig, devices} from '@playwright/test';
-import type {Options} from '../lib';
-import {nativeChromiumObservers} from '../lib';
+import type {Options, ResultAccumulator} from '../lib';
+import {nativeChromiumObservers, nativePresenters} from '../lib';
 
 const PlaywrightPerformanceReporterOptions: Options = {
-  outputDir: './',
-  outputFile: `example-output.json`,
   deleteOnFailure: false,
+  presenters: [
+    new nativePresenters.jsonChunkPresenter({outputDir: './', outputFile: 'example-json-writer.json'}),
+    new nativePresenters.chartPresenter({outputDir: './', outputFile: 'example-chart-presenter.html'}),
+  ],
   browsers: {
     chromium: {
       onTest: {
@@ -45,7 +47,8 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         launchOptions: {
           args: [
-            '--remote-debugging-port=9222'
+            '--remote-debugging-port=9222',
+            '--js-flags="--predictable-gc-schedule --gc-interval=1000"'
           ]
         }
       },
