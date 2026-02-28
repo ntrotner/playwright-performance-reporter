@@ -4,5 +4,8 @@ export {
 export {
   nativeChromiumPlugins,
 } from './browsers/chromium/plugins/index.js';
+export {
+  nativePresenters,
+} from './presenters/index.js';
 export * from './types/index.js';
 export {PerformanceReporter as default} from './engines/reporter.js';

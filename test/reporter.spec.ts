@@ -135,8 +135,6 @@ describe('Playwright Performance Reporter', () => {
 
   beforeEach(() => {
     options = {
-      outputDir: './',
-      outputFile: 'output.json',
       deleteOnFailure: false,
       browsers: {
         chromium: {

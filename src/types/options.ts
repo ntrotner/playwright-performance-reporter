@@ -7,6 +7,7 @@ import {
   type OnSamplingMeasure,
   type OnStartMeasure,
   type OnStopMeasure,
+  type ResultAccumulator,
 } from './index.js';
 
 /**
@@ -70,11 +71,6 @@ export type FirefoxMeasurePlugin = MeasurePlugin<BrowserDeveloperToolsClient['fi
 export type WebkitMetricObserver = MetricObserver<BrowserDeveloperToolsClient['webkit']>;
 export type WebkitMeasurePlugin = MeasurePlugin<BrowserDeveloperToolsClient['webkit']>;
 
-export type OptionsFileWrite = {
-  outputDir: string;
-  outputFile: string;
-};
-
 /**
  * Options to customize the reporter for a specific browser.
  */
@@ -88,25 +84,18 @@ type BrowserOptions = {
   };
 };
 
-export type JsonWriter = {
-  /**
-   * Initialize writer
-   *
-   * @param options defines target output
-   */
-  initialize(options: OptionsFileWrite): void;
-
+export type PresenterWriter = {
   /**
    * Create new entry of an object
    *
    * @param content
    */
-  write(content: Record<any, any>): Promise<boolean>;
+  write(content: ResultAccumulator): Promise<boolean>;
 
   /**
    * Finish json stream
    */
-  close(): void;
+  close(): Promise<boolean>;
 
   /**
    * Delete created target
@@ -118,16 +107,12 @@ export type JsonWriter = {
  * Customize the reporter with desired browser and (custom) metrics
  */
 export type Options = {
-  outputDir: string;
-  outputFile: string;
   deleteOnFailure: boolean;
-  customJsonWriter?: JsonWriter;
+  presenters?: PresenterWriter[];
   browsers: BrowserOptions;
 };
 
 export const defaultOptions: Options = {
-  outputDir: './',
-  outputFile: 'performance-report.json',
   deleteOnFailure: false,
   browsers: {
     chromium: {

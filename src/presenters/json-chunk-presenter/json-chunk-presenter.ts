@@ -4,21 +4,24 @@ import fs, {
 } from 'node:fs';
 import JSONStream from 'JSONStream';
 import {
-  type JsonWriter,
-  type OptionsFileWrite,
-} from '../types/index.js';
+  type PresenterWriter,
+  type ResultAccumulator,
+} from '../../types/index.js';
 import {
   Logger,
-} from './logger.js';
+} from '../../helpers/index.js';
+import {
+  type JsonChunkPresenterOptions,
+} from './types.js';
 
 /**
  * Write JSON chunks in an array of entries
  */
-export class JsonChunkWriter implements JsonWriter {
+export class JsonChunkPresenter implements PresenterWriter {
   /**
    * Locator where to store the output
    */
-  private filePath: string | undefined;
+  private readonly filePath: string | undefined;
 
   /**
    * Status whether writer is usable
@@ -28,19 +31,14 @@ export class JsonChunkWriter implements JsonWriter {
   /**
    * File writer
    */
-  private fileStream: WriteStream | undefined;
+  private readonly fileStream: WriteStream | undefined;
 
   /**
    * JSON chunk writer
    */
   private readonly jsonStream = JSONStream.stringify('[', ',', ']');
 
-  /**
-   * Initialize writer
-   *
-   * @param options defines target output
-   */
-  initialize(options: OptionsFileWrite): void {
+  constructor(options: JsonChunkPresenterOptions) {
     this.filePath = path.join(options.outputDir, options.outputFile);
     this.fileStream = fs.createWriteStream(this.filePath, {flags: 'w'});
     this.jsonStream.pipe(this.fileStream);
@@ -51,7 +49,7 @@ export class JsonChunkWriter implements JsonWriter {
    *
    * @param content
    */
-  public async write(content: Record<any, any>): Promise<boolean> {
+  public async write(content: ResultAccumulator): Promise<boolean> {
     if (this.isClosed) {
       return false;
     }

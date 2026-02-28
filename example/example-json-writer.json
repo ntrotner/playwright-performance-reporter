@@ -1,0 +1,2102 @@
+[
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1772307822691,
+        "endMeasurement": 1772307822686,
+        "startMeasurementOffset": 5
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "34e9887ef3c525f24a91aeb8158d3781": {
+        "name": "Open profile",
+        "startMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13871.064937,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 3,
+              "Frames": 1,
+              "JSEventListeners": 0,
+              "LayoutObjects": 5,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 65,
+              "Resources": 61,
+              "ContextLifecycleStateObservers": 3,
+              "V8PerContextDatas": 4,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 3,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 0,
+              "RecalcStyleCount": 0,
+              "LayoutDuration": 0,
+              "RecalcStyleDuration": 0,
+              "DevToolsCommandDuration": 0.00002,
+              "ScriptDuration": 0,
+              "V8CompileDuration": 0,
+              "TaskDuration": 0.005111,
+              "TaskOtherDuration": 0.005091,
+              "ThreadTime": 0.005335,
+              "ProcessTime": 0.06,
+              "JSHeapUsedSize": 923928,
+              "JSHeapTotalSize": 1572864,
+              "FirstMeaningfulPaint": 0,
+              "DomContentLoaded": 0,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "about:blank",
+            "type": "page",
+            "url": "about:blank",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1772307823530,
+        "endMeasurement": 1772307822873,
+        "startMeasurementOffset": 657
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13871.38376,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 4,
+              "Frames": 1,
+              "JSEventListeners": 0,
+              "LayoutObjects": 956,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 2792,
+              "Resources": 61,
+              "ContextLifecycleStateObservers": 8,
+              "V8PerContextDatas": 4,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 4,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 2,
+              "RecalcStyleCount": 2,
+              "LayoutDuration": 0.111316,
+              "RecalcStyleDuration": 0.030457,
+              "DevToolsCommandDuration": 0.000223,
+              "ScriptDuration": 0.001184,
+              "V8CompileDuration": 0.000065,
+              "TaskDuration": 0.200585,
+              "TaskOtherDuration": 0.05734,
+              "ThreadTime": 0.105863,
+              "ProcessTime": 0.27,
+              "JSHeapUsedSize": 1917840,
+              "JSHeapTotalSize": 4194304,
+              "FirstMeaningfulPaint": 0,
+              "DomContentLoaded": 0,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307823848,
+        "endMeasurementOffset": 156
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "34e9887ef3c525f24a91aeb8158d3781": {
+        "name": "Open profile",
+        "startMetrics": [],
+        "stopMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13872.129238,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 4,
+              "Frames": 1,
+              "JSEventListeners": 5363,
+              "LayoutObjects": 1859,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 10348,
+              "Resources": 102,
+              "ContextLifecycleStateObservers": 44,
+              "V8PerContextDatas": 4,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 4,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 17,
+              "RecalcStyleCount": 28,
+              "LayoutDuration": 0.218233,
+              "RecalcStyleDuration": 0.234953,
+              "DevToolsCommandDuration": 0.012999,
+              "ScriptDuration": 0.25625,
+              "V8CompileDuration": 0.001394,
+              "TaskDuration": 0.934943,
+              "TaskOtherDuration": 0.211114,
+              "ThreadTime": 0.787217,
+              "ProcessTime": 1.27,
+              "JSHeapUsedSize": 12342936,
+              "JSHeapTotalSize": 15773696,
+              "FirstMeaningfulPaint": 0,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "samplingMetrics": [],
+        "startMeasurement": 1772307824476,
+        "endMeasurement": 1772307824594,
+        "endMeasurementOffset": 118
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "c0005299a5e4c1c298ce702afb1b5912": {
+        "name": "Go to Repositories tab",
+        "startMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13872.129362,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 4,
+              "Frames": 1,
+              "JSEventListeners": 5363,
+              "LayoutObjects": 1859,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 10348,
+              "Resources": 102,
+              "ContextLifecycleStateObservers": 44,
+              "V8PerContextDatas": 4,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 4,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 17,
+              "RecalcStyleCount": 28,
+              "LayoutDuration": 0.218233,
+              "RecalcStyleDuration": 0.234953,
+              "DevToolsCommandDuration": 0.013117,
+              "ScriptDuration": 0.25637,
+              "V8CompileDuration": 0.001394,
+              "TaskDuration": 0.935063,
+              "TaskOtherDuration": 0.210996,
+              "ThreadTime": 0.787336,
+              "ProcessTime": 1.27,
+              "JSHeapUsedSize": 12342936,
+              "JSHeapTotalSize": 15773696,
+              "FirstMeaningfulPaint": 0,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1772307824594,
+        "endMeasurement": 1772307824477,
+        "startMeasurementOffset": 117
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13872.234113,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 4,
+              "Frames": 1,
+              "JSEventListeners": 5363,
+              "LayoutObjects": 1859,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 10348,
+              "Resources": 105,
+              "ContextLifecycleStateObservers": 44,
+              "V8PerContextDatas": 4,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 4,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 17,
+              "RecalcStyleCount": 28,
+              "LayoutDuration": 0.218233,
+              "RecalcStyleDuration": 0.234953,
+              "DevToolsCommandDuration": 0.013267,
+              "ScriptDuration": 0.262712,
+              "V8CompileDuration": 0.001431,
+              "TaskDuration": 0.945221,
+              "TaskOtherDuration": 0.214625,
+              "ThreadTime": 0.79919,
+              "ProcessTime": 1.3,
+              "JSHeapUsedSize": 12453036,
+              "JSHeapTotalSize": 15773696,
+              "FirstMeaningfulPaint": 0,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307824699,
+        "endMeasurementOffset": 7
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "c0005299a5e4c1c298ce702afb1b5912": {
+        "name": "Go to Repositories tab",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13873.139362,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 2,
+              "Frames": 1,
+              "JSEventListeners": 4431,
+              "LayoutObjects": 1772,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 6576,
+              "Resources": 100,
+              "ContextLifecycleStateObservers": 41,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 2,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 17,
+              "RecalcStyleCount": 28,
+              "LayoutDuration": 0.218233,
+              "RecalcStyleDuration": 0.234953,
+              "DevToolsCommandDuration": 0.01374,
+              "ScriptDuration": 0.263594,
+              "V8CompileDuration": 0.001431,
+              "TaskDuration": 1.031843,
+              "TaskOtherDuration": 0.299892,
+              "ThreadTime": 0.875082,
+              "ProcessTime": 1.57,
+              "JSHeapUsedSize": 8576064,
+              "JSHeapTotalSize": 15249408,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307824594,
+        "endMeasurement": 1772307825605,
+        "endMeasurementOffset": 10
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13873.234036,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 2,
+              "Frames": 1,
+              "JSEventListeners": 4431,
+              "LayoutObjects": 1772,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 6576,
+              "Resources": 100,
+              "ContextLifecycleStateObservers": 41,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 2,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 17,
+              "RecalcStyleCount": 28,
+              "LayoutDuration": 0.218233,
+              "RecalcStyleDuration": 0.234953,
+              "DevToolsCommandDuration": 0.014365,
+              "ScriptDuration": 0.263594,
+              "V8CompileDuration": 0.001431,
+              "TaskDuration": 1.032527,
+              "TaskOtherDuration": 0.299951,
+              "ThreadTime": 0.875873,
+              "ProcessTime": 1.57,
+              "JSHeapUsedSize": 8576064,
+              "JSHeapTotalSize": 15249408,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307825699,
+        "endMeasurementOffset": 6
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "c0005299a5e4c1c298ce702afb1b5912": {
+        "name": "Go to Repositories tab",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13874.13906,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 2,
+              "Frames": 1,
+              "JSEventListeners": 4431,
+              "LayoutObjects": 1772,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 6576,
+              "Resources": 100,
+              "ContextLifecycleStateObservers": 41,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 2,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 17,
+              "RecalcStyleCount": 28,
+              "LayoutDuration": 0.218233,
+              "RecalcStyleDuration": 0.234953,
+              "DevToolsCommandDuration": 0.01485,
+              "ScriptDuration": 0.263594,
+              "V8CompileDuration": 0.001431,
+              "TaskDuration": 1.033303,
+              "TaskOtherDuration": 0.300242,
+              "ThreadTime": 0.876789,
+              "ProcessTime": 1.57,
+              "JSHeapUsedSize": 8576064,
+              "JSHeapTotalSize": 15249408,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307824594,
+        "endMeasurement": 1772307826606,
+        "endMeasurementOffset": 9
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13874.232744,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 2,
+              "Frames": 1,
+              "JSEventListeners": 4431,
+              "LayoutObjects": 1772,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 6576,
+              "Resources": 100,
+              "ContextLifecycleStateObservers": 41,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 2,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 17,
+              "RecalcStyleCount": 28,
+              "LayoutDuration": 0.218233,
+              "RecalcStyleDuration": 0.234953,
+              "DevToolsCommandDuration": 0.015323,
+              "ScriptDuration": 0.263594,
+              "V8CompileDuration": 0.001431,
+              "TaskDuration": 1.033847,
+              "TaskOtherDuration": 0.300313,
+              "ThreadTime": 0.877431,
+              "ProcessTime": 1.57,
+              "JSHeapUsedSize": 8576064,
+              "JSHeapTotalSize": 15249408,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307826697,
+        "endMeasurementOffset": 4
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "c0005299a5e4c1c298ce702afb1b5912": {
+        "name": "Go to Repositories tab",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13875.14203,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 2,
+              "Frames": 1,
+              "JSEventListeners": 4431,
+              "LayoutObjects": 1772,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 6576,
+              "Resources": 100,
+              "ContextLifecycleStateObservers": 41,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 2,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 17,
+              "RecalcStyleCount": 28,
+              "LayoutDuration": 0.218233,
+              "RecalcStyleDuration": 0.234953,
+              "DevToolsCommandDuration": 0.016023,
+              "ScriptDuration": 0.263594,
+              "V8CompileDuration": 0.001431,
+              "TaskDuration": 1.034825,
+              "TaskOtherDuration": 0.300591,
+              "ThreadTime": 0.878311,
+              "ProcessTime": 1.58,
+              "JSHeapUsedSize": 8576064,
+              "JSHeapTotalSize": 15249408,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307824594,
+        "endMeasurement": 1772307827610,
+        "endMeasurementOffset": 13
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13875.235157,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 2,
+              "Frames": 1,
+              "JSEventListeners": 4431,
+              "LayoutObjects": 1772,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 6576,
+              "Resources": 100,
+              "ContextLifecycleStateObservers": 41,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 2,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 17,
+              "RecalcStyleCount": 28,
+              "LayoutDuration": 0.218233,
+              "RecalcStyleDuration": 0.234953,
+              "DevToolsCommandDuration": 0.016857,
+              "ScriptDuration": 0.263594,
+              "V8CompileDuration": 0.001431,
+              "TaskDuration": 1.035739,
+              "TaskOtherDuration": 0.300671,
+              "ThreadTime": 0.879248,
+              "ProcessTime": 1.58,
+              "JSHeapUsedSize": 8576064,
+              "JSHeapTotalSize": 15249408,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307827702,
+        "endMeasurementOffset": 9
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "c0005299a5e4c1c298ce702afb1b5912": {
+        "name": "Go to Repositories tab",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13876.139491,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 2,
+              "Frames": 1,
+              "JSEventListeners": 4431,
+              "LayoutObjects": 1772,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 6576,
+              "Resources": 100,
+              "ContextLifecycleStateObservers": 41,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 2,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 17,
+              "RecalcStyleCount": 28,
+              "LayoutDuration": 0.218233,
+              "RecalcStyleDuration": 0.234953,
+              "DevToolsCommandDuration": 0.017343,
+              "ScriptDuration": 0.263594,
+              "V8CompileDuration": 0.001431,
+              "TaskDuration": 1.036359,
+              "TaskOtherDuration": 0.300805,
+              "ThreadTime": 0.88016,
+              "ProcessTime": 1.58,
+              "JSHeapUsedSize": 8576064,
+              "JSHeapTotalSize": 15249408,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307824594,
+        "endMeasurement": 1772307828605,
+        "endMeasurementOffset": 7
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13876.233602,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 2,
+              "Frames": 1,
+              "JSEventListeners": 4431,
+              "LayoutObjects": 1772,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 6576,
+              "Resources": 100,
+              "ContextLifecycleStateObservers": 41,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 2,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 17,
+              "RecalcStyleCount": 28,
+              "LayoutDuration": 0.218233,
+              "RecalcStyleDuration": 0.234953,
+              "DevToolsCommandDuration": 0.018112,
+              "ScriptDuration": 0.263594,
+              "V8CompileDuration": 0.001431,
+              "TaskDuration": 1.037345,
+              "TaskOtherDuration": 0.301022,
+              "ThreadTime": 0.881193,
+              "ProcessTime": 1.58,
+              "JSHeapUsedSize": 8576064,
+              "JSHeapTotalSize": 15249408,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307828698,
+        "endMeasurementOffset": 5
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "c0005299a5e4c1c298ce702afb1b5912": {
+        "name": "Go to Repositories tab",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13877.137351,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 2,
+              "Frames": 1,
+              "JSEventListeners": 4469,
+              "LayoutObjects": 1772,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 11347,
+              "Resources": 103,
+              "ContextLifecycleStateObservers": 44,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 2,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 17,
+              "RecalcStyleCount": 34,
+              "LayoutDuration": 0.218233,
+              "RecalcStyleDuration": 0.236091,
+              "DevToolsCommandDuration": 0.042218,
+              "ScriptDuration": 0.293747,
+              "V8CompileDuration": 0.001431,
+              "TaskDuration": 1.097479,
+              "TaskOtherDuration": 0.305759,
+              "ThreadTime": 0.942726,
+              "ProcessTime": 1.65,
+              "JSHeapUsedSize": 12504876,
+              "JSHeapTotalSize": 17346560,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307824594,
+        "endMeasurement": 1772307829601,
+        "endMeasurementOffset": 2
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13877.232634,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 2,
+              "Frames": 1,
+              "JSEventListeners": 4469,
+              "LayoutObjects": 1773,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 11347,
+              "Resources": 103,
+              "ContextLifecycleStateObservers": 44,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 2,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 2,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 18,
+              "RecalcStyleCount": 39,
+              "LayoutDuration": 0.218302,
+              "RecalcStyleDuration": 0.236447,
+              "DevToolsCommandDuration": 0.042877,
+              "ScriptDuration": 0.295582,
+              "V8CompileDuration": 0.001431,
+              "TaskDuration": 1.104574,
+              "TaskOtherDuration": 0.309935,
+              "ThreadTime": 0.950307,
+              "ProcessTime": 1.66,
+              "JSHeapUsedSize": 12535276,
+              "JSHeapTotalSize": 17346560,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307829697,
+        "endMeasurementOffset": 3
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "c0005299a5e4c1c298ce702afb1b5912": {
+        "name": "Go to Repositories tab",
+        "startMetrics": [],
+        "stopMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13877.97206,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 4,
+              "Frames": 1,
+              "JSEventListeners": 1842,
+              "LayoutObjects": 1573,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 23944,
+              "Resources": 119,
+              "ContextLifecycleStateObservers": 69,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 4,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 44,
+              "RecalcStyleCount": 67,
+              "LayoutDuration": 0.250081,
+              "RecalcStyleDuration": 0.309862,
+              "DevToolsCommandDuration": 0.045123,
+              "ScriptDuration": 0.391615,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 1.444015,
+              "TaskOtherDuration": 0.445852,
+              "ThreadTime": 1.280524,
+              "ProcessTime": 2.18,
+              "JSHeapUsedSize": 10333204,
+              "JSHeapTotalSize": 20492288,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Repositories · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=repositories",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "samplingMetrics": [],
+        "startMeasurement": 1772307830432,
+        "endMeasurement": 1772307830436,
+        "endMeasurementOffset": 4
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13878.232729,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 4,
+              "Frames": 1,
+              "JSEventListeners": 1842,
+              "LayoutObjects": 1573,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 23944,
+              "Resources": 119,
+              "ContextLifecycleStateObservers": 69,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 4,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 53,
+              "RecalcStyleCount": 77,
+              "LayoutDuration": 0.250701,
+              "RecalcStyleDuration": 0.310619,
+              "DevToolsCommandDuration": 0.045424,
+              "ScriptDuration": 0.391891,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 1.45261,
+              "TaskOtherDuration": 0.452493,
+              "ThreadTime": 1.289589,
+              "ProcessTime": 2.19,
+              "JSHeapUsedSize": 10335244,
+              "JSHeapTotalSize": 20492288,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Repositories · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=repositories",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307830696,
+        "endMeasurementOffset": 2
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13879.234903,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 4,
+              "Frames": 1,
+              "JSEventListeners": 1842,
+              "LayoutObjects": 1573,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 23944,
+              "Resources": 119,
+              "ContextLifecycleStateObservers": 69,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 4,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 53,
+              "RecalcStyleCount": 77,
+              "LayoutDuration": 0.250701,
+              "RecalcStyleDuration": 0.310619,
+              "DevToolsCommandDuration": 0.045637,
+              "ScriptDuration": 0.391891,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 1.453271,
+              "TaskOtherDuration": 0.452941,
+              "ThreadTime": 1.291012,
+              "ProcessTime": 2.19,
+              "JSHeapUsedSize": 10335244,
+              "JSHeapTotalSize": 20492288,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Repositories · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=repositories",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307831699,
+        "endMeasurementOffset": 4
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13880.235982,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 4,
+              "Frames": 1,
+              "JSEventListeners": 1842,
+              "LayoutObjects": 1573,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 23944,
+              "Resources": 119,
+              "ContextLifecycleStateObservers": 69,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 4,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 53,
+              "RecalcStyleCount": 77,
+              "LayoutDuration": 0.250701,
+              "RecalcStyleDuration": 0.310619,
+              "DevToolsCommandDuration": 0.046254,
+              "ScriptDuration": 0.391891,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 1.454169,
+              "TaskOtherDuration": 0.453222,
+              "ThreadTime": 1.291758,
+              "ProcessTime": 2.19,
+              "JSHeapUsedSize": 10335244,
+              "JSHeapTotalSize": 20492288,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Repositories · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=repositories",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307832700,
+        "endMeasurementOffset": 4
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13881.237337,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 4,
+              "Frames": 1,
+              "JSEventListeners": 1842,
+              "LayoutObjects": 1573,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 23944,
+              "Resources": 119,
+              "ContextLifecycleStateObservers": 69,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 4,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 53,
+              "RecalcStyleCount": 77,
+              "LayoutDuration": 0.250701,
+              "RecalcStyleDuration": 0.310619,
+              "DevToolsCommandDuration": 0.046678,
+              "ScriptDuration": 0.391891,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 1.454894,
+              "TaskOtherDuration": 0.453523,
+              "ThreadTime": 1.29275,
+              "ProcessTime": 2.19,
+              "JSHeapUsedSize": 10335244,
+              "JSHeapTotalSize": 20492288,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Repositories · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=repositories",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307833712,
+        "endMeasurementOffset": 16
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13882.24349,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 4,
+              "Frames": 1,
+              "JSEventListeners": 1842,
+              "LayoutObjects": 1573,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 23944,
+              "Resources": 119,
+              "ContextLifecycleStateObservers": 69,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 4,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 53,
+              "RecalcStyleCount": 77,
+              "LayoutDuration": 0.250701,
+              "RecalcStyleDuration": 0.310619,
+              "DevToolsCommandDuration": 0.047324,
+              "ScriptDuration": 0.391891,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 1.455825,
+              "TaskOtherDuration": 0.453808,
+              "ThreadTime": 1.294005,
+              "ProcessTime": 2.2,
+              "JSHeapUsedSize": 10335244,
+              "JSHeapTotalSize": 20492288,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Repositories · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=repositories",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307834709,
+        "endMeasurementOffset": 12
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "ed717bac3b57b9b0418c2e7665237794": {
+        "name": "Go to Stars tab",
+        "startMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13882.978908,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 4,
+              "Frames": 1,
+              "JSEventListeners": 1842,
+              "LayoutObjects": 1573,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 23944,
+              "Resources": 119,
+              "ContextLifecycleStateObservers": 69,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 4,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 53,
+              "RecalcStyleCount": 77,
+              "LayoutDuration": 0.250701,
+              "RecalcStyleDuration": 0.310619,
+              "DevToolsCommandDuration": 0.047838,
+              "ScriptDuration": 0.391989,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 1.457688,
+              "TaskOtherDuration": 0.455059,
+              "ThreadTime": 1.296057,
+              "ProcessTime": 2.21,
+              "JSHeapUsedSize": 10335732,
+              "JSHeapTotalSize": 20492288,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Repositories · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=repositories",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1772307835449,
+        "endMeasurement": 1772307835437,
+        "startMeasurementOffset": 11
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13883.239096,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 4,
+              "Frames": 1,
+              "JSEventListeners": 1865,
+              "LayoutObjects": 1574,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 27823,
+              "Resources": 121,
+              "ContextLifecycleStateObservers": 72,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 4,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 54,
+              "RecalcStyleCount": 89,
+              "LayoutDuration": 0.250807,
+              "RecalcStyleDuration": 0.312564,
+              "DevToolsCommandDuration": 0.071884,
+              "ScriptDuration": 0.414502,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 1.520257,
+              "TaskOtherDuration": 0.469018,
+              "ThreadTime": 1.360405,
+              "ProcessTime": 2.29,
+              "JSHeapUsedSize": 13399152,
+              "JSHeapTotalSize": 20492288,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Repositories · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=repositories",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307835704,
+        "endMeasurementOffset": 6
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "ed717bac3b57b9b0418c2e7665237794": {
+        "name": "Go to Stars tab",
+        "startMetrics": [],
+        "stopMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13884.009017,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 8,
+              "Frames": 1,
+              "JSEventListeners": 1864,
+              "LayoutObjects": 2597,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 41221,
+              "Resources": 104,
+              "ContextLifecycleStateObservers": 55,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 8,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 79,
+              "RecalcStyleCount": 119,
+              "LayoutDuration": 0.313238,
+              "RecalcStyleDuration": 0.359884,
+              "DevToolsCommandDuration": 0.106235,
+              "ScriptDuration": 0.487069,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 1.919858,
+              "TaskOtherDuration": 0.65195,
+              "ThreadTime": 1.683665,
+              "ProcessTime": 2.74,
+              "JSHeapUsedSize": 10327872,
+              "JSHeapTotalSize": 17084416,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Starred · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=stars",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "samplingMetrics": [],
+        "startMeasurement": 1772307836433,
+        "endMeasurement": 1772307836473,
+        "endMeasurementOffset": 40
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "a1c49952afce01c54ce680ac26568109": {
+        "name": "Go to Packages tab (if available)",
+        "startMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13884.009201,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 8,
+              "Frames": 1,
+              "JSEventListeners": 1864,
+              "LayoutObjects": 2597,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 41221,
+              "Resources": 104,
+              "ContextLifecycleStateObservers": 55,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 8,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 79,
+              "RecalcStyleCount": 119,
+              "LayoutDuration": 0.313238,
+              "RecalcStyleDuration": 0.359884,
+              "DevToolsCommandDuration": 0.106404,
+              "ScriptDuration": 0.487069,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 1.920034,
+              "TaskOtherDuration": 0.651957,
+              "ThreadTime": 1.683843,
+              "ProcessTime": 2.74,
+              "JSHeapUsedSize": 10327872,
+              "JSHeapTotalSize": 17084416,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Starred · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=stars",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1772307836473,
+        "endMeasurement": 1772307836440,
+        "startMeasurementOffset": 32
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13884.24069,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 8,
+              "Frames": 1,
+              "JSEventListeners": 1887,
+              "LayoutObjects": 2598,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 45703,
+              "Resources": 106,
+              "ContextLifecycleStateObservers": 58,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 8,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 87,
+              "RecalcStyleCount": 138,
+              "LayoutDuration": 0.313843,
+              "RecalcStyleDuration": 0.362407,
+              "DevToolsCommandDuration": 0.131906,
+              "ScriptDuration": 0.511256,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 1.991852,
+              "TaskOtherDuration": 0.670958,
+              "ThreadTime": 1.756667,
+              "ProcessTime": 2.83,
+              "JSHeapUsedSize": 11670812,
+              "JSHeapTotalSize": 17084416,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Starred · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=stars",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307836706,
+        "endMeasurementOffset": 6
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "a1c49952afce01c54ce680ac26568109": {
+        "name": "Go to Packages tab (if available)",
+        "startMetrics": [],
+        "stopMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13884.555476,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 14,
+              "Frames": 1,
+              "JSEventListeners": 1915,
+              "LayoutObjects": 2752,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 58646,
+              "Resources": 108,
+              "ContextLifecycleStateObservers": 77,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 14,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 89,
+              "RecalcStyleCount": 142,
+              "LayoutDuration": 0.346108,
+              "RecalcStyleDuration": 0.404281,
+              "DevToolsCommandDuration": 0.132986,
+              "ScriptDuration": 0.546301,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 2.201411,
+              "TaskOtherDuration": 0.770253,
+              "ThreadTime": 1.944467,
+              "ProcessTime": 3.05,
+              "JSHeapUsedSize": 11605952,
+              "JSHeapTotalSize": 17084416,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Starred · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=packages",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "samplingMetrics": [],
+        "startMeasurement": 1772307836928,
+        "endMeasurement": 1772307837019,
+        "endMeasurementOffset": 91
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13885.258271,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 14,
+              "Frames": 1,
+              "JSEventListeners": 1915,
+              "LayoutObjects": 2752,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 58646,
+              "Resources": 109,
+              "ContextLifecycleStateObservers": 77,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 14,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 115,
+              "RecalcStyleCount": 170,
+              "LayoutDuration": 0.349098,
+              "RecalcStyleDuration": 0.408317,
+              "DevToolsCommandDuration": 0.133298,
+              "ScriptDuration": 0.567329,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 2.265743,
+              "TaskOtherDuration": 0.806219,
+              "ThreadTime": 2.011571,
+              "ProcessTime": 3.14,
+              "JSHeapUsedSize": 11650528,
+              "JSHeapTotalSize": 17084416,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Packages · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=packages",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307837724,
+        "endMeasurementOffset": 18
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13886.247747,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 14,
+              "Frames": 1,
+              "JSEventListeners": 1915,
+              "LayoutObjects": 2752,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 58646,
+              "Resources": 109,
+              "ContextLifecycleStateObservers": 77,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 14,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 115,
+              "RecalcStyleCount": 170,
+              "LayoutDuration": 0.349098,
+              "RecalcStyleDuration": 0.408317,
+              "DevToolsCommandDuration": 0.133911,
+              "ScriptDuration": 0.567329,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 2.266643,
+              "TaskOtherDuration": 0.806506,
+              "ThreadTime": 2.012931,
+              "ProcessTime": 3.15,
+              "JSHeapUsedSize": 11650528,
+              "JSHeapTotalSize": 17084416,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Packages · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=packages",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307838713,
+        "endMeasurementOffset": 6
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13887.249951,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 14,
+              "Frames": 1,
+              "JSEventListeners": 1915,
+              "LayoutObjects": 2752,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 58646,
+              "Resources": 109,
+              "ContextLifecycleStateObservers": 77,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 14,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 115,
+              "RecalcStyleCount": 170,
+              "LayoutDuration": 0.349098,
+              "RecalcStyleDuration": 0.408317,
+              "DevToolsCommandDuration": 0.13435,
+              "ScriptDuration": 0.567329,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 2.267213,
+              "TaskOtherDuration": 0.806637,
+              "ThreadTime": 2.013571,
+              "ProcessTime": 3.15,
+              "JSHeapUsedSize": 11650528,
+              "JSHeapTotalSize": 17084416,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Packages · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=packages",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307839714,
+        "endMeasurementOffset": 6
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13888.250311,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 14,
+              "Frames": 1,
+              "JSEventListeners": 1915,
+              "LayoutObjects": 2752,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 58646,
+              "Resources": 109,
+              "ContextLifecycleStateObservers": 77,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 14,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 115,
+              "RecalcStyleCount": 170,
+              "LayoutDuration": 0.349098,
+              "RecalcStyleDuration": 0.408317,
+              "DevToolsCommandDuration": 0.135232,
+              "ScriptDuration": 0.567329,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 2.268281,
+              "TaskOtherDuration": 0.806823,
+              "ThreadTime": 2.014213,
+              "ProcessTime": 3.15,
+              "JSHeapUsedSize": 11650528,
+              "JSHeapTotalSize": 17084416,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Packages · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=packages",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307840715,
+        "endMeasurementOffset": 6
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13889.250735,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 14,
+              "Frames": 1,
+              "JSEventListeners": 1915,
+              "LayoutObjects": 2752,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 58646,
+              "Resources": 109,
+              "ContextLifecycleStateObservers": 77,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 14,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 115,
+              "RecalcStyleCount": 170,
+              "LayoutDuration": 0.349098,
+              "RecalcStyleDuration": 0.408317,
+              "DevToolsCommandDuration": 0.135695,
+              "ScriptDuration": 0.567329,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 2.269005,
+              "TaskOtherDuration": 0.807084,
+              "ThreadTime": 2.015265,
+              "ProcessTime": 3.15,
+              "JSHeapUsedSize": 11650528,
+              "JSHeapTotalSize": 17084416,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Packages · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=packages",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "startMeasurement": 1772307822692,
+        "endMeasurement": 1772307841716,
+        "endMeasurementOffset": 6
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "6fbf633fae3f4113d82377093de738a5": {
+        "name": "Return to Overview",
+        "startMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13889.47272,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 14,
+              "Frames": 1,
+              "JSEventListeners": 1915,
+              "LayoutObjects": 2752,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 58646,
+              "Resources": 109,
+              "ContextLifecycleStateObservers": 77,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 14,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 115,
+              "RecalcStyleCount": 170,
+              "LayoutDuration": 0.349098,
+              "RecalcStyleDuration": 0.408317,
+              "DevToolsCommandDuration": 0.136266,
+              "ScriptDuration": 0.567329,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 2.269663,
+              "TaskOtherDuration": 0.807171,
+              "ThreadTime": 2.016025,
+              "ProcessTime": 3.15,
+              "JSHeapUsedSize": 11650528,
+              "JSHeapTotalSize": 17084416,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Packages · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=packages",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1772307841938,
+        "endMeasurement": 1772307841932,
+        "startMeasurementOffset": 6
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "6fbf633fae3f4113d82377093de738a5": {
+        "name": "Return to Overview",
+        "startMetrics": [],
+        "stopMetrics": [
+          {
+            "metric": {
+              "Timestamp": 13889.623194,
+              "AudioHandlers": 0,
+              "AudioWorkletProcessors": 0,
+              "Documents": 4,
+              "Frames": 1,
+              "JSEventListeners": 1778,
+              "LayoutObjects": 946,
+              "MediaKeySessions": 0,
+              "MediaKeys": 0,
+              "Nodes": 40774,
+              "Resources": 103,
+              "ContextLifecycleStateObservers": 45,
+              "V8PerContextDatas": 2,
+              "WorkerGlobalScopes": 0,
+              "UACSSResources": 0,
+              "RTCPeerConnections": 0,
+              "ResourceFetchers": 4,
+              "AdSubframes": 0,
+              "DetachedScriptStates": 0,
+              "ArrayBufferContents": 0,
+              "LayoutCount": 115,
+              "RecalcStyleCount": 176,
+              "LayoutDuration": 0.349098,
+              "RecalcStyleDuration": 0.409912,
+              "DevToolsCommandDuration": 0.176805,
+              "ScriptDuration": 0.588436,
+              "V8CompileDuration": 0.001482,
+              "TaskDuration": 2.382008,
+              "TaskOtherDuration": 0.856275,
+              "ThreadTime": 2.1189,
+              "ProcessTime": 3.41,
+              "JSHeapUsedSize": 10777772,
+              "JSHeapTotalSize": 14462976,
+              "FirstMeaningfulPaint": 13871.337208,
+              "DomContentLoaded": 13871.586057,
+              "NavigationStart": 13870.41906
+            },
+            "description": "",
+            "devtoolsFrontendUrl": "https://chrome-devtools-frontend.appspot.com/serve_rev/@47e20adcc15fc15f01825aa17e570c8f5492ac0f/inspector.html?ws=127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937",
+            "id": "B6BA44CC0C1528841D3F35C73B5CF937",
+            "title": "ntrotner (Nikita Trotner) / Packages · GitHub",
+            "type": "page",
+            "url": "https://github.com/ntrotner?tab=packages",
+            "webSocketDebuggerUrl": "ws://127.0.0.1:9222/devtools/page/B6BA44CC0C1528841D3F35C73B5CF937"
+          }
+        ],
+        "samplingMetrics": [],
+        "startMeasurement": 1772307842085,
+        "endMeasurement": 1772307842087,
+        "endMeasurementOffset": 2
+      }
+    }
+  },
+  {
+    "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+      "TEST_CASE_PARENT": {
+        "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+        "startMetrics": [],
+        "stopMetrics": [],
+        "samplingMetrics": [],
+        "startMeasurement": 1772307842119,
+        "endMeasurement": 1772307842121,
+        "endMeasurementOffset": 2
+      }
+    }
+  }
+]

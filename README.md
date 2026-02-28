@@ -5,13 +5,6 @@
 
 > Collect performance metrics from the browser dev tools during playwright test execution
 
-> [!CAUTION]
-> This library is work in progress. The measurement is limited to Chromium.
-> On the long run the goal is to
-> - Support Firefox and Webkit
-> - Useful amount of metrics to choose from
-> - Insightful visualization of the results
-
 ## Install
 
 ```bash
@@ -45,8 +38,6 @@ import type { CDP, Options, Metric } from 'playwright-performance-reporter';
 import { nativeChromiumObservers } from 'playwright-performance-reporter';
 
 const PlaywrightPerformanceReporterOptions: Options = {
-  outputDir: '/your/path/to/dir',
-  outputFile: `${Date.now()}.json`,
   deleteOnFailure: false,
   browsers: {
     chromium: {
@@ -153,34 +144,67 @@ const PlaywrightPerformanceReporterOptions: Options = {
 }
 ```
 
-### Custom JSON Writer
-The output is sent in chunks to the output file one defined in the options.
-If there is a need to provide a custom writer, then the `customJsonWriter` is of help to customize how the chunks are handled.
-In the beginning the `initialize` function is called with the options dedicated for the writer.
+### Custom Presenters
+The output is sent in chunks to the presenter(s) defined in the options.
+If there is a need to provide a custom writer, then the `presenters` is of help to customize how the chunks are handled.
 Every new entry is sent to the `write` function. Once the test is complete `close` is called.
 In case the test failed and `deleteOnFailure === true`, then the `delete` function is called.
 
 ```ts
-import type { JsonWriter } from 'playwright-performance-reporter';
+import type { PresenterWriter, ResultAccumulator } from 'playwright-performance-reporter';
 
-class CustomJsonWriter implements JsonWriter {
-  ...
+class CustomJsonWriter implements PresenterWriter {
+  async write(content: ResultAccumulator): Promise<boolean> {
+    // Write content
+    return true;
+  }
+
+  async close(): Promise<boolean> {
+    // Close the writer
+    return true;
+  }
+
+  async delete(): Promise<boolean> {
+    // Delete the created file
+    return true;
+  }
 }
 
 const PlaywrightPerformanceReporterOptions: Options = {
-  outputDir: '/your/path/to/dir',
-  outputFile: 'output.json',
   deleteOnFailure: true,
-  customJsonWriter: new CustomJsonWriter(),
+  presenters: [new CustomJsonWriter()],
   ...
 }
 ```
 
+### Presenters
+Presenters allow multiple output formats to be generated simultaneously from the same test data.
+Each presenter receives the same data and can transform it into a different format.
+
+#### How Presenters Work
+- Multiple presenters can be registered in the `presenters` array
+- Each presenter is initialized with the same output configuration
+- Every metric write is broadcast to all presenters
+- Each presenter handles its own file writing, closing, and deletion
+
+#### Using Predefined Presenters
+The library provides two built-in presenters:
+
+```ts
+import { presenters } from 'playwright-performance-reporter';
+
+const options: Options = {
+  presenters: [
+    new presenters.jsonChunkWriter(...),
+    new presenters.chartPresenter(...)
+  ],
+  ...
+}
+```
 
 ## Output
 
 The top level is hooked into `test()`.
-
 
 ```json
 {
@@ -205,4 +229,4 @@ the time delta in milliseconds between the request until the browser provides al
 
 Check [example/](example/) for the real-world setup.
 
-See [example/example-output.json](example/example-output.json) for detailed reporter output.
+See [example/example-chart-presenter.html](example/example-chart-presenter.html) for detailed presenter output.
