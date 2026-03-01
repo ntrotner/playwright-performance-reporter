@@ -117,3 +117,6 @@ dist
 
 # Compiled code
 lib/
+
+# Test code
+performance-report*.json
