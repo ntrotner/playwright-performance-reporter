@@ -49,10 +49,548 @@
     #performanceChart {
       max-height: 500px;
     }
+    .metrics-comparison-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .metrics-comparison-section h2 {
+      margin: 0 0 15px 0;
+      font-size: 18px;
+      color: #333;
+    }
+    .metrics-comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    .metric-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid #e9ecef;
+    }
+    .metric-card h3 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #666;
+      font-weight: 600;
+    }
+    .metric-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .metric-label {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 10px;
+    }
+    .metric-stats {
+      border-top: 1px solid #dee2e6;
+      padding-top: 10px;
+      font-size: 12px;
+    }
+    .metric-min {
+      color: #28a745;
+      margin-bottom: 3px;
+    }
+    .metric-avg {
+      color: #6c757d;
+      margin-bottom: 3px;
+    }
+    .metric-max {
+      color: #dc3545;
+    }
+    .metric-count {
+      font-size: 11px;
+      color: #adb5bd;
+      margin-top: 10px;
+      text-align: right;
+    }
   </style>
 </head>
 <body>
   <h1>Performance Report</h1>
+
+  
+  <div class="metrics-comparison-section">
+    <h2>Metrics Summary</h2>
+    <div id="metricsComparisonGrid" class="metrics-comparison-grid">
+      
+        <div class="metric-card">
+          <h3>AdSubframes</h3>
+          <div class="metric-value">0.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 0.00</div>
+            <div class="metric-max">Max: 0.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>ArrayBufferContents</h3>
+          <div class="metric-value">0.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 0.00</div>
+            <div class="metric-max">Max: 0.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>AudioHandlers</h3>
+          <div class="metric-value">0.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 0.00</div>
+            <div class="metric-max">Max: 0.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>AudioWorkletProcessors</h3>
+          <div class="metric-value">0.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 0.00</div>
+            <div class="metric-max">Max: 0.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>ContextLifecycleStateObservers</h3>
+          <div class="metric-value">45.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 3.00</div>
+            <div class="metric-avg">Avg: 51.63</div>
+            <div class="metric-max">Max: 86.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>DetachedScriptStates</h3>
+          <div class="metric-value">0.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 1.00</div>
+            <div class="metric-max">Max: 2.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>DevToolsCommandDuration</h3>
+          <div class="metric-value">0.18 ms</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00 ms</div>
+            <div class="metric-avg">Avg: 0.07 ms</div>
+            <div class="metric-max">Max: 0.18 ms</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>Documents</h3>
+          <div class="metric-value">4</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 2</div>
+            <div class="metric-avg">Avg: 5.105263157894737</div>
+            <div class="metric-max">Max: 12</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>DomContentLoaded</h3>
+          <div class="metric-value">1272.94</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 1172.44</div>
+            <div class="metric-max">Max: 1272.94</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>FirstMeaningfulPaint</h3>
+          <div class="metric-value">1272.20</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 970.89</div>
+            <div class="metric-max">Max: 1272.20</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>Frames</h3>
+          <div class="metric-value">1.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 1.00</div>
+            <div class="metric-avg">Avg: 1.00</div>
+            <div class="metric-max">Max: 1.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>JSEventListeners</h3>
+          <div class="metric-value">1747.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 2627.74</div>
+            <div class="metric-max">Max: 5258.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>JSHeapTotalSize</h3>
+          <div class="metric-value">14.29 MB</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 1.50 MB</div>
+            <div class="metric-avg">Avg: 14.15 MB</div>
+            <div class="metric-max">Max: 18.29 MB</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>JSHeapUsedSize</h3>
+          <div class="metric-value">10.64 MB</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 902.27 KB</div>
+            <div class="metric-avg">Avg: 8.95 MB</div>
+            <div class="metric-max">Max: 13.35 MB</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>LayoutCount</h3>
+          <div class="metric-value">118.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 49.39</div>
+            <div class="metric-max">Max: 118.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>LayoutDuration</h3>
+          <div class="metric-value">0.63 ms</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00 ms</div>
+            <div class="metric-avg">Avg: 0.49 ms</div>
+            <div class="metric-max">Max: 0.63 ms</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>LayoutObjects</h3>
+          <div class="metric-value">946.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 5.00</div>
+            <div class="metric-avg">Avg: 1581.89</div>
+            <div class="metric-max">Max: 2177.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>MediaKeySessions</h3>
+          <div class="metric-value">0.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 0.00</div>
+            <div class="metric-max">Max: 0.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>MediaKeys</h3>
+          <div class="metric-value">0.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 0.00</div>
+            <div class="metric-max">Max: 0.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>NavigationStart</h3>
+          <div class="metric-value">1270.58</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 1270.58</div>
+            <div class="metric-avg">Avg: 1270.58</div>
+            <div class="metric-max">Max: 1270.58</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>Nodes</h3>
+          <div class="metric-value">42755</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 65</div>
+            <div class="metric-avg">Avg: 21308.263157894737</div>
+            <div class="metric-max">Max: 54945</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>ProcessTime</h3>
+          <div class="metric-value">4.16 ms</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.07 ms</div>
+            <div class="metric-avg">Avg: 2.63 ms</div>
+            <div class="metric-max">Max: 4.16 ms</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>RTCPeerConnections</h3>
+          <div class="metric-value">0.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 0.00</div>
+            <div class="metric-max">Max: 0.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>RecalcStyleCount</h3>
+          <div class="metric-value">176.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 72.11</div>
+            <div class="metric-max">Max: 176.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>RecalcStyleDuration</h3>
+          <div class="metric-value">0.97 ms</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00 ms</div>
+            <div class="metric-avg">Avg: 0.74 ms</div>
+            <div class="metric-max">Max: 0.97 ms</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>ResourceFetchers</h3>
+          <div class="metric-value">4.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 2.00</div>
+            <div class="metric-avg">Avg: 5.11</div>
+            <div class="metric-max">Max: 12.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>Resources</h3>
+          <div class="metric-value">103.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 61.00</div>
+            <div class="metric-avg">Avg: 102.74</div>
+            <div class="metric-max">Max: 118.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>ScriptDuration</h3>
+          <div class="metric-value">1.08 ms</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00 ms</div>
+            <div class="metric-avg">Avg: 0.72 ms</div>
+            <div class="metric-max">Max: 1.08 ms</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>TaskDuration</h3>
+          <div class="metric-value">3.98 ms</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00 ms</div>
+            <div class="metric-avg">Avg: 2.73 ms</div>
+            <div class="metric-max">Max: 3.98 ms</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>TaskOtherDuration</h3>
+          <div class="metric-value">1.12 ms</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00 ms</div>
+            <div class="metric-avg">Avg: 0.71 ms</div>
+            <div class="metric-max">Max: 1.12 ms</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>ThreadTime</h3>
+          <div class="metric-value">2.80 ms</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00 ms</div>
+            <div class="metric-avg">Avg: 1.73 ms</div>
+            <div class="metric-max">Max: 2.80 ms</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>Timestamp</h3>
+          <div class="metric-value">1291.99 ms</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 1271.56 ms</div>
+            <div class="metric-avg">Avg: 1280.77 ms</div>
+            <div class="metric-max">Max: 1291.99 ms</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>UACSSResources</h3>
+          <div class="metric-value">0.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 0.00</div>
+            <div class="metric-max">Max: 0.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>V8CompileDuration</h3>
+          <div class="metric-value">0.00 ms</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00 ms</div>
+            <div class="metric-avg">Avg: 0.00 ms</div>
+            <div class="metric-max">Max: 0.00 ms</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>V8PerContextDatas</h3>
+          <div class="metric-value">2.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 2.00</div>
+            <div class="metric-avg">Avg: 2.47</div>
+            <div class="metric-max">Max: 4.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+
+        <div class="metric-card">
+          <h3>WorkerGlobalScopes</h3>
+          <div class="metric-value">0.00</div>
+          <div class="metric-label">Latest</div>
+          <div class="metric-stats">
+            <div class="metric-min">Min: 0.00</div>
+            <div class="metric-avg">Avg: 0.00</div>
+            <div class="metric-max">Max: 0.00</div>
+          </div>
+          <div class="metric-count">Data Points: 38</div>
+        </div>
+      
+    </div>
+  </div>
+
 
   <div class="control-panel">
     <div class="control-group">
@@ -110,8 +648,99 @@
   </div>
 
   <script>
-    const chartData = [{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307822873,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13871.064937,0,0,3,1,0,5,0,0,65,61,3,4,0,0,0,3,0,2,0,0,0,0,0,0.00002,0,0,0.005111,0.005091,0.005335,0.06,923928,1572864,0,0,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307823848,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13871.38376,0,0,4,1,0,956,0,0,2792,61,8,4,0,0,0,4,0,2,0,2,2,0.111316,0.030457,0.000223,0.001184,0.000065,0.200585,0.05734,0.105863,0.27,1917840,4194304,0,0,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307824594,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13872.129238,0,0,4,1,5363,1859,0,0,10348,102,44,4,0,0,0,4,0,2,0,17,28,0.218233,0.234953,0.012999,0.25625,0.001394,0.934943,0.211114,0.787217,1.27,12342936,15773696,0,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307824477,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13872.129362,0,0,4,1,5363,1859,0,0,10348,102,44,4,0,0,0,4,0,2,0,17,28,0.218233,0.234953,0.013117,0.25637,0.001394,0.935063,0.210996,0.787336,1.27,12342936,15773696,0,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307824699,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13872.234113,0,0,4,1,5363,1859,0,0,10348,105,44,4,0,0,0,4,0,2,0,17,28,0.218233,0.234953,0.013267,0.262712,0.001431,0.945221,0.214625,0.79919,1.3,12453036,15773696,0,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307825605,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13873.139362,0,0,2,1,4431,1772,0,0,6576,100,41,2,0,0,0,2,0,2,0,17,28,0.218233,0.234953,0.01374,0.263594,0.001431,1.031843,0.299892,0.875082,1.57,8576064,15249408,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307825699,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13873.234036,0,0,2,1,4431,1772,0,0,6576,100,41,2,0,0,0,2,0,2,0,17,28,0.218233,0.234953,0.014365,0.263594,0.001431,1.032527,0.299951,0.875873,1.57,8576064,15249408,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307826606,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13874.13906,0,0,2,1,4431,1772,0,0,6576,100,41,2,0,0,0,2,0,2,0,17,28,0.218233,0.234953,0.01485,0.263594,0.001431,1.033303,0.300242,0.876789,1.57,8576064,15249408,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307826697,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13874.232744,0,0,2,1,4431,1772,0,0,6576,100,41,2,0,0,0,2,0,2,0,17,28,0.218233,0.234953,0.015323,0.263594,0.001431,1.033847,0.300313,0.877431,1.57,8576064,15249408,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307827610,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13875.14203,0,0,2,1,4431,1772,0,0,6576,100,41,2,0,0,0,2,0,2,0,17,28,0.218233,0.234953,0.016023,0.263594,0.001431,1.034825,0.300591,0.878311,1.58,8576064,15249408,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307827702,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13875.235157,0,0,2,1,4431,1772,0,0,6576,100,41,2,0,0,0,2,0,2,0,17,28,0.218233,0.234953,0.016857,0.263594,0.001431,1.035739,0.300671,0.879248,1.58,8576064,15249408,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307828605,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13876.139491,0,0,2,1,4431,1772,0,0,6576,100,41,2,0,0,0,2,0,2,0,17,28,0.218233,0.234953,0.017343,0.263594,0.001431,1.036359,0.300805,0.88016,1.58,8576064,15249408,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307828698,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13876.233602,0,0,2,1,4431,1772,0,0,6576,100,41,2,0,0,0,2,0,2,0,17,28,0.218233,0.234953,0.018112,0.263594,0.001431,1.037345,0.301022,0.881193,1.58,8576064,15249408,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307829601,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13877.137351,0,0,2,1,4469,1772,0,0,11347,103,44,2,0,0,0,2,0,2,0,17,34,0.218233,0.236091,0.042218,0.293747,0.001431,1.097479,0.305759,0.942726,1.65,12504876,17346560,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307829697,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13877.232634,0,0,2,1,4469,1773,0,0,11347,103,44,2,0,0,0,2,0,2,0,18,39,0.218302,0.236447,0.042877,0.295582,0.001431,1.104574,0.309935,0.950307,1.66,12535276,17346560,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307830436,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13877.97206,0,0,4,1,1842,1573,0,0,23944,119,69,2,0,0,0,4,0,0,0,44,67,0.250081,0.309862,0.045123,0.391615,0.001482,1.444015,0.445852,1.280524,2.18,10333204,20492288,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307830696,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13878.232729,0,0,4,1,1842,1573,0,0,23944,119,69,2,0,0,0,4,0,0,0,53,77,0.250701,0.310619,0.045424,0.391891,0.001482,1.45261,0.452493,1.289589,2.19,10335244,20492288,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307831699,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13879.234903,0,0,4,1,1842,1573,0,0,23944,119,69,2,0,0,0,4,0,0,0,53,77,0.250701,0.310619,0.045637,0.391891,0.001482,1.453271,0.452941,1.291012,2.19,10335244,20492288,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307832700,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13880.235982,0,0,4,1,1842,1573,0,0,23944,119,69,2,0,0,0,4,0,0,0,53,77,0.250701,0.310619,0.046254,0.391891,0.001482,1.454169,0.453222,1.291758,2.19,10335244,20492288,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307833712,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13881.237337,0,0,4,1,1842,1573,0,0,23944,119,69,2,0,0,0,4,0,0,0,53,77,0.250701,0.310619,0.046678,0.391891,0.001482,1.454894,0.453523,1.29275,2.19,10335244,20492288,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307834709,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13882.24349,0,0,4,1,1842,1573,0,0,23944,119,69,2,0,0,0,4,0,0,0,53,77,0.250701,0.310619,0.047324,0.391891,0.001482,1.455825,0.453808,1.294005,2.2,10335244,20492288,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307835437,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13882.978908,0,0,4,1,1842,1573,0,0,23944,119,69,2,0,0,0,4,0,0,0,53,77,0.250701,0.310619,0.047838,0.391989,0.001482,1.457688,0.455059,1.296057,2.21,10335732,20492288,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307835704,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13883.239096,0,0,4,1,1865,1574,0,0,27823,121,72,2,0,0,0,4,0,0,0,54,89,0.250807,0.312564,0.071884,0.414502,0.001482,1.520257,0.469018,1.360405,2.29,13399152,20492288,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307836473,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13884.009017,0,0,8,1,1864,2597,0,0,41221,104,55,2,0,0,0,8,0,0,0,79,119,0.313238,0.359884,0.106235,0.487069,0.001482,1.919858,0.65195,1.683665,2.74,10327872,17084416,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307836440,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13884.009201,0,0,8,1,1864,2597,0,0,41221,104,55,2,0,0,0,8,0,0,0,79,119,0.313238,0.359884,0.106404,0.487069,0.001482,1.920034,0.651957,1.683843,2.74,10327872,17084416,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307836706,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13884.24069,0,0,8,1,1887,2598,0,0,45703,106,58,2,0,0,0,8,0,0,0,87,138,0.313843,0.362407,0.131906,0.511256,0.001482,1.991852,0.670958,1.756667,2.83,11670812,17084416,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307837019,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13884.555476,0,0,14,1,1915,2752,0,0,58646,108,77,2,0,0,0,14,0,0,0,89,142,0.346108,0.404281,0.132986,0.546301,0.001482,2.201411,0.770253,1.944467,3.05,11605952,17084416,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307837724,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13885.258271,0,0,14,1,1915,2752,0,0,58646,109,77,2,0,0,0,14,0,0,0,115,170,0.349098,0.408317,0.133298,0.567329,0.001482,2.265743,0.806219,2.011571,3.14,11650528,17084416,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307838713,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13886.247747,0,0,14,1,1915,2752,0,0,58646,109,77,2,0,0,0,14,0,0,0,115,170,0.349098,0.408317,0.133911,0.567329,0.001482,2.266643,0.806506,2.012931,3.15,11650528,17084416,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307839714,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13887.249951,0,0,14,1,1915,2752,0,0,58646,109,77,2,0,0,0,14,0,0,0,115,170,0.349098,0.408317,0.13435,0.567329,0.001482,2.267213,0.806637,2.013571,3.15,11650528,17084416,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307840715,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13888.250311,0,0,14,1,1915,2752,0,0,58646,109,77,2,0,0,0,14,0,0,0,115,170,0.349098,0.408317,0.135232,0.567329,0.001482,2.268281,0.806823,2.014213,3.15,11650528,17084416,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307841716,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13889.250735,0,0,14,1,1915,2752,0,0,58646,109,77,2,0,0,0,14,0,0,0,115,170,0.349098,0.408317,0.135695,0.567329,0.001482,2.269005,0.807084,2.015265,3.15,11650528,17084416,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307841932,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13889.47272,0,0,14,1,1915,2752,0,0,58646,109,77,2,0,0,0,14,0,0,0,115,170,0.349098,0.408317,0.136266,0.567329,0.001482,2.269663,0.807171,2.016025,3.15,11650528,17084416,13871.337208,13871.586057,13870.41906]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772307842087,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[13889.623194,0,0,4,1,1778,946,0,0,40774,103,45,2,0,0,0,4,0,0,0,115,176,0.349098,0.409912,0.176805,0.588436,0.001482,2.382008,0.856275,2.1189,3.41,10777772,14462976,13871.337208,13871.586057,13870.41906]}];
+    const chartData = [{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355645026,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1271.556329,0,0,3,1,0,5,0,0,65,61,3,4,0,0,0,3,0,2,0,0,0,0,0,0.000043,0,0,0.004179,0.004136,0.004444,0.07,923928,1572864,0,0,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355646023,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1271.556873,0,0,3,1,0,5,0,0,65,61,3,4,0,0,0,3,0,2,0,0,0,0,0,0.000563,0,0,0.004713,0.00415,0.004715,0.07,923928,1572864,0,0,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355646718,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1272.253516,0,0,4,1,0,956,0,0,2791,61,8,4,0,0,0,4,0,2,0,3,3,0.24773,0.069369,0.001046,0.003871,0.000087,0.480558,0.158455,0.174325,0.47,1331956,3407872,0,0,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355647466,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1272.999735,0,0,4,1,503,976,0,0,3089,91,26,4,0,0,0,4,0,2,0,6,10,0.292177,0.34387,0.001252,0.291125,0.000981,1.201552,0.272147,0.510657,0.98,5064688,7602176,0,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355647723,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1273.258258,0,0,4,1,524,995,0,0,3276,95,27,4,0,0,0,4,0,2,0,8,14,0.381728,0.443301,0.001476,0.315386,0.001373,1.453369,0.310105,0.654716,1.14,5550732,7864320,0,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355648082,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1273.618553,0,0,4,1,4563,1628,0,0,9189,97,28,4,0,0,0,4,0,2,0,10,16,0.407524,0.521126,0.001757,0.492617,0.001478,1.809055,0.384553,0.898845,1.48,5640116,8912896,0,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355648792,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1274.326728,0,0,4,1,5258,1674,0,0,9628,102,38,4,0,0,0,4,0,2,0,21,31,0.487872,0.749523,0.03314,0.659432,0.001848,2.515465,0.58365,1.46215,2.19,11434384,14725120,0,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355648830,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1274.36496,0,0,4,1,5258,1674,0,0,9628,104,38,4,0,0,0,4,0,2,0,21,31,0.487872,0.749523,0.041113,0.67521,0.001848,2.543262,0.587696,1.47301,2.2,11556276,14725120,0,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355648824,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1274.374044,0,0,4,1,5258,1674,0,0,9628,105,38,4,0,0,0,4,0,2,0,21,31,0.487872,0.749523,0.041404,0.677042,0.001848,2.545811,0.588122,1.475603,2.21,11578812,14725120,0,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355649687,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1275.222187,0,0,2,1,4342,1581,0,0,6192,100,35,2,0,0,0,2,0,2,0,21,31,0.487872,0.749523,0.041808,0.67738,0.001848,2.575357,0.616926,1.502393,2.29,8519916,14200832,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355649844,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1275.379823,0,0,2,1,4342,1581,0,0,6192,100,35,2,0,0,0,2,0,2,0,21,31,0.487872,0.749523,0.042272,0.67738,0.001848,2.575891,0.616996,1.503069,2.29,8519916,14200832,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355650685,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1276.221959,0,0,2,1,4342,1581,0,0,6192,100,35,2,0,0,0,2,0,2,0,21,31,0.487872,0.749523,0.04273,0.67738,0.001848,2.57654,0.617187,1.503885,2.29,8519916,14200832,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355650845,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1276.380949,0,0,2,1,4342,1581,0,0,6192,100,35,2,0,0,0,2,0,2,0,21,31,0.487872,0.749523,0.043118,0.67738,0.001848,2.576993,0.617252,1.50447,2.29,8519916,14200832,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355651685,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1277.221772,0,0,2,1,4342,1581,0,0,6192,100,35,2,0,0,0,2,0,2,0,21,31,0.487872,0.749523,0.043517,0.67738,0.001848,2.577518,0.617378,1.505122,2.29,8519916,14200832,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355651845,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1277.381257,0,0,2,1,4342,1581,0,0,6192,100,35,2,0,0,0,2,0,2,0,21,31,0.487872,0.749523,0.043755,0.67738,0.001848,2.577814,0.617436,1.505552,2.29,8519916,14200832,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355652689,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1278.224898,0,0,2,1,4342,1581,0,0,6192,100,35,2,0,0,0,2,0,2,0,21,31,0.487872,0.749523,0.044247,0.67738,0.001848,2.578573,0.617703,1.506525,2.29,8519916,14200832,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355652845,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1278.380801,0,0,2,1,4342,1581,0,0,6192,100,35,2,0,0,0,2,0,2,0,21,31,0.487872,0.749523,0.044783,0.67738,0.001848,2.579205,0.617799,1.507303,2.3,8519916,14200832,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355653691,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1279.226578,0,0,2,1,4342,1581,0,0,6192,101,35,2,0,0,0,2,0,2,0,21,31,0.487872,0.749523,0.045426,0.682146,0.001848,2.584995,0.61818,1.516881,2.31,8548248,14200832,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355653846,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1279.38187,0,0,2,1,4342,1581,0,0,6192,101,35,2,0,0,0,2,0,2,0,21,31,0.487872,0.749523,0.04608,0.682336,0.001848,2.586145,0.618486,1.518306,2.32,8548736,14200832,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355654690,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1280.226629,0,0,6,1,1802,1454,0,0,23251,117,81,2,0,0,0,6,0,0,0,37,59,0.518203,0.834082,0.074543,0.787226,0.001897,2.975207,0.759256,1.88631,2.92,9823400,18395136,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355654806,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1280.343545,0,0,4,1,1825,1573,0,0,20260,118,69,2,0,0,0,4,0,0,0,45,67,0.519769,0.842306,0.075228,0.796817,0.001897,3.02018,0.784163,1.932852,2.99,10078980,18395136,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355655688,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1281.225305,0,0,4,1,1825,1573,0,0,20260,118,69,2,0,0,0,4,0,0,0,57,80,0.520716,0.843398,0.075388,0.797118,0.001897,3.037199,0.798682,1.947722,3.01,10081140,18395136,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355656690,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1282.226517,0,0,4,1,1825,1573,0,0,20260,118,69,2,0,0,0,4,0,0,0,57,80,0.520716,0.843398,0.075548,0.797118,0.001897,3.037449,0.798772,1.948052,3.01,10081140,18395136,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355657691,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1283.227555,0,0,4,1,1825,1573,0,0,20260,118,69,2,0,0,0,4,0,0,0,57,80,0.520716,0.843398,0.075716,0.797118,0.001897,3.037708,0.798863,1.948401,3.01,10081140,18395136,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355658691,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1284.228183,0,0,4,1,1825,1573,0,0,20260,118,69,2,0,0,0,4,0,0,0,57,80,0.520716,0.843398,0.075884,0.797118,0.001897,3.037992,0.798979,1.948846,3.01,10081140,18395136,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355659692,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1285.228488,0,0,4,1,1825,1573,0,0,20260,118,69,2,0,0,0,4,0,0,0,57,80,0.520716,0.843398,0.076039,0.797145,0.001897,3.038323,0.799128,1.949303,3.01,10081396,18395136,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355659807,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1285.349264,0,0,4,1,1825,1573,0,0,20260,118,69,2,0,0,0,4,0,0,0,57,80,0.520716,0.843398,0.076198,0.797145,0.001897,3.038522,0.799168,1.949556,3.01,10081396,18395136,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355660693,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1286.229475,0,0,6,1,1839,2022,0,0,37520,104,64,2,0,0,0,6,0,0,0,76,114,0.584151,0.884254,0.103814,0.907653,0.001897,3.418249,0.93648,2.278215,3.46,12378884,16822272,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355660783,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1286.319913,0,0,6,1,1839,2022,0,0,37520,104,64,2,0,0,0,6,0,0,0,83,121,0.584751,0.884795,0.10459,0.907653,0.001897,3.426009,0.942323,2.286321,3.47,12392264,16822272,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355660781,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1286.320924,0,0,6,1,1839,2022,0,0,37520,104,64,2,0,0,0,6,0,0,0,83,121,0.584751,0.884795,0.104769,0.907653,0.001897,3.426206,0.942341,2.286542,3.47,12392264,16822272,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355661357,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1286.892885,0,0,12,1,1889,2176,0,0,50379,107,86,2,0,0,0,12,0,0,0,92,143,0.605476,0.927836,0.1387,0.997453,0.001897,3.716877,1.045515,2.560774,3.81,13994904,19181568,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355661700,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1287.234092,0,0,12,1,1890,2177,0,0,54945,110,86,2,0,0,0,12,0,0,0,111,163,0.629502,0.964289,0.138932,1.049069,0.001897,3.887118,1.103429,2.709257,3.98,12438496,19181568,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355662696,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1288.231771,0,0,12,1,1890,2177,0,0,54945,110,86,2,0,0,0,12,0,0,0,118,170,0.630091,0.964717,0.139223,1.049184,0.001897,3.894397,1.109285,2.717129,3.99,12439120,19181568,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355663695,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1289.230825,0,0,12,1,1890,2177,0,0,54945,110,86,2,0,0,0,12,0,0,0,118,170,0.630091,0.964717,0.139742,1.049184,0.001897,3.895037,1.109406,2.717796,3.99,12439120,19181568,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355664695,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1290.232029,0,0,12,1,1890,2177,0,0,54945,110,86,2,0,0,0,12,0,0,0,118,170,0.630091,0.964717,0.139945,1.049184,0.001897,3.895369,1.109535,2.718303,3.99,12439120,19181568,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355665700,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1291.235588,0,0,12,1,1890,2177,0,0,54945,110,86,2,0,0,0,12,0,0,0,118,170,0.630091,0.964717,0.140228,1.049184,0.001897,3.895896,1.109779,2.718998,3.99,12439120,19181568,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355666338,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1291.88015,0,0,12,1,1890,2177,0,0,54945,110,86,2,0,0,0,12,0,0,0,118,170,0.630091,0.964717,0.140728,1.049184,0.001897,3.896522,1.109905,2.719786,4,12439120,19181568,1272.198463,1272.936928,1270.578143]},{"name":" > chromium > example.spec.ts > Navigate GitHub profile tabs","timestamp":1772355666449,"labels":["Timestamp","AudioHandlers","AudioWorkletProcessors","Documents","Frames","JSEventListeners","LayoutObjects","MediaKeySessions","MediaKeys","Nodes","Resources","ContextLifecycleStateObservers","V8PerContextDatas","WorkerGlobalScopes","UACSSResources","RTCPeerConnections","ResourceFetchers","AdSubframes","DetachedScriptStates","ArrayBufferContents","LayoutCount","RecalcStyleCount","LayoutDuration","RecalcStyleDuration","DevToolsCommandDuration","ScriptDuration","V8CompileDuration","TaskDuration","TaskOtherDuration","ThreadTime","ProcessTime","JSHeapUsedSize","JSHeapTotalSize","FirstMeaningfulPaint","DomContentLoaded","NavigationStart"],"values":[1291.985501,0,0,4,1,1747,946,0,0,42755,103,45,2,0,0,0,4,0,0,0,118,176,0.630091,0.965909,0.177205,1.077451,0.001897,3.976779,1.124226,2.79948,4.16,11152252,14987264,1272.198463,1272.936928,1270.578143]}];
+    const metricsSummaryData = [{"name":"AdSubframes","min":0,"max":0,"avg":0,"latest":0,"count":38},{"name":"ArrayBufferContents","min":0,"max":0,"avg":0,"latest":0,"count":38},{"name":"AudioHandlers","min":0,"max":0,"avg":0,"latest":0,"count":38},{"name":"AudioWorkletProcessors","min":0,"max":0,"avg":0,"latest":0,"count":38},{"name":"ContextLifecycleStateObservers","min":3,"max":86,"avg":51.63157894736842,"latest":45,"count":38},{"name":"DetachedScriptStates","min":0,"max":2,"avg":1,"latest":0,"count":38},{"name":"DevToolsCommandDuration","min":0.000043,"max":0.177205,"avg":0.06926184210526315,"latest":0.177205,"count":38},{"name":"Documents","min":2,"max":12,"avg":5.105263157894737,"latest":4,"count":38},{"name":"DomContentLoaded","min":0,"max":1272.936928,"avg":1172.4419073684214,"latest":1272.936928,"count":38},{"name":"FirstMeaningfulPaint","min":0,"max":1272.198463,"avg":970.8883007105266,"latest":1272.198463,"count":38},{"name":"Frames","min":1,"max":1,"avg":1,"latest":1,"count":38},{"name":"JSEventListeners","min":0,"max":5258,"avg":2627.7368421052633,"latest":1747,"count":38},{"name":"JSHeapTotalSize","min":1572864,"max":19181568,"avg":14842179.368421054,"latest":14987264,"count":38},{"name":"JSHeapUsedSize","min":923928,"max":13994904,"avg":9384092.842105264,"latest":11152252,"count":38},{"name":"LayoutCount","min":0,"max":118,"avg":49.39473684210526,"latest":118,"count":38},{"name":"LayoutDuration","min":0,"max":0.630091,"avg":0.48955105263157905,"latest":0.630091,"count":38},{"name":"LayoutObjects","min":5,"max":2177,"avg":1581.8947368421052,"latest":946,"count":38},{"name":"MediaKeySessions","min":0,"max":0,"avg":0,"latest":0,"count":38},{"name":"MediaKeys","min":0,"max":0,"avg":0,"latest":0,"count":38},{"name":"NavigationStart","min":1270.578143,"max":1270.578143,"avg":1270.5781429999995,"latest":1270.578143,"count":38},{"name":"Nodes","min":65,"max":54945,"avg":21308.263157894737,"latest":42755,"count":38},{"name":"ProcessTime","min":0.07,"max":4.16,"avg":2.6328947368421045,"latest":4.16,"count":38},{"name":"RTCPeerConnections","min":0,"max":0,"avg":0,"latest":0,"count":38},{"name":"RecalcStyleCount","min":0,"max":176,"avg":72.10526315789474,"latest":176,"count":38},{"name":"RecalcStyleDuration","min":0,"max":0.965909,"avg":0.7419395789473685,"latest":0.965909,"count":38},{"name":"ResourceFetchers","min":2,"max":12,"avg":5.105263157894737,"latest":4,"count":38},{"name":"Resources","min":61,"max":118,"avg":102.73684210526316,"latest":103,"count":38},{"name":"ScriptDuration","min":0,"max":1.077451,"avg":0.7199437368421053,"latest":1.077451,"count":38},{"name":"TaskDuration","min":0.004179,"max":3.976779,"avg":2.7341587894736836,"latest":3.976779,"count":38},{"name":"TaskOtherDuration","min":0.004136,"max":1.124226,"avg":0.7117787368421054,"latest":1.124226,"count":38},{"name":"ThreadTime","min":0.004444,"max":2.79948,"avg":1.7304108947368424,"latest":2.79948,"count":38},{"name":"Timestamp","min":1271.556329,"max":1291.985501,"avg":1280.767887605263,"latest":1291.985501,"count":38},{"name":"UACSSResources","min":0,"max":0,"avg":0,"latest":0,"count":38},{"name":"V8CompileDuration","min":0,"max":0.001897,"avg":0.001683842105263159,"latest":0.001897,"count":38},{"name":"V8PerContextDatas","min":2,"max":4,"avg":2.473684210526316,"latest":2,"count":38},{"name":"WorkerGlobalScopes","min":0,"max":0,"avg":0,"latest":0,"count":38}];
     let chart = null;
+
+    function formatMetricValue(name, value) {
+      if (name.includes('Heap') || name.includes('Size')) {
+        if (value > 1048576) {
+          return (value / 1048576).toFixed(2) + ' MB';
+        }
+        return (value / 1024).toFixed(2) + ' KB';
+      }
+      if (name.includes('Duration') || name.includes('Time')) {
+        return value.toFixed(2) + ' ms';
+      }
+      if (name === 'Documents' || name === 'Nodes') {
+        return value.toString();
+      }
+      return value.toFixed(2);
+    }
+
+    function computeMetricsSummaryForTest(testName) {
+      const testPoints = chartData.filter(p => p.name === testName);
+      if (testPoints.length === 0) {
+        return new Map();
+      }
+
+      testPoints.sort((a, b) => a.timestamp - b.timestamp);
+
+      const allComparisonMetrics = metricsSummaryData.map(summaryData => summaryData.name);
+
+      const summary = new Map();
+
+      for (const metric of allComparisonMetrics) {
+        const values = [];
+        for (const point of testPoints) {
+          const idx = point.labels.indexOf(metric);
+          if (idx !== -1) {
+            values.push(point.values[idx]);
+          }
+        }
+
+        if (values.length === 0) {
+          continue;
+        }
+
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const avg = values.reduce((s, v) => s + v, 0) / values.length;
+        const latest = values[values.length - 1];
+
+        summary.set(metric, { min, max, avg, latest, count: values.length });
+      }
+
+      return summary;
+    }
+
+    function renderMetricsComparison(metricsSummary) {
+      const grid = document.getElementById('metricsComparisonGrid');
+      if (!grid) {
+        return;
+      }
+
+      let html = '';
+      for (const [metric, stats] of metricsSummary.entries()) {
+        const formattedValue = formatMetricValue(metric, stats.latest);
+        const formattedMin = formatMetricValue(metric, stats.min);
+        const formattedMax = formatMetricValue(metric, stats.max);
+        const formattedAvg = formatMetricValue(metric, stats.avg);
+
+        html += `
+          <div class="metric-card">
+            <h3>${metric}</h3>
+            <div class="metric-value">${formattedValue}</div>
+            <div class="metric-label">Latest</div>
+            <div class="metric-stats">
+              <div class="metric-min">Min: ${formattedMin}</div>
+              <div class="metric-avg">Avg: ${formattedAvg}</div>
+              <div class="metric-max">Max: ${formattedMax}</div>
+            </div>
+            <div class="metric-count">Runs: ${stats.count}</div>
+          </div>
+        `;
+      }
+
+      grid.innerHTML = html;
+    }
+
+    function updateMetricsComparison(testName, metricName) {
+      // The metrics comparison shows all available metrics for the test,
+      // but we could filter by the selected metric if needed
+      const summary = computeMetricsSummaryForTest(testName);
+      renderMetricsComparison(summary);
+    }
 
     function getChartData(testName, metricName) {
       // Filter data points for the selected test that have the selected metric
@@ -203,12 +832,17 @@
     // Update when test selection changes
     testSelect.addEventListener('change', function() {
       createChart(this.value, metricSelect.value);
+      updateMetricsComparison(this.value, metricSelect.value);
     });
 
     // Update when metric selection changes
     metricSelect.addEventListener('change', function() {
       createChart(testSelect.value, this.value);
+      updateMetricsComparison(testSelect.value, this.value);
     });
+
+    // Initial metrics comparison render
+    updateMetricsComparison(testSelect.value, metricSelect.value);
   </script>
 </body>
 </html>
