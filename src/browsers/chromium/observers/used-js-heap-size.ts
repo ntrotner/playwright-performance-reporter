@@ -3,10 +3,14 @@ import type Protocol from 'devtools-protocol/types/protocol';
 import {
   type ChromiumMetricObserver,
   type Metric,
+  type ObserverOptions,
 } from '../../../types/index.js';
 import {
   nativeChromiumPlugins,
 } from '../plugins/index.js';
+import {
+  enhanceGarbageCollectionPlugin,
+} from '../../../helpers/index.js';
 
 export class UsedJsHeapSize implements ChromiumMetricObserver {
   public readonly name = 'usedJsHeapSize';
@@ -14,6 +18,10 @@ export class UsedJsHeapSize implements ChromiumMetricObserver {
   public readonly plugins = [
     nativeChromiumPlugins.performanceDomainPlugin,
   ];
+
+  constructor(protected options?: ObserverOptions) {
+    enhanceGarbageCollectionPlugin(nativeChromiumPlugins.heapGarbageCollectorPlugin, this, this.options);
+  }
 
   /**
    * @inheritdoc

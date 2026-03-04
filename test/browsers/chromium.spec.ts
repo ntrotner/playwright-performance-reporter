@@ -206,7 +206,7 @@ describe('Chromium client', () => {
   });
 
   it('should activate multiple domains and return the requested metric for HeapDump', async () => {
-    const testObserver = new nativeChromiumObservers.heapDump();
+    const testObserver = new nativeChromiumObservers.heapDump({triggerGarbageCollectionOnObserve: true});
     const executedCommands: string[] = [];
     mockClient.send.mockImplementation((command, callback) => {
       executedCommands.push(command);
@@ -242,7 +242,7 @@ describe('Chromium client', () => {
   });
 
   it('should activate multiple domains and return the requested metric for HeapProfilerSampling', async () => {
-    const testObserver = new nativeChromiumObservers.heapProfilerSampling();
+    const testObserver = new nativeChromiumObservers.heapProfilerSampling({triggerGarbageCollectionOnObserve: true});
     const executedCommands: string[] = [];
     mockClient.send.mockImplementation((command, callback) => {
       executedCommands.push(command);
@@ -271,7 +271,7 @@ describe('Chromium client', () => {
   });
 
   it('should activate multiple domains and return the requested metric for HeapObjectsTracking', async () => {
-    const testObserver = new nativeChromiumObservers.heapObjectsTracking();
+    const testObserver = new nativeChromiumObservers.heapObjectsTracking({triggerGarbageCollectionOnObserve: true});
     const executedCommands: string[] = [];
     mockClient.send.mockImplementation((command, callback) => {
       executedCommands.push(command);

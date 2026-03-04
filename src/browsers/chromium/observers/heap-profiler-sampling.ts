@@ -2,17 +2,24 @@ import type CDP from 'chrome-remote-interface';
 import {
   type ChromiumMetricObserver,
   type Metric,
+  type ObserverOptions,
 } from '../../../types/index.js';
 import {
   nativeChromiumPlugins,
 } from '../plugins/index.js';
+import {
+  enhanceGarbageCollectionPlugin,
+} from '../../../helpers/index.js';
 
 export class HeapProfilerSampling implements ChromiumMetricObserver {
   public readonly name = 'heapProfilerSampling';
   public readonly plugins = [
     nativeChromiumPlugins.heapProfilerDomainPlugin,
-    nativeChromiumPlugins.heapGarbageCollectorPlugin,
   ];
+
+  constructor(protected options?: ObserverOptions) {
+    enhanceGarbageCollectionPlugin(nativeChromiumPlugins.heapGarbageCollectorPlugin, this, this.options);
+  }
 
   /**
    * @inheritdoc
