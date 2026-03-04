@@ -3,16 +3,19 @@ import type Protocol from 'devtools-protocol/types/protocol';
 import {
   type ChromiumMetricObserver,
   type Metric,
+  type ObserverOptions,
 } from '../../../types/index.js';
 import {
   nativeChromiumPlugins,
 } from '../plugins/index.js';
+import {
+  enhanceGarbageCollectionPlugin,
+} from '../../../helpers/index.js';
 
 export class HeapDump implements ChromiumMetricObserver {
   public readonly name = 'heapDump';
   public readonly plugins = [
     nativeChromiumPlugins.heapProfilerDomainPlugin,
-    nativeChromiumPlugins.heapGarbageCollectorPlugin,
   ];
 
   /**
@@ -25,6 +28,10 @@ export class HeapDump implements ChromiumMetricObserver {
     reportProgress: true,
     treatGlobalObjectsAsRoots: true,
   };
+
+  constructor(protected options?: ObserverOptions) {
+    enhanceGarbageCollectionPlugin(nativeChromiumPlugins.heapGarbageCollectorPlugin, this, this.options);
+  }
 
   /**
    * @inheritdoc

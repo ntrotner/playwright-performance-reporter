@@ -5,6 +5,22 @@
 
 > Collect performance metrics from the browser dev tools during playwright test execution
 
+## Index
+
+- [Install](#install)
+- [Usage](#usage)
+  - [Setup Reporter](#setup-reporter)
+  - [Chromium](#chromium)
+    - [Setup Browser](#setup-browser)
+- [Advanced Configurations](#advanced-configurations)
+  - [Sampling](#sampling)
+  - [Custom Metric Observer](#custom-metric-observer)
+  - [Presenters](#presenters)
+    - [How Presenters Work](#how-presenters-work)
+    - [Using Predefined Presenters](#using-predefined-presenters)
+    - [Custom Presenters](#custom-presenters)
+- [Output](#output)
+
 ## Install
 
 ```bash
@@ -31,6 +47,7 @@ export default defineConfig({
 ### Setup Reporter
 To register the reporter, include the code blow in your playwright config.
 Please see the subsections for more details about browser specific cases and advanced configurations.
+For a runnable setup, see [example/playwright.config.ts](example/playwright.config.ts).
 
 
 ```ts
@@ -144,7 +161,36 @@ const PlaywrightPerformanceReporterOptions: Options = {
 }
 ```
 
-### Custom Presenters
+### Presenters
+Presenters allow multiple output formats to be generated simultaneously from the same test data.
+Each presenter receives the same data and can transform it into a different format.
+
+In the example project, two presenters are configured and generate:
+- [example/example-json-writer.json](example/example-json-writer.json)
+- [example/example-chart-presenter.html](example/example-chart-presenter.html)
+
+#### How Presenters Work
+- Multiple presenters can be registered in the `presenters` array
+- Each presenter is initialized with the same output configuration
+- Every metric write is broadcast to all presenters
+- Each presenter handles its own file writing, closing, and deletion
+
+#### Using Predefined Presenters
+The library provides two built-in presenters:
+
+```ts
+import { presenters } from 'playwright-performance-reporter';
+
+const options: Options = {
+  presenters: [
+    new presenters.jsonChunkWriter(...),
+    new presenters.chartPresenter(...)
+  ],
+  ...
+}
+```
+
+#### Custom Presenters
 The output is sent in chunks to the presenter(s) defined in the options.
 If there is a need to provide a custom writer, then the `presenters` is of help to customize how the chunks are handled.
 Every new entry is sent to the `write` function. Once the test is complete `close` is called.
@@ -177,32 +223,11 @@ const PlaywrightPerformanceReporterOptions: Options = {
 }
 ```
 
-### Presenters
-Presenters allow multiple output formats to be generated simultaneously from the same test data.
-Each presenter receives the same data and can transform it into a different format.
-
-#### How Presenters Work
-- Multiple presenters can be registered in the `presenters` array
-- Each presenter is initialized with the same output configuration
-- Every metric write is broadcast to all presenters
-- Each presenter handles its own file writing, closing, and deletion
-
-#### Using Predefined Presenters
-The library provides two built-in presenters:
-
-```ts
-import { presenters } from 'playwright-performance-reporter';
-
-const options: Options = {
-  presenters: [
-    new presenters.jsonChunkWriter(...),
-    new presenters.chartPresenter(...)
-  ],
-  ...
-}
-```
-
 ## Output
+
+Check [example/](example/) for the real-world setup. If you run the example simulation (`cd example && npm run test`), output is written to:
+- [example/example-json-writer.json](example/example-json-writer.json) (`jsonChunkPresenter` output)
+- [example/example-chart-presenter.html](example/example-chart-presenter.html) (`chartPresenter` output)
 
 The top level is hooked into `test()`.
 
@@ -226,7 +251,3 @@ Playwright. This means that the browser API might still in the process of collec
 even though Playwright instructed the browser to continue to the next step. This could lead to wrong output.
 To check if the output is invalid, the values `startMeasurementOffset` and `endMeasurementOffset` are provided, which measure
 the time delta in milliseconds between the request until the browser provides all metrics.
-
-Check [example/](example/) for the real-world setup.
-
-See [example/example-chart-presenter.html](example/example-chart-presenter.html) for detailed presenter output.
