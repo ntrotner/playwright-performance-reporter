@@ -14,4 +14,10 @@ export class ChromiumCDPFixture {
     startTrackingHeapObjects: jest.fn().mockReturnValue(Promise.resolve({})),
     stopTrackingHeapObjects: jest.fn().mockReturnValue(Promise.resolve({}))
   }
+  public Network = {
+    requestWillBeSent: jest.fn().mockReturnValue(() => {}),
+    responseReceived: jest.fn().mockReturnValue(() => {}),
+    loadingFinished: jest.fn().mockReturnValue(() => {}),
+    loadingFailed: jest.fn().mockReturnValue(() => {}),
+  }
 }
