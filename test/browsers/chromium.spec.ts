@@ -352,4 +352,106 @@ describe('Chromium client', () => {
     expect(executedCommands[0]).toEqual('IO.close');
     expect(executedCommands.length).toEqual(1);
   });
+
+  it('should activate the Network domain and return network activity metrics', async () => {
+    const testObserver = new nativeChromiumObservers.networkActivity();
+    const executedCommands: string[] = [];
+    const networkCallbacks: Record<string, any> = {};
+
+    mockClient.send.mockImplementation((command, callback) => {
+      executedCommands.push(command);
+      if (command === 'Network.enable') {
+        callback(false);
+      } else if (command === 'Network.disable') {
+        callback(false);
+      }
+    });
+
+    (mockClient.Network as any).requestWillBeSent.mockImplementation((cb: any) => {
+      networkCallbacks.requestWillBeSent = cb;
+      return jest.fn();
+    });
+    (mockClient.Network as any).responseReceived.mockImplementation((cb: any) => {
+      networkCallbacks.responseReceived = cb;
+      return jest.fn();
+    });
+    (mockClient.Network as any).loadingFinished.mockImplementation((cb: any) => {
+      networkCallbacks.loadingFinished = cb;
+      return jest.fn();
+    });
+    (mockClient.Network as any).loadingFailed.mockImplementation((cb: any) => {
+      networkCallbacks.loadingFailed = cb;
+      return jest.fn();
+    });
+
+    const response = await chromiumDevelopmentTools.getMetric(testObserver, 'onStop');
+
+    expect((chromiumDevelopmentTools as any).connect).toHaveBeenCalled();
+    expect(executedCommands).toContain('Network.enable');
+    expect((response[0].metric as any).networkActivities).toBeDefined();
+  });
+
+  it('should include details when includeDetailsInSampling is true', async () => {
+    const testObserver = new nativeChromiumObservers.networkActivity({triggerGarbageCollectionOnObserve: false, includeDetailsInSampling: true});
+    const networkCallbacks: Record<string, any> = {};
+
+    mockClient.send.mockImplementation((command, callback) => {
+      if (command === 'Network.enable') {
+        callback(false);
+      }
+    });
+
+    (mockClient.Network as any).requestWillBeSent.mockImplementation((cb: any) => {
+      networkCallbacks.requestWillBeSent = cb;
+      return jest.fn();
+    });
+    (mockClient.Network as any).responseReceived.mockImplementation((cb: any) => {
+      networkCallbacks.responseReceived = cb;
+      return jest.fn();
+    });
+    (mockClient.Network as any).loadingFinished.mockImplementation((cb: any) => {
+      networkCallbacks.loadingFinished = cb;
+      return jest.fn();
+    });
+    (mockClient.Network as any).loadingFailed.mockImplementation((cb: any) => {
+      networkCallbacks.loadingFailed = cb;
+      return jest.fn();
+    });
+
+    const response = await chromiumDevelopmentTools.getMetric(testObserver, 'onSampling');
+
+    expect((response[0].metric as any).networkActivities).toBeDefined();
+  });
+
+  it('should not include details when includeDetailsInSampling is false (default)', async () => {
+    const testObserver = new nativeChromiumObservers.networkActivity();
+    const networkCallbacks: Record<string, any> = {};
+
+    mockClient.send.mockImplementation((command, callback) => {
+      if (command === 'Network.enable') {
+        callback(false);
+      }
+    });
+
+    (mockClient.Network as any).requestWillBeSent.mockImplementation((cb: any) => {
+      networkCallbacks.requestWillBeSent = cb;
+      return jest.fn();
+    });
+    (mockClient.Network as any).responseReceived.mockImplementation((cb: any) => {
+      networkCallbacks.responseReceived = cb;
+      return jest.fn();
+    });
+    (mockClient.Network as any).loadingFinished.mockImplementation((cb: any) => {
+      networkCallbacks.loadingFinished = cb;
+      return jest.fn();
+    });
+    (mockClient.Network as any).loadingFailed.mockImplementation((cb: any) => {
+      networkCallbacks.loadingFailed = cb;
+      return jest.fn();
+    });
+
+    const response = await chromiumDevelopmentTools.getMetric(testObserver, 'onSampling');
+
+    expect((response[0].metric as any).networkActivities).toEqual([]);
+  });
 });

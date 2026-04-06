@@ -6,21 +6,29 @@ const PlaywrightPerformanceReporterOptions: Options = {
   deleteOnFailure: false,
   presenters: [
     new nativePresenters.jsonChunkPresenter({outputDir: './', outputFile: 'example-json-writer.json'}),
-    new nativePresenters.chartPresenter({outputDir: './', outputFile: 'example-chart-presenter.html'}),
+    new nativePresenters.chartPresenter({outputDir: './', outputFile: 'example-chart-presenter.html'})
   ],
   browsers: {
     chromium: {
       onTest: {
-        metrics: [new nativeChromiumObservers.allPerformanceMetrics()],
+        metrics: [
+          new nativeChromiumObservers.allPerformanceMetrics()
+        ],
       },
       onTestStep: {
-        metrics: [new nativeChromiumObservers.allPerformanceMetrics()],
+        metrics: [
+          new nativeChromiumObservers.allPerformanceMetrics()
+        ],
       },
       sampling: {
         metrics: [
           {
             samplingTimeoutInMilliseconds: 1000,
             metric: new nativeChromiumObservers.allPerformanceMetrics(),
+          },
+          {
+            samplingTimeoutInMilliseconds: 1000,
+            metric: new nativeChromiumObservers.networkActivity({includeDetailsInSampling: false, triggerGarbageCollectionOnObserve: false}),
           }
         ]
       }

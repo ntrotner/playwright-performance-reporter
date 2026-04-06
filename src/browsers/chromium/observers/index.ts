@@ -11,6 +11,9 @@ import {
   HeapProfilerSampling,
 } from './heap-profiler-sampling.js';
 import {
+  NetworkActivityObserver,
+} from './network-activity.js';
+import {
   TotalJsHeapSize,
 } from './total-js-heap-size.js';
 import {
@@ -22,6 +25,7 @@ export const nativeChromiumObservers = {
   heapDump: HeapDump,
   heapObjectsTracking: HeapObjectsTracking,
   heapProfilerSampling: HeapProfilerSampling,
+  networkActivity: NetworkActivityObserver,
   totalJsHeapSize: TotalJsHeapSize,
   usedJsHeapSize: UsedJsHeapSize,
 } as const;
