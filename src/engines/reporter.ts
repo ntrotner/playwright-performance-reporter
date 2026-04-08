@@ -52,6 +52,21 @@ export class PerformanceReporter implements Reporter {
   private readonly presenters: PresenterWriter[];
 
   /**
+   * Latest test step identifier
+   */
+  private latestStepId: string | undefined;
+
+  /**
+   * Latest case identifier
+   */
+  private latestCaseId: string | undefined;
+
+  /**
+   * Latest test name
+   */
+  private latestName: string | undefined;
+
+  /**
    * Reference to the unsubscribe function for a hook and test id
    */
   private readonly samplingRunner = new Map<Hooks, Map<string, () => void>>([
@@ -115,6 +130,10 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
+    this.latestCaseId = id;
+    this.latestStepId = testCaseParent;
+    this.latestName = name;
+
     const results = this.createTestPerformance(id, testCaseParent, name);
     await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onStart', browserName);
     await this.writeToPresenters(results);
@@ -160,6 +179,10 @@ export class PerformanceReporter implements Reporter {
       // Root of test suite
       return;
     }
+
+    this.latestCaseId = caseIdentifier.id;
+    this.latestStepId = stepIdentifier.id;
+    this.latestName = stepIdentifier.name;
 
     const results = this.createTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
     await this.executeMetrics(results, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStart', browserName);
@@ -299,11 +322,15 @@ export class PerformanceReporter implements Reporter {
         const metricsResponse = await this.metricsEngine.getMetric(samplingItem.metric, 'onSampling');
         const endOfTrigger = Date.now();
 
-        if (metricsResponse) {
-          results[caseId][stepId][HookOrderToMeasurementOrder.onStop] = endOfTrigger;
-          results[caseId][stepId][HookOrderToMeasurementOffsetOrder.onStop] = endOfTrigger - startOfTrigger;
+        if (metricsResponse && this.latestCaseId && this.latestStepId && this.latestName) {
           const clonedResults = structuredClone(results);
-          clonedResults[caseId][stepId].samplingMetrics.push(...metricsResponse);
+
+          clonedResults[this.latestCaseId] ||= {};
+          clonedResults[this.latestCaseId][this.latestStepId] ||= buildTestPerformance(this.latestName);
+          clonedResults[this.latestCaseId][this.latestStepId][HookOrderToMeasurementOrder.onStop] = endOfTrigger;
+          clonedResults[this.latestCaseId][this.latestStepId][HookOrderToMeasurementOffsetOrder.onStop] = endOfTrigger - startOfTrigger;
+          clonedResults[this.latestCaseId][this.latestStepId].samplingMetrics.push(...metricsResponse);
+
           await this.writeToPresenters(clonedResults);
         }
       },

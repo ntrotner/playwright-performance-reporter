@@ -339,6 +339,9 @@ describe('Playwright Performance Reporter', () => {
           },
         },
       };
+      (playwrightPerformanceReporter as any).latestStepId = "Test";
+      (playwrightPerformanceReporter as any).latestCaseId = "Case";
+      (playwrightPerformanceReporter as any).latestName = "Test";
       (playwrightPerformanceReporter as any).options = optionsWithSamplingMetrics;
       mockMetricsEngine.getMetric.mockReturnValue(Promise.resolve([{metric1: 123}]));
       const results = (playwrightPerformanceReporter as any).createTestPerformance(pivot, customTest, customName);
