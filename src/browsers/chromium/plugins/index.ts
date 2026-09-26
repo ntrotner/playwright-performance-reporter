@@ -10,10 +10,14 @@ import {
 import {
   performanceDomainPlugin,
 } from './performance-domain.js';
+import {
+  profilerDomainPlugin,
+} from './profiler-domain.js';
 
 export const nativeChromiumPlugins = {
   heapGarbageCollectorPlugin,
   heapProfilerDomainPlugin,
   networkDomainPlugin,
   performanceDomainPlugin,
+  profilerDomainPlugin,
 } as const;

@@ -270,6 +270,55 @@ describe('Chromium client', () => {
     expect(responseStop).toEqual([{metric: {heapProfilerSampling: '{}'}}]);
   });
 
+  it('should activate the Profiler domain and return the cpu usage for CpuProfiler', async () => {
+    const testObserver = new nativeChromiumObservers.cpuProfiler({samplingIntervalInMicroseconds: 500, triggerGarbageCollectionOnObserve: false});
+    const executedCommands: string[] = [];
+    mockClient.send.mockImplementation((command, callback) => {
+      executedCommands.push(command);
+      callback(false);
+    });
+    mockClient.Profiler.stop = jest.fn().mockReturnValue(Promise.resolve({
+      profile: {
+        nodes: [
+          {id: 1, callFrame: {functionName: '(root)', url: '', lineNumber: -1, columnNumber: -1, scriptId: '0'}, children: [2, 3, 4]},
+          {id: 2, callFrame: {functionName: 'render', url: 'app.js', lineNumber: 9, columnNumber: 4, scriptId: '1'}},
+          {id: 3, callFrame: {functionName: '(garbage collector)', url: '', lineNumber: -1, columnNumber: -1, scriptId: '0'}},
+          {id: 4, callFrame: {functionName: '(idle)', url: '', lineNumber: -1, columnNumber: -1, scriptId: '0'}},
+        ],
+        startTime: 0,
+        endTime: 5000,
+        samples: [2, 2, 3, 4],
+        timeDeltas: [1000, 1000, 1000, 1000],
+      },
+    }));
+
+    const responseStart = await chromiumDevelopmentTools.getMetric(testObserver, 'onStart');
+    expect(executedCommands[0]).toEqual('Profiler.enable');
+    expect(mockClient.Profiler.setSamplingInterval).toHaveBeenCalledWith({interval: 500});
+    expect(mockClient.Profiler.start).toHaveBeenCalled();
+    expect(responseStart).toEqual([{metric: {}}]);
+
+    const responseSampling = await chromiumDevelopmentTools.getMetric(testObserver, 'onSampling');
+    expect(responseSampling).toEqual([{metric: {}}]);
+
+    const responseStop = await chromiumDevelopmentTools.getMetric(testObserver, 'onStop');
+    expect(responseStop).toEqual([{
+      metric: {
+        cpuProfileDuration: 5,
+        cpuProfileSampleCount: 4,
+        cpuProfileActiveTime: 3,
+        cpuProfileScriptTime: 2,
+        cpuProfileGarbageCollectorTime: 1,
+        cpuProfileProgramTime: 0,
+        cpuProfileIdleTime: 1,
+      },
+    }]);
+
+    mockClient.Profiler.stop = jest.fn().mockReturnValue(Promise.reject(new Error('not started')));
+    const responseFailed = await chromiumDevelopmentTools.getMetric(testObserver, 'onStop');
+    expect(responseFailed).toEqual([]);
+  });
+
   it('should activate multiple domains and return the requested metric for HeapObjectsTracking', async () => {
     const testObserver = new nativeChromiumObservers.heapObjectsTracking({triggerGarbageCollectionOnObserve: true});
     const executedCommands: string[] = [];
