@@ -24,7 +24,7 @@ The project is organized as follows:
 
 - **Metric Observers**: Collectors for specific performance metrics (e.g., `usedJsHeapSize`, `totalJsHeapSize`, `allPerformanceMetrics`).
 - **Sampling**: Ability to collect metrics at regular intervals during long-running test steps.
-- **Custom Presenters**: Flexible output formats. The library comes with `jsonChunkPresenter` and `chartPresenter` out of the box.
+- **Custom Presenters**: Flexible output formats. The library comes with `jsonChunkPresenter`, `chartPresenter`, `timelineDataPresenter` and `comparisonPresenter` out of the box.
 - **CDP Integration**: Leverages the Chrome DevTools Protocol to gather low-level performance data.
 
 ## Running the Simulation (`example/` folder)
@@ -58,5 +58,6 @@ npm run test
 After running the tests, you will find the generated performance reports in the `example/` directory:
 - `example-json-writer.json`: The raw performance data in JSON format.
 - `example-chart-presenter.html`: A visual representation of the performance metrics in an HTML chart.
+- `example-comparison.json` / `example-comparison.html`: Comparison of the latest run against previous runs stored in `performance-history/`. Run the example at least twice to get a baseline, and four times to separate noise from real changes.
 
 This simulation is the best way to understand how configuration abilities in `playwright.config.ts` affect the output and to verify that the reporter is correctly integrated into a Playwright workflow.
