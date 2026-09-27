@@ -4,20 +4,30 @@ import {nativeChromiumObservers, nativePresenters} from '../lib';
 
 const PlaywrightPerformanceReporterOptions: Options = {
   deleteOnFailure: false,
+  maxListeners: 10,
   presenters: [
     new nativePresenters.jsonChunkPresenter({outputDir: './', outputFile: 'example-json-writer.json'}),
-    new nativePresenters.chartPresenter({outputDir: './', outputFile: 'example-chart-presenter.html'})
+    new nativePresenters.chartPresenter({outputDir: './', outputFile: 'example-chart-presenter.html'}),
+    new nativePresenters.comparisonPresenter({
+      historyDir: './performance-history',
+      outputDir: './',
+      visualReportOutputFile: 'example-comparison.html',
+      bandPercentile: 0.15
+    })
   ],
   browsers: {
     chromium: {
       onTest: {
         metrics: [
-          new nativeChromiumObservers.allPerformanceMetrics()
+          new nativeChromiumObservers.allPerformanceMetrics(),
+          new nativeChromiumObservers.webVitals()
         ],
       },
       onTestStep: {
         metrics: [
-          new nativeChromiumObservers.allPerformanceMetrics()
+          new nativeChromiumObservers.allPerformanceMetrics(),
+          new nativeChromiumObservers.cpuProfiler({triggerGarbageCollectionOnObserve: false}),
+          new nativeChromiumObservers.webVitals()
         ],
       },
       sampling: {
@@ -56,7 +66,7 @@ export default defineConfig({
         launchOptions: {
           args: [
             '--remote-debugging-port=9222',
-            '--js-flags="--predictable-gc-schedule --gc-interval=1000"'
+            '--js-flags="--predictable-gc-schedule --gc-interval=250"'
           ]
         }
       },
