@@ -60,7 +60,7 @@ export class JsonChunkPresenter implements PresenterWriter {
         if (this.jsonStream.write(content)) {
           resolve(true);
         } else {
-          this.fileStream?.once('drain', () => {
+          this.jsonStream.once('drain', () => {
             resolve(true);
           });
         }
@@ -75,6 +75,10 @@ export class JsonChunkPresenter implements PresenterWriter {
    * Finish json stream
    */
   public async close(): Promise<boolean> {
+    if (this.fileStream?.writableEnded) {
+      return true;
+    }
+
     this.isClosed = true;
     return new Promise(resolve => {
       try {
