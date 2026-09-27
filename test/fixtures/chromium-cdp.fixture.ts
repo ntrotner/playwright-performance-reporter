@@ -14,6 +14,11 @@ export class ChromiumCDPFixture {
     startTrackingHeapObjects: jest.fn().mockReturnValue(Promise.resolve({})),
     stopTrackingHeapObjects: jest.fn().mockReturnValue(Promise.resolve({}))
   }
+  public Profiler = {
+    setSamplingInterval: jest.fn().mockReturnValue(Promise.resolve({})),
+    start: jest.fn().mockReturnValue(Promise.resolve({})),
+    stop: jest.fn().mockReturnValue(Promise.resolve({profile: {nodes: [], startTime: 0, endTime: 0}})),
+  }
   public Network = {
     requestWillBeSent: jest.fn().mockReturnValue(() => {}),
     responseReceived: jest.fn().mockReturnValue(() => {}),

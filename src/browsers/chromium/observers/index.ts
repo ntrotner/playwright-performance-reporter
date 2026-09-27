@@ -2,6 +2,9 @@ import {
   AllPerformanceMetrics,
 } from './all-performance-metrics.js';
 import {
+  CpuProfilerObserver,
+} from './cpu-profiler.js';
+import {
   HeapDump,
 } from './heap-dump.js';
 import {
@@ -19,13 +22,18 @@ import {
 import {
   UsedJsHeapSize,
 } from './used-js-heap-size.js';
+import {
+  WebVitalsObserver,
+} from './web-vitals.js';
 
 export const nativeChromiumObservers = {
   allPerformanceMetrics: AllPerformanceMetrics,
+  cpuProfiler: CpuProfilerObserver,
   heapDump: HeapDump,
   heapObjectsTracking: HeapObjectsTracking,
   heapProfilerSampling: HeapProfilerSampling,
   networkActivity: NetworkActivityObserver,
   totalJsHeapSize: TotalJsHeapSize,
   usedJsHeapSize: UsedJsHeapSize,
+  webVitals: WebVitalsObserver,
 } as const;

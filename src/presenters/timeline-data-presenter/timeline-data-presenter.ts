@@ -172,6 +172,7 @@ export class TimelineDataPresenter implements PresenterWriter {
     return {
       labels,
       name: this.testIdToParentNameMap.get(caseId) ?? caseId,
+      execution: caseId,
       timestamp: testPerformance.endMeasurement,
       values,
     };
@@ -181,6 +182,27 @@ export class TimelineDataPresenter implements PresenterWriter {
    * Generate output from collected timeline data
    */
   protected generate(): string {
-    return JSON.stringify(this.timelineData, null, 2);
+    return JSON.stringify(this.toRelativeTimeline(this.timelineData), null, 2);
+  }
+
+  /**
+   * Convert absolute timestamps to offsets relative to the start of their own execution.
+   *
+   * @param timelineData Timeline data with absolute timestamps
+   * @returns Copy of timeline data with relative timestamps
+   */
+  protected toRelativeTimeline(timelineData: TimelineDataPoint[]): TimelineDataPoint[] {
+    const executionStart = new Map<string, number>();
+    for (const datapoint of timelineData) {
+      const current = executionStart.get(datapoint.execution);
+      if (current === undefined || datapoint.timestamp < current) {
+        executionStart.set(datapoint.execution, datapoint.timestamp);
+      }
+    }
+
+    return timelineData.map(d => ({
+      ...d,
+      timestamp: d.timestamp - executionStart.get(d.execution)!,
+    }));
   }
 }

@@ -1,4 +1,7 @@
 import {
+  EventEmitter,
+} from 'node:events';
+import {
   type FullConfig,
   type FullResult,
   type Reporter,
@@ -75,6 +78,10 @@ export class PerformanceReporter implements Reporter {
   ]);
 
   constructor(private readonly options: Options) {
+    if (options.maxListeners !== undefined) {
+      EventEmitter.setMaxListeners(options.maxListeners);
+    }
+
     this.metricsEngine = new MetricsEngine();
     this.presenters = options.presenters && options.presenters.length > 0
       ? options.presenters

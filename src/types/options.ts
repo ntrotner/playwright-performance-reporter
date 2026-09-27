@@ -108,6 +108,15 @@ export type PresenterWriter = {
  */
 export type Options = {
   deleteOnFailure: boolean;
+
+  /**
+   * Maximum amount of listeners on a single event emitter before Node logs a
+   * `MaxListenersExceededWarning`. Raising this silences the warning when many
+   * presenters attach `drain` listeners to file streams. `0` disables the limit
+   * entirely. Defaults to Node's 10.
+   */
+  maxListeners?: number;
+
   presenters?: PresenterWriter[];
   browsers: BrowserOptions;
 };

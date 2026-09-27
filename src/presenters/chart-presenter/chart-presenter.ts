@@ -21,8 +21,9 @@ export class ChartPresenter extends TimelineDataPresenter {
     const defaultTest = testNames[0] ?? '';
 
     // Serialize chart data for JavaScript consumption
-    const chartDataJson = JSON.stringify(this.timelineData.map(d => ({
+    const chartDataJson = JSON.stringify(this.toRelativeTimeline(this.timelineData).map(d => ({
       name: d.name,
+      execution: d.execution,
       timestamp: d.timestamp,
       labels: d.labels,
       values: d.values,
@@ -259,35 +260,47 @@ export class ChartPresenter extends TimelineDataPresenter {
       renderMetricsComparison(summary);
     }
 
-    function getChartData(testName, metricName) {
-      // Filter data points for the selected test that have the selected metric
-      const filteredData = chartData
-        .filter(point => point.name === testName && point.labels.includes(metricName))
-        .sort((a, b) => a.timestamp - b.timestamp);
+    const executionColors = [
+      {border: 'rgba(54, 162, 235, 1)', background: 'rgba(54, 162, 235, 0.6)'},
+      {border: 'rgba(255, 99, 132, 1)', background: 'rgba(255, 99, 132, 0.6)'},
+      {border: 'rgba(75, 192, 192, 1)', background: 'rgba(75, 192, 192, 0.6)'},
+      {border: 'rgba(153, 102, 255, 1)', background: 'rgba(153, 102, 255, 0.6)'},
+      {border: 'rgba(255, 159, 64, 1)', background: 'rgba(255, 159, 64, 0.6)'},
+      {border: 'rgba(201, 203, 207, 1)', background: 'rgba(201, 203, 207, 0.6)'}
+    ];
 
-      if (filteredData.length === 0) {
-        return { labels: [], datasets: [] };
+    function getChartData(testName, metricName) {
+      // One line per execution: repeats of a test must not collapse into one aggregated timeline
+      const byExecution = new Map();
+      for (const point of chartData) {
+        if (point.name !== testName || !point.labels.includes(metricName)) {
+          continue;
+        }
+
+        const metricIndex = point.labels.indexOf(metricName);
+        const points = byExecution.get(point.execution) || [];
+        points.push({x: point.timestamp, y: point.values[metricIndex]});
+        byExecution.set(point.execution, points);
       }
 
-      // Extract the metric values
-      const labels = filteredData.map(p => new Date(p.timestamp).toLocaleString());
-      const values = filteredData.map(p => {
-        const metricIndex = p.labels.indexOf(metricName);
-        return metricIndex !== -1 ? p.values[metricIndex] : null;
-      });
-
-      return {
-        labels: labels,
-        datasets: [{
-          label: metricName,
-          data: values,
-          backgroundColor: 'rgba(54, 162, 235, 0.6)',
-          borderColor: 'rgba(54, 162, 235, 1)',
+      const datasets = [];
+      let index = 0;
+      for (const points of byExecution.values()) {
+        points.sort((a, b) => a.x - b.x);
+        const color = executionColors[index % executionColors.length];
+        datasets.push({
+          label: byExecution.size > 1 ? 'Execution ' + (index + 1) : metricName,
+          data: points,
+          backgroundColor: color.background,
+          borderColor: color.border,
           borderWidth: 2,
           tension: 0.3,
           fill: false
-        }]
-      };
+        });
+        index++;
+      }
+
+      return {datasets: datasets};
     }
 
     function createChart(testName, metricName) {
@@ -305,7 +318,7 @@ export class ChartPresenter extends TimelineDataPresenter {
           responsive: true,
           maintainAspectRatio: false,
           interaction: {
-            mode: 'index',
+            mode: 'nearest',
             intersect: false
           },
           plugins: {
@@ -319,10 +332,16 @@ export class ChartPresenter extends TimelineDataPresenter {
           },
           scales: {
             x: {
+              type: 'linear',
               display: true,
               title: {
                 display: true,
-                text: 'Timestamp'
+                text: 'Time since the start of the execution'
+              },
+              ticks: {
+                callback: function(value) {
+                  return value + ' ms';
+                }
               }
             },
             y: {
@@ -514,7 +533,7 @@ export class ChartPresenter extends TimelineDataPresenter {
       metricCards.push(`
         <div class="metric-card">
           <h3>${this.escapeHtml(metric)}</h3>
-          <div class="metric-value">${formattedAvg}<</div>
+          <div class="metric-value">${formattedAvg}</div>
           <div class="metric-label">Average</div>
           <div class="metric-stats">
             <div class="metric-min">Min: ${formattedMin}</div>
