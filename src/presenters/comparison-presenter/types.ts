@@ -25,7 +25,7 @@ export type ComparisonPresenterOptions = {
   /**
    * Json report. Defaults to `performance-comparison.json`.
    */
-  JsonReportOutputFile?: string;
+  jsonReportOutputFile?: string;
 
   /**
    * Metric names a run has to contain to be part of the comparison.

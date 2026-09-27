@@ -127,3 +127,8 @@ performance-report*.json
 
 # History of the comparison presenter in the example
 example/performance-history/
+
+# Generated presenter output in the example
+example/example-*.json
+example/example-*.html
+example/performance-comparison.html
