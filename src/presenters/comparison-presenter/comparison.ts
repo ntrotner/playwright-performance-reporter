@@ -1,12 +1,11 @@
 import {
   entityDurationMetric,
-  madScaleFactor,
   metricUnit,
 } from './constants.js';
 import {
   type ComparisonEntity,
+  type ComparisonReport,
   type ComparisonStatus,
-  type EntitySummary,
   type MetricComparison,
   type MetricKind,
   type RunSummary,
@@ -17,12 +16,22 @@ import {
 /**
  * Thresholds to decide if a change is significant
  */
-export type ComparisonSettings = {
-  minBaselineRuns: number;
-  relativeThreshold: number;
-  zScoreThreshold: number;
-  comparedMetrics?: string[];
-};
+export type ComparisonSettings = Pick<ComparisonReport['settings'], 'minBaselineRuns' | 'relativeThreshold' | 'zScoreThreshold' | 'comparedMetrics'>;
+
+/**
+ * Value below which a given fraction of the values falls, interpolated between the closest values
+ *
+ * @param values list of numbers
+ * @param fraction between 0 and 1
+ */
+export function percentile(values: number[], fraction: number): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  const index = (sorted.length - 1) * fraction;
+  const lower = Math.floor(index);
+  const upper = Math.ceil(index);
+  const weight = index - lower;
+  return (sorted[lower] * (1 - weight)) + (sorted[upper] * weight);
+}
 
 /**
  * Median of a list
@@ -30,9 +39,7 @@ export type ComparisonSettings = {
  * @param values list of numbers
  */
 export function median(values: number[]): number {
-  const sorted = [...values].sort((a, b) => a - b);
-  const middle = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+  return percentile(values, 0.5);
 }
 
 /**
@@ -42,17 +49,7 @@ export function median(values: number[]): number {
  */
 export function scaledMedianAbsoluteDeviation(values: number[]): number {
   const center = median(values);
-  return madScaleFactor * median(values.map(value => Math.abs(value - center)));
-}
-
-/**
- * Value of a metric of an entity in a run
- *
- * @param entity entity summary of a run
- * @param metric metric name
- */
-function valueOf(entity: EntitySummary | undefined, metric: string): number | undefined {
-  return entity?.metrics[metric]?.value;
+  return 1.4826 * median(values.map(value => Math.abs(value - center)));
 }
 
 /**
@@ -79,37 +76,29 @@ type ComparisonContext = {
 };
 
 /**
- * Inputs to decide the verdict of a change
+ * Decide the verdict of a change.
+ * Once enough baseline runs exist, a change within the noise of the baseline is never reported.
+ *
+ * @param change difference between current value and baseline
+ * @param settings thresholds
  */
-type VerdictInput = {
-  absoluteChange: number;
-  baselineCount: number;
-  spread: number;
-  relativeChange: number | undefined;
-  minBaselineRuns: number;
-  relativeThreshold: number;
-  zScore: number | undefined;
-  zScoreThreshold: number;
-};
-
-/**
- * Decide the verdict of a change from the computed statistics
- */
-function decideStatus(input: VerdictInput): ComparisonStatus {
-  const {absoluteChange, baselineCount, spread, relativeChange, minBaselineRuns, relativeThreshold, zScore, zScoreThreshold} = input;
-  if (absoluteChange === 0) {
+function decideStatus(
+  change: {absoluteChange: number; relativeChange: number | undefined; zScore: number | undefined; baselineRuns: number},
+  settings: ComparisonSettings,
+): ComparisonStatus {
+  if (change.absoluteChange === 0) {
     return 'unchanged';
   }
 
-  const withinNoiseBand = baselineCount >= minBaselineRuns && spread > 0 && Math.abs(absoluteChange) < 3 * spread;
-  const belowRelativeThreshold = relativeChange !== undefined && Math.abs(relativeChange) < relativeThreshold;
-  if (withinNoiseBand && belowRelativeThreshold) {
+  if (change.baselineRuns >= settings.minBaselineRuns && change.zScore !== undefined && Math.abs(change.zScore) < settings.zScoreThreshold) {
     return 'noisy';
   }
 
-  const exceedsRelative = relativeChange === undefined ? true : Math.abs(relativeChange) >= relativeThreshold;
-  const exceedsNoise = baselineCount < minBaselineRuns || zScore === undefined || Math.abs(zScore) >= zScoreThreshold;
-  return exceedsRelative && exceedsNoise ? (absoluteChange > 0 ? 'increased' : 'decreased') : 'unchanged';
+  if (change.relativeChange !== undefined && Math.abs(change.relativeChange) < settings.relativeThreshold) {
+    return 'unchanged';
+  }
+
+  return change.absoluteChange > 0 ? 'increased' : 'decreased';
 }
 
 /**
@@ -121,40 +110,30 @@ function compareMetric(
   kind: MetricKind,
   {recent, baseline, settings}: ComparisonContext,
 ): MetricComparison {
-  const entityKey = entity.key;
-  const recentValues = recent
-    .map(run => valueOf(run.entities[entityKey], metric))
-    .filter(value => value !== undefined);
-  const recentRates = recent
-    .map(run => run.entities[entityKey]?.metrics[metric]?.rate)
-    .filter(value => value !== undefined);
-  const currentValue = recentValues.length > 0 ? median(recentValues) : undefined;
-  const baselineEntities = baseline.map(run => run.entities[entityKey]);
-  const baselineValues = baselineEntities
-    .map(entity => valueOf(entity, metric))
-    .filter(value => value !== undefined);
-  const baselineRates = baselineEntities
-    .map(entity => entity?.metrics[metric]?.rate)
-    .filter(value => value !== undefined);
+  const valueOf = (run: RunSummary, field: 'value' | 'rate') => run.entities[entity.key]?.metrics[metric]?.[field];
+  const valuesOf = (runs: RunSummary[], field: 'value' | 'rate') => runs.map(run => valueOf(run, field)).filter(value => value !== undefined);
+  const medianOf = (values: number[]) => values.length > 0 ? median(values) : undefined;
+  const recentValues = valuesOf(recent, 'value');
+  const baselineValues = valuesOf(baseline, 'value');
+  const current = medianOf(recentValues);
 
-  const series = [...baseline, ...recent].map(run => ({runId: run.id, value: valueOf(run.entities[entityKey], metric)}));
   const comparison: MetricComparison = {
-    entityKey,
+    entityKey: entity.key,
     entityName: describeEntity(entity),
     metric,
     kind,
     unit: metricUnit(metric),
     status: 'unchanged',
-    current: currentValue,
-    currentRate: recentRates.length > 0 ? median(recentRates) : undefined,
+    current,
+    currentRate: medianOf(valuesOf(recent, 'rate')),
     recentRuns: recentValues.length,
     baselineRuns: baselineValues.length,
-    series,
+    series: [...baseline, ...recent].map(run => ({runId: run.id, value: valueOf(run, 'value')})),
   };
 
-  if (currentValue === undefined) {
+  if (current === undefined) {
     comparison.status = 'missing';
-    comparison.baselineMedian = baselineValues.length > 0 ? median(baselineValues) : undefined;
+    comparison.baselineMedian = medianOf(baselineValues);
     return comparison;
   }
 
@@ -165,7 +144,7 @@ function compareMetric(
 
   const baselineMedian = median(baselineValues);
   const spread = scaledMedianAbsoluteDeviation(baselineValues);
-  const absoluteChange = currentValue - baselineMedian;
+  const absoluteChange = current - baselineMedian;
   const relativeChange = baselineMedian === 0 ? undefined : absoluteChange / Math.abs(baselineMedian);
   const zScore = spread > 0 ? absoluteChange / spread : undefined;
 
@@ -175,17 +154,10 @@ function compareMetric(
     absoluteChange,
     relativeChange,
     zScore,
-    baselineRateMedian: baselineRates.length > 0 ? median(baselineRates) : undefined,
+    baselineRateMedian: medianOf(valuesOf(baseline, 'rate')),
     status: decideStatus({
-      absoluteChange,
-      baselineCount: baselineValues.length,
-      spread,
-      relativeChange,
-      minBaselineRuns: settings.minBaselineRuns,
-      relativeThreshold: settings.relativeThreshold,
-      zScore,
-      zScoreThreshold: settings.zScoreThreshold,
-    }),
+      absoluteChange, relativeChange, zScore, baselineRuns: baselineValues.length,
+    }, settings),
   });
 
   return comparison;
@@ -256,12 +228,9 @@ export function compareRuns(recent: RunSummary[], baseline: RunSummary[], settin
     }
 
     for (const [metric, kind] of metrics) {
-      const excluded = settings.comparedMetrics && settings.comparedMetrics.length > 0 && !settings.comparedMetrics.includes(metric);
-      if (metric !== entityDurationMetric && excluded) {
-        continue;
+      if (metric === entityDurationMetric || !settings.comparedMetrics || settings.comparedMetrics.includes(metric)) {
+        comparisons.push(compareMetric(entity, metric, kind, context));
       }
-
-      comparisons.push(compareMetric(entity, metric, kind, context));
     }
   }
 
@@ -289,13 +258,14 @@ function selectChanges(comparisons: MetricComparison[]): MetricComparison[] {
  * @param comparisons comparisons of the test or step
  */
 function stepStatusOf(comparisons: MetricComparison[]): StepStatus {
-  const statuses = new Set(comparisons.map(comparison => comparison.status));
-  if (comparisons.some(comparison => comparison.metric === entityDurationMetric && (comparison.status === 'missing' || comparison.status === 'new'))) {
-    return comparisons.find(comparison => comparison.metric === entityDurationMetric)!.status as StepStatus;
+  const duration = comparisons.find(comparison => comparison.metric === entityDurationMetric);
+  if (duration?.status === 'missing' || duration?.status === 'new') {
+    return duration.status;
   }
 
-  const notable = [...statuses].filter(s => s !== 'unchanged');
-  if (notable.length > 0 && notable.every(s => s === 'noisy')) {
+  const statuses = new Set(comparisons.map(comparison => comparison.status));
+  statuses.delete('unchanged');
+  if (statuses.size === 1 && statuses.has('noisy')) {
     return 'noisy';
   }
 
@@ -319,7 +289,9 @@ function stepStatusOf(comparisons: MetricComparison[]): StepStatus {
 export function buildStepComparisons(entities: ComparisonEntity[], comparisons: MetricComparison[]): StepComparison[] {
   const byEntity = new Map<string, MetricComparison[]>();
   for (const comparison of comparisons) {
-    byEntity.set(comparison.entityKey, [...(byEntity.get(comparison.entityKey) ?? []), comparison]);
+    const entityComparisons = byEntity.get(comparison.entityKey) ?? [];
+    entityComparisons.push(comparison);
+    byEntity.set(comparison.entityKey, entityComparisons);
   }
 
   return entities.map(entity => {

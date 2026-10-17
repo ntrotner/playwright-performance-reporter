@@ -4,7 +4,6 @@ import {
   testCaseParent,
   type ResultAccumulator,
   type TargetMetric,
-  type TestPerformance,
 } from '../../types/index.js';
 import {
   classifyMetric,
@@ -12,12 +11,14 @@ import {
   ignoredMetrics,
 } from './constants.js';
 import {
+  percentile,
+} from './comparison.js';
+import {
   type EntitySummary,
   type ExcludedRun,
   type MetricKind,
   type MetricSummary,
   type RunSummary,
-  type WebVitalsAttribution,
 } from './types.js';
 
 /**
@@ -217,33 +218,34 @@ function computeTimeWeightedMean(points: Point[]): number {
 }
 
 /**
- * Median of a list of numbers
+ * Percentile of weighted values, e.g. weighted by the time they were observed for
  *
  * @param values list of numbers
- */
-function median(values: number[]): number {
-  return percentile(values, 0.5);
-}
-
-/**
- * Value below which a given fraction of the observations falls
- *
- * @param values list of numbers
+ * @param weights weight of each value
  * @param fraction between 0 and 1
  */
-function percentile(values: number[], fraction: number): number {
-  const sorted = [...values].sort((a, b) => a - b);
-  const index = (sorted.length - 1) * fraction;
-  const lower = Math.floor(index);
-  const upper = Math.ceil(index);
-  const weight = index - lower;
-  return (sorted[lower] * (1 - weight)) + (sorted[upper] * weight);
+function weightedPercentile(values: number[], weights: number[], fraction: number): number {
+  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+  if (totalWeight <= 0) {
+    return percentile(values, fraction);
+  }
+
+  const order = [...values.keys()].sort((a, b) => values[a] - values[b]);
+  let cumulativeWeight = 0;
+  for (const index of order) {
+    cumulativeWeight += weights[index];
+    if (cumulativeWeight >= fraction * totalWeight) {
+      return values[index];
+    }
+  }
+
+  return values[order.at(-1)!];
 }
 
 /**
  * Condense a metric within the time window of a test or step.
- * The boundaries are estimated from the surrounding observations, so the result doesn't depend on
- * how many samples were taken within the window.
+ * The boundaries are estimated from the surrounding observations and gauges are weighted by time,
+ * so the result doesn't depend on how many samples were taken within the window.
  *
  * @param metricName name of the metric
  * @param pointsPerTarget observations of the metric for each target
@@ -254,8 +256,9 @@ function summarizeMetric(metricName: string, pointsPerTarget: Point[][], metricW
   const {start, end} = metricWindow;
   const kind = classifyMetric(metricName);
   const values: number[] = [];
+  const weights: number[] = [];
   let value = 0;
-  let hasValue = false;
+  let observations = 0;
 
   for (const points of pointsPerTarget) {
     const inside = points.filter(point => point.time >= start && point.time <= end);
@@ -269,24 +272,39 @@ function summarizeMetric(metricName: string, pointsPerTarget: Point[][], metricW
       ...inside,
       {time: end, value: valueAt(points, end, kind)},
     ];
-    value += kind === 'cumulative' ? computeGrowth(window.map(point => point.value)) : computeTimeWeightedMean(window);
-    values.push(...(inside.length > 0 ? inside : window).map(point => point.value));
-    hasValue = true;
+    observations += inside.length > 0 ? inside.length : window.length;
+    if (kind === 'cumulative') {
+      value += computeGrowth(window.map(point => point.value));
+      continue;
+    }
+
+    value += computeTimeWeightedMean(window);
+    for (const [index, point] of window.entries()) {
+      values.push(point.value);
+      weights.push((window[Math.min(index + 1, window.length - 1)].time - window[Math.max(index - 1, 0)].time) / 2);
+    }
   }
 
-  if (!hasValue) {
+  if (observations === 0) {
     return undefined;
   }
 
   const duration = end - start;
+  // The growth of a counter has no spread within the entity
+  const band = kind === 'cumulative'
+    ? {lower: value, median: value, upper: value}
+    : {
+      lower: weightedPercentile(values, weights, bandPercentile),
+      median: weightedPercentile(values, weights, 0.5),
+      upper: weightedPercentile(values, weights, 1 - bandPercentile),
+    };
+
   return {
     kind,
     value,
     rate: kind === 'cumulative' && duration > 0 ? value / (duration / 1000) : undefined,
-    lower: percentile(values, bandPercentile),
-    upper: percentile(values, 1 - bandPercentile),
-    median: median(values),
-    observations: values.length,
+    ...band,
+    observations,
   };
 }
 
@@ -295,9 +313,8 @@ function summarizeMetric(metricName: string, pointsPerTarget: Point[][], metricW
  * They only come from the own observations, as neighboring steps measure their own totals.
  *
  * @param observations observations of an entity
- * @param bandPercentile percentile of the lower band
  */
-function summarizeTotals(observations: Observation[], bandPercentile: number): Record<string, MetricSummary> {
+function summarizeTotals(observations: Observation[]): Record<string, MetricSummary> {
   // Latest value per target, summed across targets
   const latest = new Map<string, Map<string, Point>>();
   for (const observation of observations) {
@@ -317,14 +334,9 @@ function summarizeTotals(observations: Observation[], bandPercentile: number): R
 
   const totals: Record<string, MetricSummary> = {};
   for (const [metricName, perTarget] of latest) {
-    const values = [...perTarget.values()].map(point => point.value);
+    const value = [...perTarget.values()].reduce((sum, point) => sum + point.value, 0);
     totals[metricName] = {
-      kind: 'total',
-      value: values.reduce((sum, value) => sum + value, 0),
-      lower: percentile(values, bandPercentile),
-      upper: percentile(values, 1 - bandPercentile),
-      median: median(values),
-      observations: values.length,
+      kind: 'total', value, lower: value, upper: value, median: value, observations: perTarget.size,
     };
   }
 
@@ -344,28 +356,12 @@ function timeWindowOf(raw: RawEntity): {start: number; end: number} {
 }
 
 /**
- * Latest Web Vitals attribution observed for an entity, if any
- *
- * @param observations observations of an entity
- */
-function extractAttribution(observations: Observation[]): WebVitalsAttribution | undefined {
-  for (const observation of [...observations].reverse()) {
-    const {attribution} = observation.metric;
-    if (attribution && typeof attribution === 'object') {
-      return attribution as WebVitalsAttribution;
-    }
-  }
-
-  return undefined;
-}
-
-/**
  * Condense the chunks of a run into comparable entities
  *
  * @param chunks json chunks of a run
  * @param bandPercentile percentile of the lower band
  */
-export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile = 0.05): Record<string, EntitySummary> {
+export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile: number): Record<string, EntitySummary> {
   const rawEntities = mergeChunks(chunks);
   const metricTimelines = new Map<string, Point[][]>();
   for (const metrics of buildTimelines(rawEntities).values()) {
@@ -407,10 +403,10 @@ export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile = 
       }
     }
 
-    Object.assign(metrics, summarizeTotals(raw.observations, bandPercentile));
+    Object.assign(metrics, summarizeTotals(raw.observations));
 
     const key = isTest ? raw.caseId : `${raw.caseId}|${raw.name}|${occurrence}`;
-    const summary: EntitySummary = {
+    entities[key] = {
       key,
       kind: isTest ? 'test' : 'step',
       testId: raw.caseId,
@@ -421,12 +417,6 @@ export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile = 
       duration,
       metrics,
     };
-    const attribution = extractAttribution(raw.observations);
-    if (attribution) {
-      summary.attribution = attribution;
-    }
-
-    entities[key] = summary;
   }
 
   return entities;
@@ -439,7 +429,7 @@ export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile = 
  * @param requiredMetrics metrics that have to be present
  * @param bandPercentile percentile of the lower band
  */
-export async function loadRun(filePath: string, requiredMetrics: string[], bandPercentile = 0.05): Promise<LoadedRun> {
+export async function loadRun(filePath: string, requiredMetrics: string[], bandPercentile: number): Promise<LoadedRun> {
   const file = path.basename(filePath);
   let chunks: unknown;
   try {
@@ -482,12 +472,13 @@ export async function loadRun(filePath: string, requiredMetrics: string[], bandP
  *
  * @param historyDir directory with json chunks
  * @param requiredMetrics metrics that have to be present
- * @param ignoredFiles files that are not part of the history
+ * @param ignoredPaths files that are not part of the history
  * @param bandPercentile percentile of the lower band
  */
-export async function loadHistory(historyDir: string, requiredMetrics: string[], ignoredFiles: string[], bandPercentile = 0.05): Promise<{runs: RunSummary[]; excluded: ExcludedRun[]}> {
+export async function loadHistory(historyDir: string, requiredMetrics: string[], ignoredPaths: string[], bandPercentile: number): Promise<{runs: RunSummary[]; excluded: ExcludedRun[]}> {
   const runs: RunSummary[] = [];
   const excluded: ExcludedRun[] = [];
+  const ignored = new Set(ignoredPaths.map(filePath => path.resolve(filePath)));
 
   let files: string[];
   try {
@@ -497,7 +488,7 @@ export async function loadHistory(historyDir: string, requiredMetrics: string[],
   }
 
   for (const file of files.sort()) {
-    if (!file.endsWith('.json') || ignoredFiles.includes(file)) {
+    if (!file.endsWith('.json') || ignored.has(path.resolve(historyDir, file))) {
       continue;
     }
 

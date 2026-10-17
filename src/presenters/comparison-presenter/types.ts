@@ -52,7 +52,7 @@ export type ComparisonPresenterOptions = {
   recentRuns?: number;
 
   /**
-   * Amount of runs before the recent runs used as baseline. Defaults to 10.
+   * Amount of runs before the recent runs used as baseline. Defaults to 20.
    */
   baselineWindow?: number;
 
@@ -114,17 +114,17 @@ export type MetricSummary = {
   rate?: number;
 
   /**
-   * 5th percentile of the observations within the entity
+   * Lower percentile (`bandPercentile`) of a gauge within the entity, weighted by time. Otherwise the value.
    */
   lower: number;
 
   /**
-   * 95th percentile of the observations within the entity
+   * Upper percentile (1 - `bandPercentile`) of a gauge within the entity, weighted by time. Otherwise the value.
    */
   upper: number;
 
   /**
-   * Median of the observations within the entity, always between `lower` and `upper`
+   * Median of a gauge within the entity, weighted by time. Otherwise the value.
    */
   median: number;
 
@@ -159,26 +159,6 @@ export type ComparisonEntity = {
 };
 
 /**
- * Attribution of a single Web Vital, explaining what caused the value
- */
-export type WebVitalsAttribution = {
-  /**
-   * Element that triggered the largest contentful paint
-   */
-  lcp?: {elementTag?: string; url?: string};
-
-  /**
-   * Source of the largest layout shift
-   */
-  cls?: {source?: string};
-
-  /**
-   * Interaction type of the slowest interaction to next paint
-   */
-  inp?: {interactionType?: string};
-};
-
-/**
  * Condensed metrics of an entity in a single run
  */
 export type EntitySummary = ComparisonEntity & {
@@ -187,11 +167,6 @@ export type EntitySummary = ComparisonEntity & {
    */
   duration: number;
   metrics: Record<string, MetricSummary>;
-
-  /**
-   * Non-numeric attribution of the Web Vitals, when captured for this entity
-   */
-  attribution?: WebVitalsAttribution;
 };
 
 /**
@@ -213,6 +188,9 @@ export type ExcludedRun = {
   missingMetrics?: string[];
 };
 
+/**
+ * Verdict of a metric, where `noisy` is a change within the noise of the baseline
+ */
 export type ComparisonStatus = 'increased' | 'decreased' | 'unchanged' | 'noisy' | 'new' | 'missing';
 
 /**
