@@ -20,6 +20,9 @@ import {
   NetworkActivityObserver,
 } from './network-activity.js';
 import {
+  ResourceTimingObserver,
+} from './resource-timing.js';
+import {
   TotalJsHeapSize,
 } from './total-js-heap-size.js';
 import {
@@ -37,6 +40,7 @@ export const nativeChromiumObservers = {
   heapProfilerSampling: HeapProfilerSampling,
   navigationTiming: NavigationTimingObserver,
   networkActivity: NetworkActivityObserver,
+  resourceTiming: ResourceTimingObserver,
   totalJsHeapSize: TotalJsHeapSize,
   usedJsHeapSize: UsedJsHeapSize,
   webVitals: WebVitalsObserver,

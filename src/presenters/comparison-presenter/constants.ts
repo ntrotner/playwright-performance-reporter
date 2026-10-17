@@ -73,6 +73,19 @@ export function classifyMetric(metricName: string): MetricKind {
 }
 
 /**
+ * Durations of observers in milliseconds, while other durations of the Performance domain are in seconds
+ */
+const millisecondMetrics = new Set([
+  'totalDnsTime',
+  'totalTcpTime',
+  'totalTlsTime',
+  'totalRequestTime',
+  'totalResponseTime',
+  'totalRedirectTime',
+  'totalBlockedTime',
+]);
+
+/**
  * Decide on the unit of a metric
  *
  * @param metricName name of the metric
@@ -86,7 +99,7 @@ export function metricUnit(metricName: string): MetricUnit {
     return 'bytes';
   }
 
-  if (webVitalsMetrics.has(metricName) || navigationTimingMetrics.has(metricName)) {
+  if (webVitalsMetrics.has(metricName) || navigationTimingMetrics.has(metricName) || millisecondMetrics.has(metricName)) {
     return 'ms';
   }
 

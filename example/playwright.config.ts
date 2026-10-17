@@ -29,7 +29,8 @@ const PlaywrightPerformanceReporterOptions: Options = {
         metrics: [
           new nativeChromiumObservers.allPerformanceMetrics(),
           new nativeChromiumObservers.webVitals(),
-          new nativeChromiumObservers.navigationTiming()
+          new nativeChromiumObservers.navigationTiming(),
+          new nativeChromiumObservers.resourceTiming()
         ],
       },
       onTestStep: {
@@ -37,7 +38,8 @@ const PlaywrightPerformanceReporterOptions: Options = {
           new nativeChromiumObservers.allPerformanceMetrics(),
           new nativeChromiumObservers.cpuProfiler({triggerGarbageCollectionOnObserve: false}),
           new nativeChromiumObservers.webVitals(),
-          new nativeChromiumObservers.navigationTiming()
+          new nativeChromiumObservers.navigationTiming(),
+          new nativeChromiumObservers.resourceTiming()
         ],
       },
       sampling: {
