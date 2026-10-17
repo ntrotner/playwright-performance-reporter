@@ -52,7 +52,7 @@ export type ComparisonPresenterOptions = {
   recentRuns?: number;
 
   /**
-   * Amount of runs before the recent runs used as baseline. Defaults to 10.
+   * Amount of runs before the recent runs used as baseline. Defaults to 20.
    */
   baselineWindow?: number;
 
@@ -114,12 +114,12 @@ export type MetricSummary = {
   rate?: number;
 
   /**
-   * 5th percentile of the observations within the entity
+   * Lower percentile (`bandPercentile`) of the observations within the entity
    */
   lower: number;
 
   /**
-   * 95th percentile of the observations within the entity
+   * Upper percentile (1 - `bandPercentile`) of the observations within the entity
    */
   upper: number;
 
@@ -213,6 +213,9 @@ export type ExcludedRun = {
   missingMetrics?: string[];
 };
 
+/**
+ * Verdict of a metric, where `noisy` is a change within the noise of the baseline
+ */
 export type ComparisonStatus = 'increased' | 'decreased' | 'unchanged' | 'noisy' | 'new' | 'missing';
 
 /**

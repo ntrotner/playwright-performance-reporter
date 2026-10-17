@@ -482,12 +482,13 @@ export async function loadRun(filePath: string, requiredMetrics: string[], bandP
  *
  * @param historyDir directory with json chunks
  * @param requiredMetrics metrics that have to be present
- * @param ignoredFiles files that are not part of the history
+ * @param ignoredPaths files that are not part of the history
  * @param bandPercentile percentile of the lower band
  */
-export async function loadHistory(historyDir: string, requiredMetrics: string[], ignoredFiles: string[], bandPercentile = 0.05): Promise<{runs: RunSummary[]; excluded: ExcludedRun[]}> {
+export async function loadHistory(historyDir: string, requiredMetrics: string[], ignoredPaths: string[], bandPercentile = 0.05): Promise<{runs: RunSummary[]; excluded: ExcludedRun[]}> {
   const runs: RunSummary[] = [];
   const excluded: ExcludedRun[] = [];
+  const ignored = new Set(ignoredPaths.map(filePath => path.resolve(filePath)));
 
   let files: string[];
   try {
@@ -497,7 +498,7 @@ export async function loadHistory(historyDir: string, requiredMetrics: string[],
   }
 
   for (const file of files.sort()) {
-    if (!file.endsWith('.json') || ignoredFiles.includes(file)) {
+    if (!file.endsWith('.json') || ignored.has(path.resolve(historyDir, file))) {
       continue;
     }
 

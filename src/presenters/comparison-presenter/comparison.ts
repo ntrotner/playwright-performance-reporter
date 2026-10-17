@@ -79,37 +79,29 @@ type ComparisonContext = {
 };
 
 /**
- * Inputs to decide the verdict of a change
+ * Decide the verdict of a change.
+ * Once enough baseline runs exist, a change within the noise of the baseline is never reported.
+ *
+ * @param change difference between current value and baseline
+ * @param settings thresholds
  */
-type VerdictInput = {
-  absoluteChange: number;
-  baselineCount: number;
-  spread: number;
-  relativeChange: number | undefined;
-  minBaselineRuns: number;
-  relativeThreshold: number;
-  zScore: number | undefined;
-  zScoreThreshold: number;
-};
-
-/**
- * Decide the verdict of a change from the computed statistics
- */
-function decideStatus(input: VerdictInput): ComparisonStatus {
-  const {absoluteChange, baselineCount, spread, relativeChange, minBaselineRuns, relativeThreshold, zScore, zScoreThreshold} = input;
-  if (absoluteChange === 0) {
+function decideStatus(
+  change: {absoluteChange: number; relativeChange: number | undefined; zScore: number | undefined; baselineRuns: number},
+  settings: ComparisonSettings,
+): ComparisonStatus {
+  if (change.absoluteChange === 0) {
     return 'unchanged';
   }
 
-  const withinNoiseBand = baselineCount >= minBaselineRuns && spread > 0 && Math.abs(absoluteChange) < 3 * spread;
-  const belowRelativeThreshold = relativeChange !== undefined && Math.abs(relativeChange) < relativeThreshold;
-  if (withinNoiseBand && belowRelativeThreshold) {
+  if (change.baselineRuns >= settings.minBaselineRuns && change.zScore !== undefined && Math.abs(change.zScore) < settings.zScoreThreshold) {
     return 'noisy';
   }
 
-  const exceedsRelative = relativeChange === undefined ? true : Math.abs(relativeChange) >= relativeThreshold;
-  const exceedsNoise = baselineCount < minBaselineRuns || zScore === undefined || Math.abs(zScore) >= zScoreThreshold;
-  return exceedsRelative && exceedsNoise ? (absoluteChange > 0 ? 'increased' : 'decreased') : 'unchanged';
+  if (change.relativeChange !== undefined && Math.abs(change.relativeChange) < settings.relativeThreshold) {
+    return 'unchanged';
+  }
+
+  return change.absoluteChange > 0 ? 'increased' : 'decreased';
 }
 
 /**
@@ -177,15 +169,8 @@ function compareMetric(
     zScore,
     baselineRateMedian: baselineRates.length > 0 ? median(baselineRates) : undefined,
     status: decideStatus({
-      absoluteChange,
-      baselineCount: baselineValues.length,
-      spread,
-      relativeChange,
-      minBaselineRuns: settings.minBaselineRuns,
-      relativeThreshold: settings.relativeThreshold,
-      zScore,
-      zScoreThreshold: settings.zScoreThreshold,
-    }),
+      absoluteChange, relativeChange, zScore, baselineRuns: baselineValues.length,
+    }, settings),
   });
 
   return comparison;

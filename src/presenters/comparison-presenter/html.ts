@@ -190,27 +190,28 @@ const thresholdBandsPlugin = {
     const metricName = document.getElementById('metricSelect').value;
     const threshold = data.thresholds[metricName];
     if (!threshold) { return; }
+    const {left, right, top, bottom} = chartInstance.chartArea;
     const yAxis = chartInstance.scales.y;
-    const xAxis = chartInstance.scales.x;
     const ctx = chartInstance.ctx;
-    const goodY = yAxis.getPixelForValue(threshold.good);
-    const poorY = yAxis.getPixelForValue(threshold.poor);
-    const top = yAxis.getPixelForValue(yAxis.max);
-    const bottom = yAxis.getPixelForValue(yAxis.min);
+    const clamp = function (value) { return Math.min(Math.max(yAxis.getPixelForValue(value), top), bottom); };
+    const goodY = clamp(threshold.good);
+    const poorY = clamp(threshold.poor);
+    const drawLine = function (y, color) {
+      if (y <= top || y >= bottom) { return; }
+      ctx.strokeStyle = color;
+      ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke();
+    };
     ctx.save();
     ctx.fillStyle = 'rgba(22,163,74,0.08)';
-    ctx.fillRect(xAxis.left, goodY, xAxis.right - xAxis.left, bottom - goodY);
+    ctx.fillRect(left, goodY, right - left, bottom - goodY);
     ctx.fillStyle = 'rgba(217,119,6,0.08)';
-    ctx.fillRect(xAxis.left, poorY, xAxis.right - xAxis.left, goodY - poorY);
+    ctx.fillRect(left, poorY, right - left, goodY - poorY);
     ctx.fillStyle = 'rgba(220,38,38,0.08)';
-    ctx.fillRect(xAxis.left, top, xAxis.right - xAxis.left, poorY - top);
-    ctx.strokeStyle = 'rgba(22,163,74,0.5)';
+    ctx.fillRect(left, top, right - left, poorY - top);
     ctx.lineWidth = 1;
     ctx.setLineDash([4, 4]);
-    ctx.beginPath(); ctx.moveTo(xAxis.left, goodY); ctx.lineTo(xAxis.right, goodY); ctx.stroke();
-    ctx.strokeStyle = 'rgba(220,38,38,0.5)';
-    ctx.beginPath(); ctx.moveTo(xAxis.left, poorY); ctx.lineTo(xAxis.right, poorY); ctx.stroke();
-    ctx.setLineDash([]);
+    drawLine(goodY, 'rgba(22,163,74,0.5)');
+    drawLine(poorY, 'rgba(220,38,38,0.5)');
     ctx.restore();
   },
 };

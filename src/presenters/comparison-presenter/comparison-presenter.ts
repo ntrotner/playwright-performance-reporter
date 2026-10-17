@@ -152,6 +152,11 @@ export class ComparisonPresenter implements PresenterWriter {
    * Remove current run from the history and the generated reports
    */
   async delete(): Promise<boolean> {
+    if (!this.jsonChunkPresenter) {
+      // Reports in the output directory belong to a previous run
+      return true;
+    }
+
     await this.close();
 
     for (const filePath of [path.join(this.options.historyDir, this.getRunPath()), this.getVisualReportPath(), this.getJsonReportPath()]) {
@@ -165,7 +170,8 @@ export class ComparisonPresenter implements PresenterWriter {
    * Read the history and create the json chunk file of the current run
    */
   private initialize(): JsonChunkPresenter {
-    this.history ??= loadHistory(this.options.historyDir, this.settings.requiredMetrics, [this.getRunPath(), this.getVisualReportPath(), this.getJsonReportPath()], this.settings.bandPercentile);
+    const ignoredPaths = [path.join(this.options.historyDir, this.getRunPath()), this.getVisualReportPath(), this.getJsonReportPath()];
+    this.history ??= loadHistory(this.options.historyDir, this.settings.requiredMetrics, ignoredPaths, this.settings.bandPercentile);
     this.jsonChunkPresenter ??= new JsonChunkPresenter({outputDir: this.options.historyDir, outputFile: this.getRunPath()});
     return this.jsonChunkPresenter;
   }

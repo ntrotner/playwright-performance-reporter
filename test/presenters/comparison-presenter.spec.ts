@@ -4,7 +4,8 @@ import path from 'node:path';
 import {nativePresenters} from '../../src/presenters';
 import {type ComparisonReport} from '../../src/presenters';
 import {loadHistory, summarizeEntities} from '../../src/presenters/comparison-presenter/history';
-import {median, scaledMedianAbsoluteDeviation, splitRuns} from '../../src/presenters/comparison-presenter/comparison';
+import {compareRuns, median, scaledMedianAbsoluteDeviation, splitRuns} from '../../src/presenters/comparison-presenter/comparison';
+import {type RunSummary} from '../../src/presenters/comparison-presenter/types';
 import {type ResultAccumulator, type TargetMetric} from '../../src';
 
 type RunInput = {
@@ -116,6 +117,54 @@ describe('Comparison presenter', () => {
     });
   });
 
+  describe('compareRuns', () => {
+    const run = (id: string, value: number): RunSummary => ({
+      id,
+      file: `${id}.json`,
+      startedAt: 0,
+      entities: {
+        case: {
+          key: 'case',
+          kind: 'test',
+          testId: 'case',
+          testName: 'test',
+          order: 0,
+          duration: 1,
+          metrics: {TaskDuration: {kind: 'cumulative', value, lower: value, upper: value, median: value, observations: 1}},
+        },
+      },
+    });
+    const compare = (baseline: number[], current: number) => compareRuns(
+      [run('current', current)],
+      baseline.map((value, index) => run(`run-${index}`, value)),
+      {minBaselineRuns: 3, relativeThreshold: 0.1, zScoreThreshold: 2},
+    ).find(comparison => comparison.metric === 'TaskDuration')!;
+
+    it('should report changes above the relative threshold and outside the noise', () => {
+      expect(compare([1, 1.01, 0.99], 2)).toEqual(expect.objectContaining({status: 'increased', baselineMedian: 1, absoluteChange: 1, relativeChange: 1}));
+      expect(compare([1, 1.01, 0.99], 0.5).status).toBe('decreased');
+      expect(compare([1, 1.01, 0.99], 1).status).toBe('unchanged');
+    });
+
+    it('should ignore changes below the relative threshold', () => {
+      expect(compare([1, 1.01, 0.99], 1.05).status).toBe('unchanged');
+    });
+
+    it('should classify changes within the noise of the baseline as noisy', () => {
+      // Spread of the baseline is about 0.74, so a change of 30% has a z-score of about 0.4
+      expect(compare([1, 1.5, 0.5], 1.3)).toEqual(expect.objectContaining({status: 'noisy', relativeChange: expect.closeTo(0.3)}));
+      expect(compare([1, 1.5, 0.5], 1.3).zScore).toBeLessThan(2);
+    });
+
+    it('should only use the relative threshold without enough baseline runs', () => {
+      expect(compare([0.5, 1.5], 1.3).status).toBe('increased');
+    });
+
+    it('should not divide by a zero baseline', () => {
+      expect(compare([0, 0, 0], 1)).toEqual(expect.objectContaining({status: 'increased', relativeChange: undefined, zScore: undefined}));
+    });
+  });
+
   describe('splitRuns', () => {
     const runs = (count: number) => Array.from({length: count}, (_, index) => ({id: `run-${index}`, file: '', startedAt: index, entities: {}}));
     const ids = (split: ReturnType<typeof splitRuns>) => ({recent: split.recent.map(run => run.id), baseline: split.baseline.map(run => run.id)});
@@ -214,7 +263,7 @@ describe('Comparison presenter', () => {
       writeHistory('object.json', {not: 'chunks'});
       writeHistory('notes.txt', 'ignored');
 
-      const history = await loadHistory(historyDir, ['JSHeapUsedSize', 'totalNetworkRequests'], ['object.json']);
+      const history = await loadHistory(historyDir, ['JSHeapUsedSize', 'totalNetworkRequests'], [path.join(historyDir, 'object.json')]);
 
       expect(history.runs.map(run => run.id)).toEqual(['a-valid', 'b-valid']);
       expect(history.excluded).toEqual([
@@ -347,6 +396,24 @@ describe('Comparison presenter', () => {
       expect(fs.readdirSync(outputDir)).toEqual([]);
     });
 
+    it('should not treat the reports as history when they are written into the history directory', async () => {
+      outputDir = historyDir;
+      await runPresenter(buildRun(baselineInputs[0]));
+      const {report} = await runPresenter(buildRun(baselineInputs[1]));
+
+      expect(report.excludedRuns).toEqual([]);
+      expect(report.baselineRuns).toHaveLength(1);
+    });
+
+    it('should keep the reports of a previous run on delete without writes', async () => {
+      await runPresenter(buildRun(baselineInputs[0]));
+      const presenter = new nativePresenters.comparisonPresenter({historyDir, outputDir});
+
+      expect(await presenter.delete()).toBe(true);
+      expect(fs.readdirSync(historyDir)).toHaveLength(1);
+      expect(fs.readdirSync(outputDir)).toEqual(['performance-comparison.html', 'performance-comparison.json']);
+    });
+
     it('should remove the current run and reports on delete', async () => {
       const {presenter} = await runPresenter(buildRun(baselineInputs[0]));
 
@@ -363,13 +430,13 @@ describe('Comparison presenter', () => {
       expect(html).not.toContain('</script><script>alert(1)');
     });
 
-    it('should classify small within-band changes as noisy', async () => {
+    it('should classify small changes within the noise as noisy', async () => {
       for (const [index, input] of baselineInputs.entries()) {
         writeHistory(`run-${index}.json`, buildRun(input));
       }
 
       // cpuProfileActiveTime = 21 (baseline median = 20, spread ≈ 1.48),
-      // a 5% increase that sits inside the 3×MAD band and below the relative threshold
+      // a 5% increase with a z-score of about 0.7
       const {report} = await runPresenter(buildRun({
         start: 10_000, taskDuration: 1, heapSamples: Array.from({length: 12}, () => 100), networkRequests: 10, cpuActiveTime: 21,
       }));
