@@ -7,6 +7,7 @@ const PlaywrightPerformanceReporterOptions: Options = {
   maxListeners: 10,
   presenters: [
     new nativePresenters.jsonChunkPresenter({outputDir: './', outputFile: 'example-json-writer.json'}),
+    new nativePresenters.jsonAggregatePresenter({outputDir: './', outputFile: 'example-json-aggregate.json'}),
     new nativePresenters.chartPresenter({outputDir: './', outputFile: 'example-chart-presenter.html'}),
     new nativePresenters.comparisonPresenter({
       historyDir: './performance-history',
