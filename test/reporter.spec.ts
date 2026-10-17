@@ -4,6 +4,7 @@ import path from 'node:path';
 import process from 'node:process';
 import {
   type FullProject,
+  type FullResult,
   type Suite,
   type TestCase,
   type TestResult,
@@ -17,6 +18,13 @@ import {
   type Options,
   type PresenterWriter,
 } from '../src/types/options.js';
+import {
+  type BudgetRule,
+  type BudgetSample,
+} from '../src/types/index.js';
+import {
+  Logger,
+} from '../src/helpers/index.js';
 import {
   MetricsEngineFixture,
 } from './fixtures/metrics.fixture.js';
@@ -402,6 +410,148 @@ describe('Playwright Performance Reporter', () => {
 
       expect(mockMetricsEngine.getMetric).not.toHaveBeenCalled();
       expect(mockMetricsEngine.runCustomMetric).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('budgets', () => {
+    let presenter: {write: jest.Mock; close: jest.Mock; delete: jest.Mock};
+    let errorSpy: jest.SpyInstance;
+    let warningSpy: jest.SpyInstance;
+
+    const createReporter = (budgets: Options['budgets']) => {
+      const reporter = new PlaywrightPerformanceReporter({...options, presenters: [presenter], budgets});
+      (reporter as any).metricsEngine = mockMetricsEngine;
+      return reporter;
+    };
+
+    const getBudgetStore = (reporter: PlaywrightPerformanceReporter) => (reporter as unknown as {budgetStore: BudgetSample[]}).budgetStore;
+    const buildResult = (status: FullResult['status']): FullResult => ({status, startTime: new Date(0), duration: 0});
+
+    beforeEach(() => {
+      presenter = {
+        write: jest.fn().mockResolvedValue(true),
+        close: jest.fn().mockResolvedValue(true),
+        delete: jest.fn().mockResolvedValue(true),
+      };
+      errorSpy = jest.spyOn(Logger, 'error').mockImplementation(() => {});
+      warningSpy = jest.spyOn(Logger, 'warning').mockImplementation(() => {});
+      jest.spyOn(Logger, 'info').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it.each<[string, BudgetRule]>([
+      ['neither max nor min', {metric: 'value'}],
+      ['max less than min', {metric: 'value', max: 1, min: 2}],
+      ['empty metric', {metric: '', max: 1}],
+    ])('should throw on invalid rule with %s', (_, rule) => {
+      expect(() => createReporter({rules: [rule]})).toThrow();
+    });
+
+    it('should capture final metrics in onTestEnd and onStepEnd', async () => {
+      const reporter = createReporter({rules: [{metric: 'largestContentfulPaint', max: 2500}]});
+      mockMetricsEngine.getBrowser.mockReturnValue('chromium');
+      mockMetricsEngine.getMetric.mockResolvedValue([{metric: {largestContentfulPaint: 3000, heap: 'large'}}]);
+      (reporter as any).options.browsers.chromium.onTestStep = {metrics: [new nativeChromiumObservers.usedJsHeapSize()]};
+
+      await reporter.onTestEnd(mockTestCase, mockTestResult);
+      await reporter.onStepEnd(mockTestCase, mockTestResult, mockTestStep);
+
+      expect(getBudgetStore(reporter)).toEqual([
+        {name: 'title > path', metric: {largestContentfulPaint: 3000}},
+        {name: 'title > path', metric: {largestContentfulPaint: 3000}},
+        {name: 'file > path', metric: {largestContentfulPaint: 3000}},
+      ]);
+    });
+
+    it('should not capture metrics without budgets', async () => {
+      const reporter = createReporter(undefined);
+      mockMetricsEngine.getBrowser.mockReturnValue('chromium');
+      mockMetricsEngine.getMetric.mockResolvedValue([{metric: {largestContentfulPaint: 3000}}]);
+
+      await reporter.onTestEnd(mockTestCase, mockTestResult);
+
+      expect(getBudgetStore(reporter)).toHaveLength(0);
+    });
+
+    it('should fail the run on violation', async () => {
+      const reporter = createReporter({rules: [{metric: 'value', max: 5}]});
+      getBudgetStore(reporter).push({name: 'X', metric: {value: 10}});
+      const result = buildResult('passed');
+
+      expect(await reporter.onEnd(result)).toEqual({status: 'failed'});
+      expect(result.status).toEqual('failed');
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Budget violation'));
+    });
+
+    it('should keep the run passing when budgets are satisfied', async () => {
+      const reporter = createReporter({rules: [{metric: 'value', max: 50}]});
+      getBudgetStore(reporter).push({name: 'X', metric: {value: 10}});
+      const result = buildResult('passed');
+
+      expect(await reporter.onEnd(result)).toEqual({status: 'passed'});
+      expect(errorSpy).not.toHaveBeenCalled();
+    });
+
+    it('should skip evaluation without budgets', async () => {
+      const reporter = createReporter(undefined);
+
+      expect(await reporter.onEnd(buildResult('passed'))).toEqual({status: 'passed'});
+    });
+
+    it('should only warn on violation with onViolation warn', async () => {
+      const reporter = createReporter({rules: [{metric: 'value', max: 5}], onViolation: 'warn'});
+      getBudgetStore(reporter).push({name: 'X', metric: {value: 10}});
+      const result = buildResult('passed');
+
+      await reporter.onEnd(result);
+
+      expect(result.status).toEqual('passed');
+      expect(warningSpy).toHaveBeenCalledWith(expect.stringContaining('Budget violation'));
+    });
+
+    it('should not override an interrupted run', async () => {
+      const reporter = createReporter({rules: [{metric: 'value', max: 5}]});
+      getBudgetStore(reporter).push({name: 'X', metric: {value: 10}});
+      const result = buildResult('interrupted');
+
+      await reporter.onEnd(result);
+
+      expect(result.status).toEqual('interrupted');
+    });
+
+    it('should enforce budgets when closing presenters fails', async () => {
+      presenter.close.mockRejectedValue(new Error('close failed'));
+      const reporter = createReporter({rules: [{metric: 'value', max: 5}]});
+      getBudgetStore(reporter).push({name: 'X', metric: {value: 10}});
+      const result = buildResult('passed');
+
+      expect(await reporter.onEnd(result)).toEqual({status: 'failed'});
+      expect(errorSpy).toHaveBeenCalledWith('Error writing report');
+    });
+
+    it('should delete reports on violation when deleteOnFailure is enabled', async () => {
+      options.deleteOnFailure = true;
+      const reporter = createReporter({rules: [{metric: 'value', max: 5}]});
+      getBudgetStore(reporter).push({name: 'X', metric: {value: 10}});
+
+      await reporter.onEnd(buildResult('passed'));
+
+      expect(presenter.delete).toHaveBeenCalled();
+    });
+
+    it('should close presenters when evaluation fails', async () => {
+      const reporter = createReporter({rules: [{metric: 'value', max: 5}]});
+      getBudgetStore(reporter).push(null as unknown as BudgetSample);
+      const result = buildResult('passed');
+
+      await reporter.onEnd(result);
+
+      expect(result.status).toEqual('passed');
+      expect(errorSpy).toHaveBeenCalledWith('Error evaluating budgets', expect.any(String));
+      expect(presenter.close).toHaveBeenCalled();
     });
   });
 });

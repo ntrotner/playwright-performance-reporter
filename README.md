@@ -8,6 +8,7 @@
 
 - **No test instrumentation.** The reporter collects metrics per `test()` and per `test.step()`. Your specs need no extra code.
 - **Built-in observers.** JS heap, CDP performance counters, CPU profile summary, Web Vitals, navigation timing (TTFB), network activity, heap snapshots and allocation sampling.
+- **Budgets.** Fail the run when a metric crosses a threshold, e.g. LCP above 2.5 s.
 - **Sampling.** Polls metrics at a fixed interval during long tests and steps.
 - **Presenters.** Streamed JSON, aggregated JSON, timeline JSON, a Chart.js HTML report and a comparison against previous runs.
 - **Extensible.** Add your own observer for any CDP call, or your own presenter for any output format.
@@ -202,6 +203,7 @@ The options are the second element of the reporter tuple: `['playwright-performa
 | `browsers`        | `BrowserOptions`    | yes      | none                                                             | Observers per browser and hook. See below.                                                                                                                                                  |
 | `deleteOnFailure` | `boolean`           | yes      | none                                                             | If the Playwright run status is not `passed`, call `delete()` on every presenter. This removes the generated files.                                                                         |
 | `presenters`      | `PresenterWriter[]` | no       | one `jsonChunkPresenter` writing `./performance-report-<epochMs>.json` | Output writers. Every chunk is sent to every presenter.                                                                                                                                     |
+| `budgets`         | `BudgetOptions`     | no       | none (purely passive)                                            | Performance budgets checked against the final (`onStop`) metrics. A violation fails the run by default. See [Budgets](#budgets).                                                           |
 | `maxListeners`    | `number`            | no       | Node default (`10`)                                              | Sets `EventEmitter.setMaxListeners()` globally. Raise it if many presenters cause a `MaxListenersExceededWarning`. `0` removes the limit.                                                  |
 
 `defaultOptions` is exported as a ready-made starting point. It runs `allPerformanceMetrics` on `onTest` and samples `usedJsHeapSize` every 1000 ms. It is **not** applied automatically, so you have to pass it yourself: `['playwright-performance-reporter', defaultOptions]`.
@@ -259,6 +261,45 @@ const options: Options = {
   },
 };
 ```
+
+### Budgets
+Budgets turn measured metrics into a pass/fail gate. Each rule is checked against the final (`onStop`) metrics
+of every test and step. By default, a violation sets the status of the run to `failed`, so Playwright exits with a non-zero code.
+
+```ts
+const PlaywrightPerformanceReporterOptions: Options = {
+  ...
+  budgets: {
+    onViolation: 'fail', // default, use 'warn' to only log violations
+    rules: [
+      {metric: 'largestContentfulPaint', max: 2500},
+      {metric: 'totalNetworkDuration', max: 3000},
+      {metric: 'JSHeapUsedSize', max: 120 * 1024 * 1024},
+      // Scope a rule with a glob (`*` and `?`) on the test or step name
+      {metric: 'cumulativeLayoutShift', max: 0.1, namePattern: '*checkout*'},
+    ],
+  },
+}
+```
+
+- `metric`: key of the metric as written in `stopMetrics[].metric`
+- `max` / `min`: fail if any matching value is above / below the bound (at least one is required)
+- `namePattern`: glob matched against the name of the test or step (default `*`). A test is named by its title path, e.g. `" > chromium > profile.spec.ts > Profile"`, a step only by its title, e.g. `"Open profile"`
+
+A violation is logged as `Budget violation: metric "largestContentfulPaint" = 3120.5 > 2500 (ms) (test: "...")`.
+Invalid rules throw when the reporter is created. A metric that was never measured only logs a warning, so make sure
+the observer emitting it is registered in `onTest` or `onTestStep`. Sampling metrics are not evaluated.
+Every retry is evaluated as well, and with `deleteOnFailure: true` a violation deletes the report like any other failure.
+
+Values are compared in the native unit of the metric:
+
+| Metric | Unit |
+|---|---|
+| `largestContentfulPaint`, `firstContentfulPaint`, `interactionToNextPaint`, `totalNetworkDuration` | milliseconds |
+| `cumulativeLayoutShift` | score |
+| `*Size`, `*Bytes`, e.g. `JSHeapUsedSize`, `usedJsHeapSize`, `totalNetworkTransferSize` | bytes |
+| Other `*Duration` / `*Time` of `allPerformanceMetrics`, e.g. `ScriptDuration`, `TaskDuration` | seconds |
+| Everything else, e.g. `Nodes`, `totalNetworkRequests` | count |
 
 ## Chromium observers
 
