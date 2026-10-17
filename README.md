@@ -9,7 +9,7 @@
 - **No test instrumentation.** The reporter collects metrics per `test()` and per `test.step()`. Your specs need no extra code.
 - **Built-in observers.** JS heap, CDP performance counters, CPU profile summary, Web Vitals, navigation timing (TTFB), network activity, heap snapshots and allocation sampling.
 - **Sampling.** Polls metrics at a fixed interval during long tests and steps.
-- **Presenters.** Streamed JSON, timeline JSON, a Chart.js HTML report and a comparison against previous runs.
+- **Presenters.** Streamed JSON, aggregated JSON, timeline JSON, a Chart.js HTML report and a comparison against previous runs.
 - **Extensible.** Add your own observer for any CDP call, or your own presenter for any output format.
 
 ## Contents
@@ -173,7 +173,7 @@ test('open profile', async ({page}) => {
 
 Run `npx playwright test`. You get `performance.json` and `performance.html` in the working directory.
 
-A more complete setup is in [`example/playwright.config.ts`](example/playwright.config.ts). It configures all four presenters, sampling, CPU profiling, Web Vitals and network activity.
+A more complete setup is in [`example/playwright.config.ts`](example/playwright.config.ts). It configures four presenters, sampling, CPU profiling, Web Vitals and network activity.
 
 ## How it works
 
@@ -314,11 +314,12 @@ The presenters are available as `nativePresenters.<name>`. The sources are in [`
 | Presenter               | Output                                                                                     | Constructor options                                  |
 |-------------------------|--------------------------------------------------------------------------------------------|------------------------------------------------------|
 | `jsonChunkPresenter`    | JSON array of every chunk, streamed to disk ([format](#json-chunk-format))                 | `{outputDir: string; outputFile: string}`            |
+| `jsonAggregatePresenter` | One JSON object with all chunks merged per test and step, written on close ([format](#json-aggregate-format)) | `{outputDir: string; outputFile: string; pretty?: boolean}` |
 | `timelineDataPresenter` | JSON array of numeric data points, timestamps relative to each execution ([format](#timeline-data-format)) | `{outputDir: string; outputFile: string}` |
 | `chartPresenter`        | Self-contained HTML report (Chart.js) with summary cards and a timeline per test and metric | `{outputDir: string; outputFile: string}`            |
 | `comparisonPresenter`   | Stores each run in a history folder and compares the latest runs against a baseline. Writes HTML and JSON ([format](#comparison-report-format)) | `Partial<ComparisonPresenterOptions>`, see below |
 
-`jsonChunkPresenter`, `timelineDataPresenter` and `chartPresenter` open their file in the constructor. Make sure `outputDir` exists. `comparisonPresenter` creates its folders itself.
+`jsonChunkPresenter`, `timelineDataPresenter` and `chartPresenter` open their file in the constructor. Make sure `outputDir` exists. `jsonAggregatePresenter` keeps the merged result in memory and only creates its file on `close()`, so `outputDir` must exist by the end of the run. `comparisonPresenter` creates its folders itself.
 
 ### `comparisonPresenter`
 
@@ -362,7 +363,7 @@ All types are exported from the package root and live in [`src/types/`](src/type
 
 ### JSON chunk format
 
-`jsonChunkPresenter` writes `ResultAccumulator[]`. Every chunk holds one measurement. To get the full picture of a test, merge all chunks with the same keys.
+`jsonChunkPresenter` writes `ResultAccumulator[]`. Every chunk holds one measurement. To get the full picture of a test, merge all chunks with the same keys, or use [`jsonAggregatePresenter`](#json-aggregate-format).
 
 ```ts
 type ResultAccumulator = Record<
@@ -390,6 +391,51 @@ type TargetMetric = {
 ```
 
 Each `*Metrics` array holds one `TargetMetric` **per observer and per CDP target**. A `TargetMetric` can have an empty `metric` (`{}`), for example the `onStart` entry of `cpuProfiler`. See the trimmed real example in the [Showcase](#jsonchunkpresenter-raw-data-export).
+
+### JSON aggregate format
+
+`jsonAggregatePresenter` writes a single `ResultAccumulator` (same types as above, but one object instead of an array). All chunks of the same test case id and step id are merged:
+
+- `startMetrics`, `stopMetrics` and `samplingMetrics` are concatenated in arrival order. Chunks are not cumulative, so nothing is duplicated.
+- `startMeasurement` is the earliest and `endMeasurement` the latest measurement, each with its offset. A chunk sets the measurements it did not trigger to its creation time without an offset. These placeholders are only used if no chunk measured the value.
+- `name` is kept from the first chunk.
+
+This example is trimmed from the example run. Only one entry per metrics array and a few metric keys are shown:
+
+```json
+{
+  "a30a6eba6312f6b87ea5-0d3741cd336b023b92f5": {
+    "TEST_CASE_PARENT": {
+      "name": " > chromium > example.spec.ts > Navigate GitHub profile tabs",
+      "startMetrics": [],
+      "stopMetrics": [],
+      "samplingMetrics": [],
+      "startMeasurement": 1792273008014,
+      "startMeasurementOffset": 6,
+      "endMeasurement": 1792273027473,
+      "endMeasurementOffset": 6
+    },
+    "aed4b317b0f4cff9327170e3f49efebd": {
+      "name": "Open profile",
+      "startMetrics": [
+        { "metric": { "Nodes": 307, "Documents": 3 }, "id": "977A53376712E4AAE330519F8E1F17E2", "type": "page" }
+      ],
+      "stopMetrics": [
+        { "metric": { "Nodes": 2203, "Documents": 2 }, "id": "977A53376712E4AAE330519F8E1F17E2", "type": "page" }
+      ],
+      "samplingMetrics": [
+        { "metric": { "totalNetworkRequests": 0, "totalNetworkTransferSize": 0, "totalNetworkDuration": 0, "networkActivities": [] }, "id": "977A53376712E4AAE330519F8E1F17E2", "type": "page" }
+      ],
+      "startMeasurement": 1792273009408,
+      "startMeasurementOffset": 683,
+      "endMeasurement": 1792273010401,
+      "endMeasurementOffset": 8
+    }
+  }
+}
+```
+
+The output is compact JSON unless `pretty: true` is set.
 
 ### Timeline data format
 
@@ -583,7 +629,7 @@ Only `test.step()` blocks are measured. Wrap the interesting parts of your test 
 Set `maxListeners` in `Options`, for example to `20`, or to `0` for no limit.
 
 **`ENOENT` when the reporter starts.**
-`outputDir` of `jsonChunkPresenter`, `timelineDataPresenter` or `chartPresenter` does not exist. Create it first.
+`outputDir` of `jsonChunkPresenter`, `timelineDataPresenter` or `chartPresenter` does not exist. Create it first. `jsonAggregatePresenter` reports the same error when it is closed at the end of the run.
 
 **Comparison report says `invalid-current-run`.**
 The run lacks one of the `requiredMetrics`. Add `allPerformanceMetrics`, `networkActivity` and `cpuProfiler`, or set `requiredMetrics` to metrics you collect.
@@ -612,7 +658,7 @@ src/
   browsers/chromium/observers/    # native observers (register new ones in observers/index.ts)
   browsers/chromium/plugins/      # CDP domain plugins (register in plugins/index.ts)
   browsers/{firefox,webkit}/      # stub clients
-  presenters/                     # json-chunk, timeline-data, chart, comparison (register in presenters/index.ts)
+  presenters/                     # json-chunk, json-aggregate, timeline-data, chart, comparison (register in presenters/index.ts)
   types/                          # Options, MetricObserver, PerformanceMetrics, ResultAccumulator
 test/                             # Jest unit tests (*.spec.ts) and fixtures
 example/                          # runnable Playwright project using ../lib
