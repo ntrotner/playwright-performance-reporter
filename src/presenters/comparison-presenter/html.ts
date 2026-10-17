@@ -34,6 +34,7 @@ const metricLabels: Record<string, string> = {
   firstContentfulPaint: 'FCP',
   cumulativeLayoutShift: 'CLS',
   interactionToNextPaint: 'INP',
+  totalBlockingTime: 'TBT',
 };
 /* eslint-enable @typescript-eslint/naming-convention */
 
