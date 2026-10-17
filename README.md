@@ -7,7 +7,7 @@
 > A Playwright reporter that collects performance metrics from the browser dev tools (Chrome DevTools Protocol) while your tests run, and writes them as JSON, interactive HTML charts and run-over-run regression reports.
 
 - **No test instrumentation.** The reporter collects metrics per `test()` and per `test.step()`. Your specs need no extra code.
-- **Built-in observers.** JS heap, CDP performance counters, CPU profile summary, Web Vitals, navigation timing (TTFB), network activity, per-resource timing, heap snapshots and allocation sampling.
+- **Built-in observers.** JS heap, CDP performance counters, CPU profile summary, Web Vitals, navigation timing (TTFB), long tasks and Total Blocking Time, network activity, per-resource timing, heap snapshots and allocation sampling.
 - **Budgets.** Fail the run when a metric crosses a threshold, e.g. LCP above 2.5 s.
 - **Sampling.** Polls metrics at a fixed interval during long tests and steps.
 - **Presenters.** Streamed JSON, aggregated JSON, timeline JSON, a Chart.js HTML report and a comparison against previous runs.
@@ -174,7 +174,7 @@ test('open profile', async ({page}) => {
 
 Run `npx playwright test`. You get `performance.json` and `performance.html` in the working directory.
 
-A more complete setup is in [`example/playwright.config.ts`](example/playwright.config.ts). It configures four presenters, sampling, CPU profiling, Web Vitals and network activity.
+A more complete setup is in [`example/playwright.config.ts`](example/playwright.config.ts). It configures four presenters, sampling, CPU profiling, Web Vitals, long tasks and network activity.
 
 ## How it works
 
@@ -312,6 +312,7 @@ The observers are available as `nativeChromiumObservers.<name>`. Each one is a c
 | `totalJsHeapSize`       | Total JS heap (`JSHeapTotalSize`)                                                                                                                | `totalJsHeapSize`                                                                                                                                                                                                                                                                                             | bytes                                                                                                                                         | start, sampling, stop                 | `ObserverOptions`                                                                    |
 | `cpuProfiler`           | V8 CPU profile between start and stop, summarized by category                                                                                    | `cpuProfileDuration`, `cpuProfileSampleCount`, `cpuProfileActiveTime`, `cpuProfileScriptTime`, `cpuProfileGarbageCollectorTime`, `cpuProfileProgramTime`, `cpuProfileIdleTime`                                                                                                                              | ms (`cpuProfileSampleCount`: count)                                                                                                           | stop (start begins profiling)         | `{samplingIntervalInMicroseconds?: number /* 1000 */, triggerGarbageCollectionOnObserve?: boolean /* true */}` |
 | `webVitals`             | Web Vitals from a persistent in-page `PerformanceObserver`                                                                                       | `largestContentfulPaint`, `firstContentfulPaint`, `cumulativeLayoutShift`, `interactionToNextPaint`                                                                                                                                                                                                          | ms since the page's time origin, CLS is a unitless score. `0` = not observed yet                                                                     | start, sampling, stop                 | none                                                                                 |
+| `longTasks`             | Main-thread [long tasks](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceLongTaskTiming) (> 50 ms) from an in-page `PerformanceObserver`, since the latest `onStart` | `longTaskCount`, `totalLongTasksDuration`, `totalBlockingTime` (sum of `max(0, duration - 50)`), `maxLongTaskDuration` | count, ms | start (always `0`), sampling, stop | none |
 | `navigationTiming`      | [Navigation Timing](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceNavigationTiming) of the current document via `Runtime.evaluate` | `timeToFirstByte`, `redirectTime`, `dnsLookupTime`, `tcpConnectTime`, `tlsTime`, `requestTime` (server response time), `responseTime` (download), `domContentLoadedTime`, `domCompleteTime`, `loadEventTime`, `nextHopProtocol`, `navigationTransferSize`, `navigationEncodedBodySize`, `navigationDecodedBodySize` | ms (`timeToFirstByte` and load milestones since the navigation start), sizes in bytes, `nextHopProtocol` is a string | start, sampling, stop | `{includeSizes?: boolean /* true */, includeLoadMilestones?: boolean /* true */}`: `false` drops the size/protocol keys or the load milestone keys |
 | `networkActivity`       | Requests seen via the CDP `Network` domain, counted from the first time this instance observed a target                                          | `totalNetworkRequests`, `totalNetworkTransferSize`, `totalNetworkDuration`, `networkActivities` (array of `{requestId, url, method, status?, transferSize?, duration?, timestamp}`)                                                                                                                          | count, bytes (encoded), ms (sum of request durations)                                                                                         | start, sampling, stop                 | `{includeDetailsInSampling?: boolean /* false */, triggerGarbageCollectionOnObserve: boolean /* required by the type, ignored */}`: if `includeDetailsInSampling` is `false`, `networkActivities` is `[]` while sampling |
 | `resourceTiming`        | [Resource Timing](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceResourceTiming) of every subresource of the page via `Runtime.evaluate` | `totalResources`, `totalTransferSize`, `totalEncodedBodySize`, `totalDecodedBodySize`, `totalDnsTime`, `totalTcpTime`, `totalTlsTime`, `totalRequestTime` (time to first byte), `totalResponseTime` (download), `totalRedirectTime`, `totalBlockedTime` (queueing before the fetch), `cacheHits`, `timingHiddenResources`, `resourceTimings` (array of `{name, initiatorType, nextHopProtocol, transferSize, encodedBodySize, decodedBodySize, dnsTime, tcpTime, tlsTime, requestTime, responseTime, redirectTime, blockedTime, cached, timingHidden}`) | ms, sizes in bytes, counts | start, sampling, stop | `{includeDetails?: boolean /* true */, bufferSize?: number /* 500 */}`: `includeDetails: false` omits `resourceTimings` (recommended for sampling). `bufferSize` is passed to `performance.setResourceTimingBufferSize()` |
@@ -330,6 +331,7 @@ new nativeChromiumObservers.networkActivity({includeDetailsInSampling: true, tri
 new nativeChromiumObservers.webVitals();
 new nativeChromiumObservers.navigationTiming({includeSizes: false});
 new nativeChromiumObservers.resourceTiming({includeDetails: false, bufferSize: 1000});
+new nativeChromiumObservers.longTasks();
 ```
 
 Notes:
@@ -338,6 +340,7 @@ Notes:
 - `navigationTiming` describes the latest navigation, so a step without navigation reports the previous document. Cross-origin documents without a `Timing-Allow-Origin` header report most phases as `0`.
 - `resourceTiming` reads the entries of the current document, so a navigation resets them. Cross-origin resources without a `Timing-Allow-Origin` header hide their phases and sizes; they are reported with `timingHidden: true` and phases of `0`. `cached` is a heuristic (`transferSize === 0 && decodedBodySize > 0`).
 - `heapDump` and `heapObjectsTracking` produce strings of many MB per target. Use them sparingly.
+- `longTasks` keeps one buffer per page, which every `onStart` resets. Each step only measures its own long tasks, and `sampling` reports the growing values within the current step. Using it in both `onTest` and `onTestStep` makes the steps reset the test's buffer. After a navigation, the observer is reinstalled with `buffered: true` to include the new document's long tasks. `totalBlockingTime` is not limited to the window between FCP and Time to Interactive, so it differs from Lighthouse's TBT.
 
 ### Plugins
 
@@ -649,7 +652,7 @@ Use it with `presenters: [new NdjsonPresenter('./performance.ndjson')]`. If any 
 - **Browser detection.** The reporter uses `project.use.defaultBrowserType` and `project.use.launchOptions.args`. `devices[...]` presets set `defaultBrowserType`. Without it, nothing is measured.
 - **Asynchronous measurements.** Playwright does not wait for reporter hooks. The browser may already run the next action while metrics are fetched. `startMeasurementOffset` and `endMeasurementOffset` (ms) show how long a fetch took. High values mean the measurement drifted into later work.
 - **Steps.** Only `test.step()` is measured. Playwright API calls, `expect`, fixtures and hooks are not.
-- **Units.** `allPerformanceMetrics` reports durations in **seconds** (Chromium's convention). `cpuProfile*`, `webVitals` and `networkActivity` durations are in **milliseconds**.
+- **Units.** `allPerformanceMetrics` reports durations in **seconds** (Chromium's convention). `cpuProfile*`, `webVitals`, `longTasks` and `networkActivity` durations are in **milliseconds**.
 - **Viewing HTML reports.** `chartPresenter` and `comparisonPresenter` load Chart.js from `cdn.jsdelivr.net`, so viewing them needs internet access.
 
 ## Troubleshooting / FAQ

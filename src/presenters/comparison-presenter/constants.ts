@@ -83,6 +83,9 @@ const millisecondMetrics = new Set([
   'totalResponseTime',
   'totalRedirectTime',
   'totalBlockedTime',
+  'totalLongTasksDuration',
+  'totalBlockingTime',
+  'maxLongTaskDuration',
 ]);
 
 /**

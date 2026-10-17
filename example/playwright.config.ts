@@ -39,7 +39,8 @@ const PlaywrightPerformanceReporterOptions: Options = {
           new nativeChromiumObservers.cpuProfiler({triggerGarbageCollectionOnObserve: false}),
           new nativeChromiumObservers.webVitals(),
           new nativeChromiumObservers.navigationTiming(),
-          new nativeChromiumObservers.resourceTiming()
+          new nativeChromiumObservers.resourceTiming(),
+          new nativeChromiumObservers.longTasks()
         ],
       },
       sampling: {
@@ -51,6 +52,10 @@ const PlaywrightPerformanceReporterOptions: Options = {
           {
             samplingTimeoutInMilliseconds: 1000,
             metric: new nativeChromiumObservers.networkActivity({includeDetailsInSampling: false, triggerGarbageCollectionOnObserve: false}),
+          },
+          {
+            samplingTimeoutInMilliseconds: 1000,
+            metric: new nativeChromiumObservers.longTasks(),
           }
         ]
       }
