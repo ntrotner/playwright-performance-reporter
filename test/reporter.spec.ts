@@ -1,3 +1,7 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import process from 'node:process';
 import {
   type FullProject,
   type Suite,
@@ -5,9 +9,17 @@ import {
   type TestResult,
   type TestStep,
 } from '@playwright/test/reporter';
-import PlaywrightPerformanceReporter, {nativeChromiumObservers} from '../src/index.js';
-import {type Options} from '../src/types/options.js';
-import {MetricsEngineFixture} from './fixtures/metrics.fixture.js';
+import PlaywrightPerformanceReporter, {
+  nativeChromiumObservers,
+  nativePresenters,
+} from '../src/index.js';
+import {
+  type Options,
+  type PresenterWriter,
+} from '../src/types/options.js';
+import {
+  MetricsEngineFixture,
+} from './fixtures/metrics.fixture.js';
 
 const mockSuite: Suite = {
   allTests(): TestCase[] {
@@ -126,7 +138,7 @@ const mockTestResult: TestResult = {
 };
 
 jest.useFakeTimers();
-jest.spyOn(global, 'setInterval');
+jest.spyOn(globalThis, 'setInterval');
 
 describe('Playwright Performance Reporter', () => {
   let options: Options;
@@ -134,8 +146,14 @@ describe('Playwright Performance Reporter', () => {
   let mockMetricsEngine: MetricsEngineFixture;
 
   beforeEach(() => {
+    const presenter: PresenterWriter = {
+      write: jest.fn().mockResolvedValue(true),
+      close: jest.fn().mockResolvedValue(true),
+      delete: jest.fn().mockResolvedValue(true),
+    };
     options = {
       deleteOnFailure: false,
+      presenters: [presenter],
       browsers: {
         chromium: {
           onTest: {
@@ -151,6 +169,23 @@ describe('Playwright Performance Reporter', () => {
 
   it('should create reporter with passed options', () => {
     expect((playwrightPerformanceReporter as any).options).toEqual(options);
+  });
+
+  it('should fall back to json chunk presenter when no presenters are passed', async () => {
+    const cwd = process.cwd();
+    const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), 'reporter-'));
+    process.chdir(outputDir);
+    try {
+      const reporter = new PlaywrightPerformanceReporter({...options, presenters: undefined});
+      const [presenter] = (reporter as any).presenters as PresenterWriter[];
+      await presenter.close();
+
+      expect(presenter).toBeInstanceOf(nativePresenters.jsonChunkPresenter);
+      expect(fs.readdirSync(outputDir)).toEqual([expect.stringMatching(/^performance-report-\d+\.json$/)]);
+    } finally {
+      process.chdir(cwd);
+      fs.rmSync(outputDir, {recursive: true, force: true});
+    }
   });
 
   describe('browserName', () => {
@@ -339,9 +374,9 @@ describe('Playwright Performance Reporter', () => {
           },
         },
       };
-      (playwrightPerformanceReporter as any).latestStepId = "Test";
-      (playwrightPerformanceReporter as any).latestCaseId = "Case";
-      (playwrightPerformanceReporter as any).latestName = "Test";
+      (playwrightPerformanceReporter as any).latestStepId = 'Test';
+      (playwrightPerformanceReporter as any).latestCaseId = 'Case';
+      (playwrightPerformanceReporter as any).latestName = 'Test';
       (playwrightPerformanceReporter as any).options = optionsWithSamplingMetrics;
       mockMetricsEngine.getMetric.mockReturnValue(Promise.resolve([{metric1: 123}]));
       const results = (playwrightPerformanceReporter as any).createTestPerformance(pivot, customTest, customName);
