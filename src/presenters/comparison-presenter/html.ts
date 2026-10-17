@@ -1,11 +1,11 @@
 import {
+  entityDurationMetric,
   metricUnit,
   webVitalThresholds,
 } from './constants.js';
 import {
   type ComparisonReport,
   type RunSummary,
-  type WebVitalsAttribution,
 } from './types.js';
 
 /**
@@ -43,7 +43,7 @@ const metricLabels: Record<string, string> = {
 type EmbeddedData = {
   currentRunId: string | undefined;
   runs: Array<{id: string; label: string}>;
-  steps: Array<{key: string; name: string; kind: string; attribution?: WebVitalsAttribution}>;
+  steps: Array<{key: string; name: string; kind: string}>;
   metrics: Array<{name: string; label: string; unit: string}>;
   thresholds: Record<string, {good: number; poor: number}>;
   bandPercentile: number;
@@ -122,35 +122,10 @@ function metricByName(name) {
   return data.metrics.find(function (m) { return m.name === name; });
 }
 
-function fillSelect(select, options, labels) {
+function fillSelect(select, options) {
   select.replaceChildren(...options.map(function (option) {
     return el('option', {value: option.value, text: option.label});
   }));
-}
-
-function renderForensics() {
-  const panel = document.getElementById('forensicsPanel');
-  const metricName = document.getElementById('metricSelect').value;
-  const stepKey = document.getElementById('stepSelect').value;
-  const step = data.steps.find(function (s) { return s.key === stepKey; });
-  const attr = step ? step.attribution : undefined;
-  const lines = [];
-  if (metricName === 'largestContentfulPaint' || metricName === 'firstContentfulPaint') {
-    if (attr?.lcp) {
-      lines.push('LCP element: ' + (attr.lcp.elementTag || 'unknown'));
-      if (attr.lcp.url) { lines.push('URL: ' + attr.lcp.url); }
-    }
-  } else if (metricName === 'cumulativeLayoutShift') {
-    if (attr?.cls) { lines.push('CLS source: ' + (attr.cls.source || 'unknown')); }
-  } else if (metricName === 'interactionToNextPaint') {
-    if (attr?.inp) { lines.push('INP interaction: ' + (attr.inp.interactionType || 'unknown')); }
-  } else {
-    panel.replaceChildren(); panel.style.display = 'none'; return;
-  }
-
-  if (lines.length === 0) { panel.replaceChildren(); panel.style.display = 'none'; return; }
-  panel.style.display = 'block';
-  panel.replaceChildren(...lines.map(function (line) { return el('p', {class: 'forensics-line', text: line}); }));
 }
 
 function updateMetrics() {
@@ -166,7 +141,6 @@ function updateMetrics() {
     ? selected
     : (metrics.length > 0 ? metrics[0].value : '');
   renderChart();
-  renderForensics();
 }
 
 function renderSelectors() {
@@ -178,7 +152,7 @@ function renderSelectors() {
   }));
 
   stepSelect.addEventListener('change', updateMetrics);
-  metricSelect.addEventListener('change', function () { renderChart(); renderForensics(); });
+  metricSelect.addEventListener('change', renderChart);
 
   if (data.steps.length > 0) { stepSelect.value = data.steps[0].key; }
   updateMetrics();
@@ -316,45 +290,14 @@ export function renderComparisonHtml(report: ComparisonReport, runs: RunSummary[
   const sortedRuns = [...runs].sort((a, b) => runAxis.sortValue(a) - runAxis.sortValue(b));
 
   const values = buildValueMatrix(sortedRuns);
-  const metricNames = new Set<string>();
-  for (const metrics of Object.values(values)) {
-    for (const metric of Object.keys(metrics)) {
-      metricNames.add(metric);
-    }
-  }
-
-  const byName = [...metricNames].sort((a, b) => {
-    if (a === 'entityDuration') {
-      return -1;
-    }
-
-    if (b === 'entityDuration') {
-      return 1;
-    }
-
-    return a.localeCompare(b);
-  });
-  const metrics = byName.map(name => ({name, label: metricLabels[name] ?? name, unit: metricUnit(name)}));
-
-  const attributionByKey = new Map<string, WebVitalsAttribution>();
-  for (const run of sortedRuns) {
-    for (const [entityKey, entity] of Object.entries(run.entities)) {
-      if (entity.attribution) {
-        attributionByKey.set(entityKey, entity.attribution);
-      }
-    }
-  }
+  const metricNames = [...new Set(Object.values(values).flatMap(metrics => Object.keys(metrics)))]
+    .sort((a, b) => Number(b === entityDurationMetric) - Number(a === entityDurationMetric) || a.localeCompare(b));
 
   const data: EmbeddedData = {
     currentRunId: report.currentRun?.id,
     runs: sortedRuns.map(run => ({id: run.id, label: runAxis.label(run)})),
-    steps: report.steps.map(step => ({
-      key: step.key,
-      name: step.name,
-      kind: step.kind,
-      attribution: attributionByKey.get(step.key),
-    })),
-    metrics,
+    steps: report.steps.map(step => ({key: step.key, name: step.name, kind: step.kind})),
+    metrics: metricNames.map(name => ({name, label: metricLabels[name] ?? name, unit: metricUnit(name)})),
     thresholds: webVitalThresholds,
     bandPercentile: report.settings.bandPercentile,
     values,
@@ -378,8 +321,6 @@ export function renderComparisonHtml(report: ComparisonReport, runs: RunSummary[
     .controls label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 600; }
     .controls select { min-width: 220px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; background: #fff; }
     .chart-box { position: relative; height: 420px; }
-    .forensics-panel { background: #f9fafb; border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-bottom: 12px; }
-    .forensics-panel p { margin: 2px 0; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -396,7 +337,6 @@ export function renderComparisonHtml(report: ComparisonReport, runs: RunSummary[
         <select id="metricSelect"></select>
       </label>
     </div>
-    <div id="forensicsPanel" class="forensics-panel" style="display:none"></div>
     <div class="chart-box"><canvas id="historyChart"></canvas></div>
   </section>
 

@@ -1,12 +1,32 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {nativePresenters} from '../../src/presenters';
-import {type ComparisonReport} from '../../src/presenters';
-import {loadHistory, summarizeEntities} from '../../src/presenters/comparison-presenter/history';
-import {compareRuns, median, scaledMedianAbsoluteDeviation, splitRuns} from '../../src/presenters/comparison-presenter/comparison';
-import {type RunSummary} from '../../src/presenters/comparison-presenter/types';
-import {type ResultAccumulator, type TargetMetric} from '../../src';
+import {
+  nativePresenters,
+  type ComparisonReport,
+} from '../../src/presenters';
+import {
+  loadHistory,
+  summarizeEntities,
+} from '../../src/presenters/comparison-presenter/history';
+import {
+  compareRuns,
+  median,
+  percentile,
+  scaledMedianAbsoluteDeviation,
+  splitRuns,
+} from '../../src/presenters/comparison-presenter/comparison';
+import {
+  classifyMetric,
+  metricUnit,
+} from '../../src/presenters/comparison-presenter/constants';
+import {
+  type RunSummary,
+} from '../../src/presenters/comparison-presenter/types';
+import {
+  type ResultAccumulator,
+  type TargetMetric,
+} from '../../src';
 
 type RunInput = {
   start: number;
@@ -41,8 +61,12 @@ function buildRun(input: RunInput): ResultAccumulator[] {
     return {totalNetworkRequests: requests, totalNetworkTransferSize: requests * 100, totalNetworkDuration: requests * 5};
   };
 
-  const startMetric = target({JSHeapUsedSize: input.heapSamples[0], TaskDuration: 1, ScriptDuration: 0.5, Timestamp: input.start, ...network(stepStart)});
-  const stopMetric = target({JSHeapUsedSize: input.heapSamples.at(-1)!, TaskDuration: 1 + input.taskDuration, ScriptDuration: 0.5 + input.taskDuration / 2, Timestamp: stepEnd, ...network(stepEnd)});
+  const startMetric = target({
+    JSHeapUsedSize: input.heapSamples[0], TaskDuration: 1, ScriptDuration: 0.5, Timestamp: input.start, ...network(stepStart),
+  });
+  const stopMetric = target({
+    JSHeapUsedSize: input.heapSamples.at(-1)!, TaskDuration: 1 + input.taskDuration, ScriptDuration: 0.5 + input.taskDuration / 2, Timestamp: stepEnd, ...network(stepEnd),
+  });
   const profile = target({
     cpuProfileDuration: 1000,
     cpuProfileSampleCount: 1000,
@@ -63,17 +87,41 @@ function buildRun(input: RunInput): ResultAccumulator[] {
         }),
       },
     })),
-    {case: {step: performance('open page', {stopMetrics: [stopMetric, profile], startMeasurement: stepEnd, endMeasurement: stepEnd, endMeasurementOffset: 1})}},
+    {
+      case: {
+        step: performance('open page', {
+          stopMetrics: [stopMetric, profile], startMeasurement: stepEnd, endMeasurement: stepEnd, endMeasurementOffset: 1,
+        }),
+      },
+    },
     {case: {second: performance('submit form', {startMetrics: [target({TaskDuration: 5})], startMeasurement: stepEnd + 1, startMeasurementOffset: 1})}},
-    {case: {second: performance('submit form', {stopMetrics: [target({TaskDuration: 5.5})], startMeasurement: stepEnd + 3, endMeasurement: stepEnd + 3, endMeasurementOffset: 1})}},
-    {case: {TEST_CASE_PARENT: performance('suite > test', {stopMetrics: [stopMetric], startMeasurement: stepEnd + 5, endMeasurement: stepEnd + 5, endMeasurementOffset: 1})}},
+    {
+      case: {
+        second: performance('submit form', {
+          stopMetrics: [target({TaskDuration: 5.5})], startMeasurement: stepEnd + 3, endMeasurement: stepEnd + 3, endMeasurementOffset: 1,
+        }),
+      },
+    },
+    {
+      case: {
+        TEST_CASE_PARENT: performance('suite > test', {
+          stopMetrics: [stopMetric], startMeasurement: stepEnd + 5, endMeasurement: stepEnd + 5, endMeasurementOffset: 1,
+        }),
+      },
+    },
   ] as ResultAccumulator[];
 }
 
 const baselineInputs: RunInput[] = [
-  {start: 1000, taskDuration: 1, heapSamples: [100, 100, 100], networkRequests: 10, cpuActiveTime: 20},
-  {start: 2000, taskDuration: 1.05, heapSamples: [102, 102, 102, 102, 102], networkRequests: 10, cpuActiveTime: 21},
-  {start: 3000, taskDuration: 0.95, heapSamples: [98, 98], networkRequests: 10, cpuActiveTime: 19},
+  {
+    start: 1000, taskDuration: 1, heapSamples: [100, 100, 100], networkRequests: 10, cpuActiveTime: 20,
+  },
+  {
+    start: 2000, taskDuration: 1.05, heapSamples: [102, 102, 102, 102, 102], networkRequests: 10, cpuActiveTime: 21,
+  },
+  {
+    start: 3000, taskDuration: 0.95, heapSamples: [98, 98], networkRequests: 10, cpuActiveTime: 19,
+  },
 ];
 
 describe('Comparison presenter', () => {
@@ -105,7 +153,9 @@ describe('Comparison presenter', () => {
     const closed = await presenter.close();
     const report = JSON.parse(fs.readFileSync(path.join(outputDir, 'performance-comparison.json'), 'utf8')) as ComparisonReport;
     const html = fs.readFileSync(path.join(outputDir, 'performance-comparison.html'), 'utf8');
-    return {presenter, closed, report, html};
+    return {
+      presenter, closed, report, html,
+    };
   };
 
   describe('statistics', () => {
@@ -114,6 +164,32 @@ describe('Comparison presenter', () => {
       expect(median([4, 1, 2, 3])).toBe(2.5);
       expect(scaledMedianAbsoluteDeviation([1, 1, 1])).toBe(0);
       expect(scaledMedianAbsoluteDeviation([1, 2, 3])).toBeCloseTo(1.4826);
+      expect(percentile([1, 2, 3, 4, 5], 0.05)).toBeCloseTo(1.2);
+      expect(percentile([5, 1, 3], 1)).toBe(5);
+    });
+  });
+
+  describe('metric semantics', () => {
+    it.each([
+      ['entityDuration', 'cumulative', 'ms'],
+      ['TaskDuration', 'cumulative', 's'],
+      ['ThreadTime', 'cumulative', 's'],
+      ['LayoutCount', 'cumulative', 'count'],
+      ['JSHeapUsedSize', 'gauge', 'bytes'],
+      ['usedJsHeapSize', 'gauge', 'bytes'],
+      ['Nodes', 'gauge', 'count'],
+      ['totalNetworkRequests', 'cumulative', 'count'],
+      ['totalNetworkTransferSize', 'cumulative', 'bytes'],
+      ['totalNetworkDuration', 'cumulative', 'ms'],
+      ['cpuProfileActiveTime', 'total', 'ms'],
+      ['cpuProfileDuration', 'total', 'ms'],
+      ['cpuProfileSampleCount', 'total', 'count'],
+      ['largestContentfulPaint', 'total', 'ms'],
+      ['interactionToNextPaint', 'total', 'ms'],
+      ['cumulativeLayoutShift', 'total', 'score'],
+    ])('should classify %s as %s in %s', (metric, kind, unit) => {
+      expect(classifyMetric(metric)).toBe(kind);
+      expect(metricUnit(metric)).toBe(unit);
     });
   });
 
@@ -130,7 +206,11 @@ describe('Comparison presenter', () => {
           testName: 'test',
           order: 0,
           duration: 1,
-          metrics: {TaskDuration: {kind: 'cumulative', value, lower: value, upper: value, median: value, observations: 1}},
+          metrics: {
+            TaskDuration: {
+              kind: 'cumulative', value, lower: value, upper: value, median: value, observations: 1,
+            },
+          },
         },
       },
     });
@@ -141,7 +221,9 @@ describe('Comparison presenter', () => {
     ).find(comparison => comparison.metric === 'TaskDuration')!;
 
     it('should report changes above the relative threshold and outside the noise', () => {
-      expect(compare([1, 1.01, 0.99], 2)).toEqual(expect.objectContaining({status: 'increased', baselineMedian: 1, absoluteChange: 1, relativeChange: 1}));
+      expect(compare([1, 1.01, 0.99], 2)).toEqual(expect.objectContaining({
+        status: 'increased', baselineMedian: 1, absoluteChange: 1, relativeChange: 1,
+      }));
       expect(compare([1, 1.01, 0.99], 0.5).status).toBe('decreased');
       expect(compare([1, 1.01, 0.99], 1).status).toBe('unchanged');
     });
@@ -152,12 +234,34 @@ describe('Comparison presenter', () => {
 
     it('should classify changes within the noise of the baseline as noisy', () => {
       // Spread of the baseline is about 0.74, so a change of 30% has a z-score of about 0.4
-      expect(compare([1, 1.5, 0.5], 1.3)).toEqual(expect.objectContaining({status: 'noisy', relativeChange: expect.closeTo(0.3)}));
-      expect(compare([1, 1.5, 0.5], 1.3).zScore).toBeLessThan(2);
+      const comparison = compare([1, 1.5, 0.5], 1.3);
+
+      expect(comparison.status).toBe('noisy');
+      expect(comparison.relativeChange).toBeCloseTo(0.3);
+      expect(comparison.zScore).toBeLessThan(2);
     });
 
     it('should only use the relative threshold without enough baseline runs', () => {
       expect(compare([0.5, 1.5], 1.3).status).toBe('increased');
+    });
+
+    it('should only compare the configured metrics and the duration', () => {
+      const runWithHeap = (id: string) => {
+        const summary = run(id, 1);
+        summary.entities.case.metrics.JSHeapUsedSize = {
+          kind: 'gauge', value: 1, lower: 1, upper: 1, median: 1, observations: 1,
+        };
+        summary.entities.case.metrics.entityDuration = {
+          kind: 'cumulative', value: 1, lower: 1, upper: 1, median: 1, observations: 1,
+        };
+        return summary;
+      };
+
+      const comparisons = compareRuns([runWithHeap('current')], [runWithHeap('run-0')], {
+        minBaselineRuns: 3, relativeThreshold: 0.1, zScoreThreshold: 2, comparedMetrics: ['JSHeapUsedSize'],
+      });
+
+      expect(comparisons.map(comparison => comparison.metric)).toEqual(['JSHeapUsedSize', 'entityDuration']);
     });
 
     it('should not divide by a zero baseline', () => {
@@ -166,7 +270,9 @@ describe('Comparison presenter', () => {
   });
 
   describe('splitRuns', () => {
-    const runs = (count: number) => Array.from({length: count}, (_, index) => ({id: `run-${index}`, file: '', startedAt: index, entities: {}}));
+    const runs = (count: number) => Array.from({length: count}, (_, index) => ({
+      id: `run-${index}`, file: '', startedAt: index, entities: {},
+    }));
     const ids = (split: ReturnType<typeof splitRuns>) => ({recent: split.recent.map(run => run.id), baseline: split.baseline.map(run => run.id)});
     const settings = {recentRuns: 3, baselineWindow: 4, minBaselineRuns: 3};
 
@@ -186,8 +292,12 @@ describe('Comparison presenter', () => {
 
   describe('summarizeEntities', () => {
     it('should condense metrics independent of the amount of samples', () => {
-      const few = summarizeEntities(buildRun({start: 0, taskDuration: 1, heapSamples: [100, 100], networkRequests: 10, cpuActiveTime: 20}));
-      const many = summarizeEntities(buildRun({start: 0, taskDuration: 1, heapSamples: Array.from({length: 30}, () => 100), networkRequests: 10, cpuActiveTime: 20}));
+      const few = summarizeEntities(buildRun({
+        start: 0, taskDuration: 1, heapSamples: [100, 100], networkRequests: 10, cpuActiveTime: 20,
+      }), 0.05);
+      const many = summarizeEntities(buildRun({
+        start: 0, taskDuration: 1, heapSamples: Array.from({length: 30}, () => 100), networkRequests: 10, cpuActiveTime: 20,
+      }), 0.05);
       const stepKey = 'case|open page|0';
 
       expect(Object.keys(few)).toEqual(['case', stepKey, 'case|submit form|0']);
@@ -211,9 +321,11 @@ describe('Comparison presenter', () => {
         case: {step: performance('open page', {endMeasurement: time, endMeasurementOffset: 1, samplingMetrics: [target({JSHeapUsedSize: heap})]})},
       }) as ResultAccumulator;
       const withSamples = (samples: ResultAccumulator[]) => {
-        const run = buildRun({start: 0, taskDuration: 1, heapSamples: [100, 200], networkRequests: 10, cpuActiveTime: 20});
+        const run = buildRun({
+          start: 0, taskDuration: 1, heapSamples: [100, 200], networkRequests: 10, cpuActiveTime: 20,
+        });
         // Keep start and stop chunks, replace the evenly spaced samples
-        return summarizeEntities([...run.slice(0, 2), ...samples, ...run.slice(-4)])['case|open page|0'].metrics.JSHeapUsedSize;
+        return summarizeEntities([...run.slice(0, 2), ...samples, ...run.slice(-4)], 0.05)['case|open page|0'].metrics.JSHeapUsedSize;
       };
 
       const sparse = withSamples([sample(250, 100), sample(750, 200)]);
@@ -225,7 +337,9 @@ describe('Comparison presenter', () => {
     });
 
     it('should estimate the boundaries of a step from surrounding samples', () => {
-      const run = buildRun({start: 0, taskDuration: 1, heapSamples: [100, 100], networkRequests: 10, cpuActiveTime: 20});
+      const run = buildRun({
+        start: 0, taskDuration: 1, heapSamples: [100, 100], networkRequests: 10, cpuActiveTime: 20,
+      });
       const withoutNetwork = (stepIds: string[]) => summarizeEntities(run.map(chunk => {
         const copy = structuredClone(chunk);
         for (const stepId of stepIds) {
@@ -235,7 +349,7 @@ describe('Comparison presenter', () => {
         }
 
         return copy;
-      }))['case|open page|0'].metrics.totalNetworkRequests.value;
+      }), 0.05)['case|open page|0'].metrics.totalNetworkRequests.value;
 
       // Step boundaries are interpolated between the test boundaries and the samples
       expect(withoutNetwork(['step'])).toBeGreaterThan(9.5);
@@ -245,9 +359,11 @@ describe('Comparison presenter', () => {
     });
 
     it('should tolerate counter resets', () => {
-      const run = buildRun({start: 0, taskDuration: 1, heapSamples: [100, 100], networkRequests: 10, cpuActiveTime: 20});
+      const run = buildRun({
+        start: 0, taskDuration: 1, heapSamples: [100, 100], networkRequests: 10, cpuActiveTime: 20,
+      });
       run.splice(-4, 0, {case: {step: performance('open page', {endMeasurement: 900, endMeasurementOffset: 1, samplingMetrics: [target({TaskDuration: 0.25})]})}} as ResultAccumulator);
-      const entities = summarizeEntities(run);
+      const entities = summarizeEntities(run, 0.05);
 
       // 1 -> reset to 0.25 -> 2
       expect(entities['case|open page|0'].metrics.TaskDuration.value).toBeCloseTo(2);
@@ -263,7 +379,7 @@ describe('Comparison presenter', () => {
       writeHistory('object.json', {not: 'chunks'});
       writeHistory('notes.txt', 'ignored');
 
-      const history = await loadHistory(historyDir, ['JSHeapUsedSize', 'totalNetworkRequests'], [path.join(historyDir, 'object.json')]);
+      const history = await loadHistory(historyDir, ['JSHeapUsedSize', 'totalNetworkRequests'], [path.join(historyDir, 'object.json')], 0.05);
 
       expect(history.runs.map(run => run.id)).toEqual(['a-valid', 'b-valid']);
       expect(history.excluded).toEqual([
@@ -273,7 +389,7 @@ describe('Comparison presenter', () => {
     });
 
     it('should return an empty history for a missing directory', async () => {
-      expect(await loadHistory(path.join(historyDir, 'unknown'), [], [])).toEqual({runs: [], excluded: []});
+      expect(await loadHistory(path.join(historyDir, 'unknown'), [], [], 0.05)).toEqual({runs: [], excluded: []});
     });
   });
 
@@ -414,6 +530,14 @@ describe('Comparison presenter', () => {
       expect(fs.readdirSync(outputDir)).toEqual(['performance-comparison.html', 'performance-comparison.json']);
     });
 
+    it('should generate the reports only once', async () => {
+      const {presenter} = await runPresenter(buildRun(baselineInputs[0]));
+      fs.rmSync(path.join(outputDir, 'performance-comparison.json'));
+
+      expect(await presenter.close()).toBe(true);
+      expect(fs.existsSync(path.join(outputDir, 'performance-comparison.json'))).toBe(false);
+    });
+
     it('should remove the current run and reports on delete', async () => {
       const {presenter} = await runPresenter(buildRun(baselineInputs[0]));
 
@@ -435,7 +559,7 @@ describe('Comparison presenter', () => {
         writeHistory(`run-${index}.json`, buildRun(input));
       }
 
-      // cpuProfileActiveTime = 21 (baseline median = 20, spread ≈ 1.48),
+      // CpuProfileActiveTime = 21 (baseline median = 20, spread ≈ 1.48),
       // a 5% increase with a z-score of about 0.7
       const {report} = await runPresenter(buildRun({
         start: 10_000, taskDuration: 1, heapSamples: Array.from({length: 12}, () => 100), networkRequests: 10, cpuActiveTime: 21,

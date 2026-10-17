@@ -4,7 +4,6 @@ import {
   testCaseParent,
   type ResultAccumulator,
   type TargetMetric,
-  type TestPerformance,
 } from '../../types/index.js';
 import {
   classifyMetric,
@@ -12,12 +11,15 @@ import {
   ignoredMetrics,
 } from './constants.js';
 import {
+  median,
+  percentile,
+} from './comparison.js';
+import {
   type EntitySummary,
   type ExcludedRun,
   type MetricKind,
   type MetricSummary,
   type RunSummary,
-  type WebVitalsAttribution,
 } from './types.js';
 
 /**
@@ -217,30 +219,6 @@ function computeTimeWeightedMean(points: Point[]): number {
 }
 
 /**
- * Median of a list of numbers
- *
- * @param values list of numbers
- */
-function median(values: number[]): number {
-  return percentile(values, 0.5);
-}
-
-/**
- * Value below which a given fraction of the observations falls
- *
- * @param values list of numbers
- * @param fraction between 0 and 1
- */
-function percentile(values: number[], fraction: number): number {
-  const sorted = [...values].sort((a, b) => a - b);
-  const index = (sorted.length - 1) * fraction;
-  const lower = Math.floor(index);
-  const upper = Math.ceil(index);
-  const weight = index - lower;
-  return (sorted[lower] * (1 - weight)) + (sorted[upper] * weight);
-}
-
-/**
  * Condense a metric within the time window of a test or step.
  * The boundaries are estimated from the surrounding observations, so the result doesn't depend on
  * how many samples were taken within the window.
@@ -344,28 +322,12 @@ function timeWindowOf(raw: RawEntity): {start: number; end: number} {
 }
 
 /**
- * Latest Web Vitals attribution observed for an entity, if any
- *
- * @param observations observations of an entity
- */
-function extractAttribution(observations: Observation[]): WebVitalsAttribution | undefined {
-  for (const observation of [...observations].reverse()) {
-    const {attribution} = observation.metric;
-    if (attribution && typeof attribution === 'object') {
-      return attribution as WebVitalsAttribution;
-    }
-  }
-
-  return undefined;
-}
-
-/**
  * Condense the chunks of a run into comparable entities
  *
  * @param chunks json chunks of a run
  * @param bandPercentile percentile of the lower band
  */
-export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile = 0.05): Record<string, EntitySummary> {
+export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile: number): Record<string, EntitySummary> {
   const rawEntities = mergeChunks(chunks);
   const metricTimelines = new Map<string, Point[][]>();
   for (const metrics of buildTimelines(rawEntities).values()) {
@@ -410,7 +372,7 @@ export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile = 
     Object.assign(metrics, summarizeTotals(raw.observations, bandPercentile));
 
     const key = isTest ? raw.caseId : `${raw.caseId}|${raw.name}|${occurrence}`;
-    const summary: EntitySummary = {
+    entities[key] = {
       key,
       kind: isTest ? 'test' : 'step',
       testId: raw.caseId,
@@ -421,12 +383,6 @@ export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile = 
       duration,
       metrics,
     };
-    const attribution = extractAttribution(raw.observations);
-    if (attribution) {
-      summary.attribution = attribution;
-    }
-
-    entities[key] = summary;
   }
 
   return entities;
@@ -439,7 +395,7 @@ export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile = 
  * @param requiredMetrics metrics that have to be present
  * @param bandPercentile percentile of the lower band
  */
-export async function loadRun(filePath: string, requiredMetrics: string[], bandPercentile = 0.05): Promise<LoadedRun> {
+export async function loadRun(filePath: string, requiredMetrics: string[], bandPercentile: number): Promise<LoadedRun> {
   const file = path.basename(filePath);
   let chunks: unknown;
   try {
@@ -485,7 +441,7 @@ export async function loadRun(filePath: string, requiredMetrics: string[], bandP
  * @param ignoredPaths files that are not part of the history
  * @param bandPercentile percentile of the lower band
  */
-export async function loadHistory(historyDir: string, requiredMetrics: string[], ignoredPaths: string[], bandPercentile = 0.05): Promise<{runs: RunSummary[]; excluded: ExcludedRun[]}> {
+export async function loadHistory(historyDir: string, requiredMetrics: string[], ignoredPaths: string[], bandPercentile: number): Promise<{runs: RunSummary[]; excluded: ExcludedRun[]}> {
   const runs: RunSummary[] = [];
   const excluded: ExcludedRun[] = [];
   const ignored = new Set(ignoredPaths.map(filePath => path.resolve(filePath)));

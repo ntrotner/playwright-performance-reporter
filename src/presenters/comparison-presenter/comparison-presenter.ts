@@ -6,7 +6,6 @@ import {
 } from '../../types/index.js';
 import {
   assignConfig,
-  Lock,
   Logger,
 } from '../../helpers/index.js';
 import {
@@ -29,14 +28,16 @@ import {
   type ComparisonPresenterOptions,
   type ComparisonReport,
   type ExcludedRun,
-  type MetricComparison,
   type RunSummary,
   type StepComparison,
 } from './types.js';
 
+/**
+ * Compare the current run against previous runs and write a json and html report
+ */
 export class ComparisonPresenter implements PresenterWriter {
   /**
-   * Writer of the current run into the history, created on the first write.
+   * Writer of the current run into the history, created on the first write
    */
   private jsonChunkPresenter: JsonChunkPresenter | undefined;
 
@@ -46,14 +47,14 @@ export class ComparisonPresenter implements PresenterWriter {
   private history: Promise<{runs: RunSummary[]; excluded: ExcludedRun[]}> | undefined;
 
   /**
-   * Result of closing, to avoid generating the reports twice
+   * Result of closing, to generate the reports only once
    */
-  private readonly compareLock = new Lock();
+  private closing: Promise<boolean> | undefined;
 
   /**
-   * File name of the current run, computed once so write and read agree
+   * File name of the current run in the history
    */
-  private runPath: string | undefined;
+  private readonly runFile: string;
 
   /**
    * Settings for the comparison builder
@@ -86,10 +87,11 @@ export class ComparisonPresenter implements PresenterWriter {
     runFilePrefix: 'performance-run',
     runSortValue: ((run: RunSummary) => run.startedAt),
     runLabel: ((run: RunSummary) => new Date(run.startedAt).toLocaleString()),
-  } as const;
+  };
 
-  constructor(options: Partial<ComparisonPresenterOptions>) {
+  constructor(options: ComparisonPresenterOptions) {
     assignConfig(this.options, options);
+    this.runFile = `${this.options.runFilePrefix}-${new Date().toISOString().replaceAll(':', '-')}.json`;
 
     fs.mkdirSync(this.options.historyDir, {recursive: true});
     fs.mkdirSync(this.options.outputDir, {recursive: true});
@@ -117,35 +119,8 @@ export class ComparisonPresenter implements PresenterWriter {
    * Finish the current run and generate the comparison
    */
   async close(): Promise<boolean> {
-    const unlock = this.compareLock.lock();
-    if (!unlock) {
-      return false;
-    }
-
-    if (!this.jsonChunkPresenter) {
-      // Nothing was measured, so there is nothing to compare
-      unlock();
-      return true;
-    }
-
-    const isClosed = await this.jsonChunkPresenter.close();
-    if (!isClosed) {
-      unlock();
-      return false;
-    }
-
-    try {
-      const {report, runs} = await this.compare();
-      await fs.promises.writeFile(this.getJsonReportPath(), JSON.stringify(report, null, 2));
-      await fs.promises.writeFile(this.getVisualReportPath(), renderComparisonHtml(report, runs, {sortValue: this.options.runSortValue, label: this.options.runLabel}));
-      Logger.info(report.message);
-      return true;
-    } catch (error) {
-      Logger.error(`Failed to compare runs: ${String(error)}`);
-      return false;
-    } finally {
-      unlock();
-    }
+    this.closing ??= this.finish();
+    return this.closing;
   }
 
   /**
@@ -159,7 +134,7 @@ export class ComparisonPresenter implements PresenterWriter {
 
     await this.close();
 
-    for (const filePath of [path.join(this.options.historyDir, this.getRunPath()), this.getVisualReportPath(), this.getJsonReportPath()]) {
+    for (const filePath of [this.getRunPath(), this.getVisualReportPath(), this.getJsonReportPath()]) {
       fs.rmSync(filePath, {force: true, maxRetries: 5, retryDelay: 500});
     }
 
@@ -170,18 +145,42 @@ export class ComparisonPresenter implements PresenterWriter {
    * Read the history and create the json chunk file of the current run
    */
   private initialize(): JsonChunkPresenter {
-    const ignoredPaths = [path.join(this.options.historyDir, this.getRunPath()), this.getVisualReportPath(), this.getJsonReportPath()];
-    this.history ??= loadHistory(this.options.historyDir, this.settings.requiredMetrics, ignoredPaths, this.settings.bandPercentile);
-    this.jsonChunkPresenter ??= new JsonChunkPresenter({outputDir: this.options.historyDir, outputFile: this.getRunPath()});
+    this.history ??= loadHistory(this.options.historyDir, this.settings.requiredMetrics, [this.getRunPath(), this.getVisualReportPath(), this.getJsonReportPath()], this.settings.bandPercentile);
+    this.jsonChunkPresenter ??= new JsonChunkPresenter({outputDir: this.options.historyDir, outputFile: this.runFile});
     return this.jsonChunkPresenter;
+  }
+
+  /**
+   * Close the current run and write the reports
+   */
+  private async finish(): Promise<boolean> {
+    if (!this.jsonChunkPresenter) {
+      // Nothing was measured, so there is nothing to compare
+      return true;
+    }
+
+    if (!await this.jsonChunkPresenter.close()) {
+      return false;
+    }
+
+    try {
+      const {report, runs} = await this.compare();
+      await fs.promises.writeFile(this.getJsonReportPath(), JSON.stringify(report, null, 2));
+      await fs.promises.writeFile(this.getVisualReportPath(), renderComparisonHtml(report, runs, {sortValue: this.options.runSortValue, label: this.options.runLabel}));
+      Logger.info(report.message);
+      return true;
+    } catch (error) {
+      Logger.error(`Failed to compare runs: ${String(error)}`);
+      return false;
+    }
   }
 
   /**
    * Compare current run against the history
    */
-  private async compare(): Promise<{report: ComparisonReport; comparisons: MetricComparison[]; runs: RunSummary[]}> {
+  private async compare(): Promise<{report: ComparisonReport; runs: RunSummary[]}> {
     const history = await this.history!;
-    const loaded = await loadRun(path.join(this.options.historyDir, this.getRunPath()), this.settings.requiredMetrics, this.settings.bandPercentile);
+    const loaded = await loadRun(this.getRunPath(), this.settings.requiredMetrics, this.settings.bandPercentile);
 
     const report: ComparisonReport = {
       schemaVersion: 1,
@@ -199,7 +198,7 @@ export class ComparisonPresenter implements PresenterWriter {
       const missing = loaded.excluded.missingMetrics ? ` (${loaded.excluded.missingMetrics.join(', ')})` : '';
       report.status = 'invalid-current-run';
       report.message = `Current run can't be compared: ${loaded.excluded.reason}${missing}. Make sure the observers of these metrics are configured.`;
-      return {report, comparisons: [], runs: []};
+      return {report, runs: []};
     }
 
     const current = loaded.run;
@@ -226,7 +225,7 @@ export class ComparisonPresenter implements PresenterWriter {
       }
     }
 
-    return {report, comparisons, runs: [...baseline, ...recent]};
+    return {report, runs: [...baseline, ...recent]};
   }
 
   private getVisualReportPath(): string {
@@ -238,7 +237,6 @@ export class ComparisonPresenter implements PresenterWriter {
   }
 
   private getRunPath(): string {
-    this.runPath ??= `${this.options.runFilePrefix}-${new Date().toISOString().replaceAll(':', '-')}.json`;
-    return this.runPath;
+    return path.join(this.options.historyDir, this.runFile);
   }
 }

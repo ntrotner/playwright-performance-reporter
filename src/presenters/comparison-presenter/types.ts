@@ -159,26 +159,6 @@ export type ComparisonEntity = {
 };
 
 /**
- * Attribution of a single Web Vital, explaining what caused the value
- */
-export type WebVitalsAttribution = {
-  /**
-   * Element that triggered the largest contentful paint
-   */
-  lcp?: {elementTag?: string; url?: string};
-
-  /**
-   * Source of the largest layout shift
-   */
-  cls?: {source?: string};
-
-  /**
-   * Interaction type of the slowest interaction to next paint
-   */
-  inp?: {interactionType?: string};
-};
-
-/**
  * Condensed metrics of an entity in a single run
  */
 export type EntitySummary = ComparisonEntity & {
@@ -187,11 +167,6 @@ export type EntitySummary = ComparisonEntity & {
    */
   duration: number;
   metrics: Record<string, MetricSummary>;
-
-  /**
-   * Non-numeric attribution of the Web Vitals, when captured for this entity
-   */
-  attribution?: WebVitalsAttribution;
 };
 
 /**
