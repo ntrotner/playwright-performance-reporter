@@ -12,6 +12,7 @@ const PlaywrightPerformanceReporterOptions: Options = {
       historyDir: './performance-history',
       outputDir: './',
       visualReportOutputFile: 'example-comparison.html',
+      jsonReportOutputFile: 'example-comparison.json',
       bandPercentile: 0.15
     })
   ],
