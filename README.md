@@ -82,6 +82,7 @@ Following metrics are supported out of the box:
 - allPerformanceMetrics
 - heapDump
 - heapProfilerSampling
+- navigationTiming
 
 The `MetricsEngine` relies on the [Chrome DevTool Protocol (CDP)](https://chromedevtools.github.io/devtools-protocol/),
 which can be accessed through HTTP and WebSocket. To allow for a connection, make sure to expose a port for the remote debugging.
@@ -101,6 +102,25 @@ The reporter will try to extract that port during start-up.
   }
 },
 ```
+
+#### Navigation Timing
+`navigationTiming` reads the [Navigation Timing](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceNavigationTiming) of the current document,
+which separates server latency from network and rendering time. All durations are in milliseconds:
+- `timeToFirstByte`: time from the navigation start until the first byte of the response
+- `redirectTime`, `dnsLookupTime`, `tcpConnectTime`, `tlsTime`: phases of the connection
+- `requestTime`: server response time, from sending the request until the first byte
+- `responseTime`: time to download the response
+- `domContentLoadedTime`, `domCompleteTime`, `loadEventTime`: load milestones since the navigation start, which can be disabled with `includeLoadMilestones: false`
+- `nextHopProtocol`, `navigationTransferSize`, `navigationEncodedBodySize`, `navigationDecodedBodySize`: protocol and sizes of the document, which can be disabled with `includeSizes: false`
+
+```ts
+onTestStep: {
+  metrics: [new nativeChromiumObservers.navigationTiming({includeSizes: false})],
+}
+```
+
+The values describe the latest navigation, so a step without navigation reports the previous document.
+Cross-origin documents without a `Timing-Allow-Origin` header report most phases as `0`.
 
 ## Advanced Configurations
 

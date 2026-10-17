@@ -20,14 +20,16 @@ const PlaywrightPerformanceReporterOptions: Options = {
       onTest: {
         metrics: [
           new nativeChromiumObservers.allPerformanceMetrics(),
-          new nativeChromiumObservers.webVitals()
+          new nativeChromiumObservers.webVitals(),
+          new nativeChromiumObservers.navigationTiming()
         ],
       },
       onTestStep: {
         metrics: [
           new nativeChromiumObservers.allPerformanceMetrics(),
           new nativeChromiumObservers.cpuProfiler({triggerGarbageCollectionOnObserve: false}),
-          new nativeChromiumObservers.webVitals()
+          new nativeChromiumObservers.webVitals(),
+          new nativeChromiumObservers.navigationTiming()
         ],
       },
       sampling: {

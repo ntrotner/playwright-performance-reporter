@@ -14,6 +14,9 @@ import {
   HeapProfilerSampling,
 } from './heap-profiler-sampling.js';
 import {
+  NavigationTimingObserver,
+} from './navigation-timing.js';
+import {
   NetworkActivityObserver,
 } from './network-activity.js';
 import {
@@ -32,6 +35,7 @@ export const nativeChromiumObservers = {
   heapDump: HeapDump,
   heapObjectsTracking: HeapObjectsTracking,
   heapProfilerSampling: HeapProfilerSampling,
+  navigationTiming: NavigationTimingObserver,
   networkActivity: NetworkActivityObserver,
   totalJsHeapSize: TotalJsHeapSize,
   usedJsHeapSize: UsedJsHeapSize,

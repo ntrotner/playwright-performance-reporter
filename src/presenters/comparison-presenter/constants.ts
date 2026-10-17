@@ -19,6 +19,22 @@ export const webVitalsMetrics = new Set([
 ]);
 
 /**
+ * Durations of the Navigation Timing, which describe the latest document, so only their latest value matters
+ */
+export const navigationTimingMetrics = new Set([
+  'timeToFirstByte',
+  'redirectTime',
+  'dnsLookupTime',
+  'tcpConnectTime',
+  'tlsTime',
+  'requestTime',
+  'responseTime',
+  'domContentLoadedTime',
+  'domCompleteTime',
+  'loadEventTime',
+]);
+
+/**
  * Google's official "good" and "poor" thresholds per Web Vital.
  * Values between `good` and `poor` are "needs improvement".
  */
@@ -55,7 +71,7 @@ export const madScaleFactor = 1.4826;
  * @param metricName name of the metric
  */
 export function classifyMetric(metricName: string): MetricKind {
-  if (metricName.startsWith(totalMetricPrefix) || webVitalsMetrics.has(metricName)) {
+  if (metricName.startsWith(totalMetricPrefix) || webVitalsMetrics.has(metricName) || navigationTimingMetrics.has(metricName)) {
     return 'total';
   }
 
@@ -87,7 +103,7 @@ export function metricUnit(metricName: string): MetricUnit {
     return 'score';
   }
 
-  if (millisecondMetrics.has(metricName) || (metricName.startsWith(totalMetricPrefix) && /(?:Duration|Time)$/.test(metricName))) {
+  if (millisecondMetrics.has(metricName) || navigationTimingMetrics.has(metricName) || (metricName.startsWith(totalMetricPrefix) && /(?:Duration|Time)$/.test(metricName))) {
     return 'ms';
   }
 
