@@ -284,7 +284,7 @@ const PlaywrightPerformanceReporterOptions: Options = {
 
 - `metric`: key of the metric as written in `stopMetrics[].metric`
 - `max` / `min`: fail if any matching value is above / below the bound (at least one is required)
-- `namePattern`: glob matched against the name of the test or step, e.g. `" > chromium > profile.spec.ts > Profile"` (default `*`)
+- `namePattern`: glob matched against the name of the test or step (default `*`). A test is named by its title path, e.g. `" > chromium > profile.spec.ts > Profile"`, a step only by its title, e.g. `"Open profile"`
 
 A violation is logged as `Budget violation: metric "largestContentfulPaint" = 3120.5 > 2500 (ms) (test: "...")`.
 Invalid rules throw when the reporter is created. A metric that was never measured only logs a warning, so make sure
