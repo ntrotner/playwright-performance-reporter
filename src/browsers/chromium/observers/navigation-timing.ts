@@ -95,7 +95,7 @@ export class NavigationTimingObserver implements ChromiumMetricObserver {
       redirectTime: entry.redirectEnd - entry.redirectStart,
       dnsLookupTime: entry.domainLookupEnd - entry.domainLookupStart,
       tcpConnectTime: entry.connectEnd - entry.connectStart,
-      tlsTime: entry.secureConnectionStart > 0 ? entry.requestStart - entry.secureConnectionStart : 0,
+      tlsTime: entry.secureConnectionStart > 0 ? entry.connectEnd - entry.secureConnectionStart : 0,
       requestTime: entry.responseStart - entry.requestStart,
       responseTime: entry.responseEnd - entry.responseStart,
       domContentLoadedTime: entry.domContentLoadedEventEnd - entry.startTime,
