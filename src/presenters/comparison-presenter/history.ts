@@ -11,7 +11,6 @@ import {
   ignoredMetrics,
 } from './constants.js';
 import {
-  median,
   percentile,
 } from './comparison.js';
 import {
@@ -219,9 +218,34 @@ function computeTimeWeightedMean(points: Point[]): number {
 }
 
 /**
+ * Percentile of weighted values, e.g. weighted by the time they were observed for
+ *
+ * @param values list of numbers
+ * @param weights weight of each value
+ * @param fraction between 0 and 1
+ */
+function weightedPercentile(values: number[], weights: number[], fraction: number): number {
+  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+  if (totalWeight <= 0) {
+    return percentile(values, fraction);
+  }
+
+  const order = [...values.keys()].sort((a, b) => values[a] - values[b]);
+  let cumulativeWeight = 0;
+  for (const index of order) {
+    cumulativeWeight += weights[index];
+    if (cumulativeWeight >= fraction * totalWeight) {
+      return values[index];
+    }
+  }
+
+  return values[order.at(-1)!];
+}
+
+/**
  * Condense a metric within the time window of a test or step.
- * The boundaries are estimated from the surrounding observations, so the result doesn't depend on
- * how many samples were taken within the window.
+ * The boundaries are estimated from the surrounding observations and gauges are weighted by time,
+ * so the result doesn't depend on how many samples were taken within the window.
  *
  * @param metricName name of the metric
  * @param pointsPerTarget observations of the metric for each target
@@ -232,8 +256,9 @@ function summarizeMetric(metricName: string, pointsPerTarget: Point[][], metricW
   const {start, end} = metricWindow;
   const kind = classifyMetric(metricName);
   const values: number[] = [];
+  const weights: number[] = [];
   let value = 0;
-  let hasValue = false;
+  let observations = 0;
 
   for (const points of pointsPerTarget) {
     const inside = points.filter(point => point.time >= start && point.time <= end);
@@ -247,24 +272,39 @@ function summarizeMetric(metricName: string, pointsPerTarget: Point[][], metricW
       ...inside,
       {time: end, value: valueAt(points, end, kind)},
     ];
-    value += kind === 'cumulative' ? computeGrowth(window.map(point => point.value)) : computeTimeWeightedMean(window);
-    values.push(...(inside.length > 0 ? inside : window).map(point => point.value));
-    hasValue = true;
+    observations += inside.length > 0 ? inside.length : window.length;
+    if (kind === 'cumulative') {
+      value += computeGrowth(window.map(point => point.value));
+      continue;
+    }
+
+    value += computeTimeWeightedMean(window);
+    for (const [index, point] of window.entries()) {
+      values.push(point.value);
+      weights.push((window[Math.min(index + 1, window.length - 1)].time - window[Math.max(index - 1, 0)].time) / 2);
+    }
   }
 
-  if (!hasValue) {
+  if (observations === 0) {
     return undefined;
   }
 
   const duration = end - start;
+  // The growth of a counter has no spread within the entity
+  const band = kind === 'cumulative'
+    ? {lower: value, median: value, upper: value}
+    : {
+      lower: weightedPercentile(values, weights, bandPercentile),
+      median: weightedPercentile(values, weights, 0.5),
+      upper: weightedPercentile(values, weights, 1 - bandPercentile),
+    };
+
   return {
     kind,
     value,
     rate: kind === 'cumulative' && duration > 0 ? value / (duration / 1000) : undefined,
-    lower: percentile(values, bandPercentile),
-    upper: percentile(values, 1 - bandPercentile),
-    median: median(values),
-    observations: values.length,
+    ...band,
+    observations,
   };
 }
 
@@ -273,9 +313,8 @@ function summarizeMetric(metricName: string, pointsPerTarget: Point[][], metricW
  * They only come from the own observations, as neighboring steps measure their own totals.
  *
  * @param observations observations of an entity
- * @param bandPercentile percentile of the lower band
  */
-function summarizeTotals(observations: Observation[], bandPercentile: number): Record<string, MetricSummary> {
+function summarizeTotals(observations: Observation[]): Record<string, MetricSummary> {
   // Latest value per target, summed across targets
   const latest = new Map<string, Map<string, Point>>();
   for (const observation of observations) {
@@ -295,14 +334,9 @@ function summarizeTotals(observations: Observation[], bandPercentile: number): R
 
   const totals: Record<string, MetricSummary> = {};
   for (const [metricName, perTarget] of latest) {
-    const values = [...perTarget.values()].map(point => point.value);
+    const value = [...perTarget.values()].reduce((sum, point) => sum + point.value, 0);
     totals[metricName] = {
-      kind: 'total',
-      value: values.reduce((sum, value) => sum + value, 0),
-      lower: percentile(values, bandPercentile),
-      upper: percentile(values, 1 - bandPercentile),
-      median: median(values),
-      observations: values.length,
+      kind: 'total', value, lower: value, upper: value, median: value, observations: perTarget.size,
     };
   }
 
@@ -369,7 +403,7 @@ export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile: n
       }
     }
 
-    Object.assign(metrics, summarizeTotals(raw.observations, bandPercentile));
+    Object.assign(metrics, summarizeTotals(raw.observations));
 
     const key = isTest ? raw.caseId : `${raw.caseId}|${raw.name}|${occurrence}`;
     entities[key] = {

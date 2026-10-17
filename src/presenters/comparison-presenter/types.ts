@@ -114,17 +114,17 @@ export type MetricSummary = {
   rate?: number;
 
   /**
-   * Lower percentile (`bandPercentile`) of the observations within the entity
+   * Lower percentile (`bandPercentile`) of a gauge within the entity, weighted by time. Otherwise the value.
    */
   lower: number;
 
   /**
-   * Upper percentile (1 - `bandPercentile`) of the observations within the entity
+   * Upper percentile (1 - `bandPercentile`) of a gauge within the entity, weighted by time. Otherwise the value.
    */
   upper: number;
 
   /**
-   * Median of the observations within the entity, always between `lower` and `upper`
+   * Median of a gauge within the entity, weighted by time. Otherwise the value.
    */
   median: number;
 

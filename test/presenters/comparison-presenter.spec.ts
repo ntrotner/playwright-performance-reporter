@@ -306,7 +306,10 @@ describe('Comparison presenter', () => {
         expect(many[stepKey].metrics[metric].value).toBeCloseTo(few[stepKey].metrics[metric].value);
       }
 
-      expect(few[stepKey].metrics.TaskDuration).toEqual(expect.objectContaining({kind: 'cumulative', value: 1, rate: 1}));
+      // Band of a counter is its growth, not the absolute counter values
+      expect(few[stepKey].metrics.TaskDuration).toEqual(expect.objectContaining({
+        kind: 'cumulative', value: 1, rate: 1, lower: 1, median: 1, upper: 1,
+      }));
       expect(few[stepKey].metrics.JSHeapUsedSize.kind).toBe('gauge');
       // Totals only belong to the step that measured them
       expect(few[stepKey].metrics.cpuProfileActiveTime).toEqual(expect.objectContaining({kind: 'total', value: 20}));
@@ -334,6 +337,22 @@ describe('Comparison presenter', () => {
       expect(sparse.value).toBeCloseTo(151);
       expect(dense.value).toBeCloseTo(sparse.value);
       expect(dense.observations).toBeGreaterThan(sparse.observations);
+      expect(sparse).toEqual(expect.objectContaining({lower: 100, upper: 200}));
+      expect([dense.lower, dense.median, dense.upper]).toEqual([sparse.lower, sparse.median, sparse.upper]);
+    });
+
+    it('should condense a step without duration', () => {
+      const run = buildRun({
+        start: 0, taskDuration: 1, heapSamples: [100, 200], networkRequests: 10, cpuActiveTime: 20,
+      });
+      run.at(-2)!.case.second.endMeasurement = run.at(-3)!.case.second.startMeasurement;
+      const {metrics} = summarizeEntities(run, 0.05)['case|submit form|0'];
+
+      expect(metrics.entityDuration.value).toBe(0);
+      expect(metrics.JSHeapUsedSize).toEqual(expect.objectContaining({
+        value: 200, lower: 200, median: 200, upper: 200,
+      }));
+      expect(metrics.TaskDuration.rate).toBeUndefined();
     });
 
     it('should estimate the boundaries of a step from surrounding samples', () => {
@@ -386,6 +405,15 @@ describe('Comparison presenter', () => {
         {file: 'missing.json', reason: 'Missing required metrics', missingMetrics: ['totalNetworkRequests']},
         expect.objectContaining({file: 'truncated.json'}),
       ]);
+    });
+
+    it('should date a run without measurements by its file', async () => {
+      writeHistory('empty.json', []);
+      const {mtimeMs} = fs.statSync(path.join(historyDir, 'empty.json'));
+
+      const {runs} = await loadHistory(historyDir, [], [], 0.05);
+
+      expect(runs).toEqual([expect.objectContaining({id: 'empty', startedAt: mtimeMs, entities: {}})]);
     });
 
     it('should return an empty history for a missing directory', async () => {
