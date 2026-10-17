@@ -3,6 +3,7 @@ import {
   nativeChromiumObservers,
 } from '../browsers/chromium/observers/index.js';
 import {
+  type BudgetOptions,
   type MeasurePlugin,
   type OnSamplingMeasure,
   type OnStartMeasure,
@@ -119,6 +120,12 @@ export type Options = {
 
   presenters?: PresenterWriter[];
   browsers: BrowserOptions;
+
+  /**
+   * Performance budgets enforced against the final ("onStop") metrics.
+   * Omit to keep the reporter passive.
+   */
+  budgets?: BudgetOptions;
 };
 
 export const defaultOptions: Options = {

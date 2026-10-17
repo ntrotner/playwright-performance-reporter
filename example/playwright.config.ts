@@ -15,6 +15,12 @@ const PlaywrightPerformanceReporterOptions: Options = {
       bandPercentile: 0.15
     })
   ],
+  budgets: {
+    // Fails the run if any test or step exceeds the threshold, which is set high to keep the example green
+    rules: [
+      {metric: 'largestContentfulPaint', max: 10000},
+    ],
+  },
   browsers: {
     chromium: {
       onTest: {

@@ -24,8 +24,12 @@ import {
   type BrowserDeveloperToolsClient,
   type MetricObserver,
   type MetricSampling,
+  type BudgetSample,
 } from '../types/index.js';
 import {
+  evaluateBudgets,
+  formatBudgetViolation,
+  validateBudgetRules,
   buildTestCaseIdentifier,
   buildTestPerformance,
   buildTestStepIdentifier,
@@ -77,9 +81,18 @@ export class PerformanceReporter implements Reporter {
     ['onTestStep', new Map()],
   ]);
 
+  /**
+   * Final metrics of tests and steps, used to evaluate budgets
+   */
+  private readonly budgetStore: BudgetSample[] = [];
+
   constructor(private readonly options: Options) {
     if (options.maxListeners !== undefined) {
       EventEmitter.setMaxListeners(options.maxListeners);
+    }
+
+    if (options.budgets) {
+      validateBudgetRules(options.budgets.rules);
     }
 
     this.metricsEngine = new MetricsEngine();
@@ -96,6 +109,9 @@ export class PerformanceReporter implements Reporter {
   onBegin(config: FullConfig, suite: Suite) {}
 
   async onEnd(result: FullResult) {
+    // Enforce budgets before closing presenters, so a failing presenter can't skip it
+    this.enforceBudgets(result);
+
     let closeStatus: boolean;
 
     try {
@@ -106,7 +122,7 @@ export class PerformanceReporter implements Reporter {
 
     if (!closeStatus) {
       Logger.error('Error writing report');
-      return;
+      return {status: result.status};
     }
 
     if (result.status !== 'passed' && this.options.deleteOnFailure) {
@@ -115,6 +131,8 @@ export class PerformanceReporter implements Reporter {
     } else {
       Logger.info('Successfully closed presenters');
     }
+
+    return {status: result.status};
   }
 
   async onTestBegin(test: TestCase, result: TestResult) {
@@ -165,6 +183,7 @@ export class PerformanceReporter implements Reporter {
     this.destroySamplingRunner(id, testCaseParent, 'onTest');
     const results = this.createTestPerformance(id, testCaseParent, name);
     await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onStop', browserName);
+    this.captureFinalMetrics(results);
     this.metricsEngine.destroy();
     await this.writeToPresenters(results);
   }
@@ -220,6 +239,7 @@ export class PerformanceReporter implements Reporter {
     this.destroySamplingRunner(caseIdentifier.id, stepIdentifier.id, 'onTestStep');
     const results = this.createTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
     await this.executeMetrics(results, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStop', browserName);
+    this.captureFinalMetrics(results);
     await this.writeToPresenters(results);
   }
 
@@ -246,6 +266,59 @@ export class PerformanceReporter implements Reporter {
    */
   private async deleteFromPresenters(): Promise<void> {
     await Promise.allSettled(this.presenters.map(async presenter => presenter.delete()));
+  }
+
+  /**
+   * Retain the final metrics that budgets refer to, without keeping large payloads like heap dumps in memory
+   *
+   * @param results result accumulator after the 'onStop' measurement
+   */
+  private captureFinalMetrics(results: ResultAccumulator) {
+    if (!this.options.budgets) {
+      return;
+    }
+
+    const budgetMetrics = this.options.budgets.rules.map(rule => rule.metric);
+    for (const steps of Object.values(results)) {
+      for (const performance of Object.values(steps)) {
+        for (const targetMetric of performance.stopMetrics) {
+          const metric = Object.fromEntries(budgetMetrics
+            .filter(key => Object.hasOwn(targetMetric.metric, key))
+            .map(key => [key, targetMetric.metric[key]]));
+          this.budgetStore.push({name: performance.name, metric});
+        }
+      }
+    }
+  }
+
+  /**
+   * Evaluate budgets and fail the run on violations, if configured.
+   * The status is also returned from `onEnd`, as Playwright may pass a copy of the result.
+   *
+   * @param result result of the full test run
+   */
+  private enforceBudgets(result: FullResult) {
+    if (!this.options.budgets) {
+      return;
+    }
+
+    try {
+      const shouldFail = (this.options.budgets.onViolation ?? 'fail') === 'fail';
+      const violations = evaluateBudgets(this.budgetStore, this.options.budgets.rules);
+      for (const violation of violations) {
+        if (shouldFail) {
+          Logger.error(formatBudgetViolation(violation));
+        } else {
+          Logger.warning(formatBudgetViolation(violation));
+        }
+      }
+
+      if (shouldFail && violations.length > 0 && result.status === 'passed') {
+        result.status = 'failed';
+      }
+    } catch (error) {
+      Logger.error('Error evaluating budgets', String(error));
+    }
   }
 
   /**
