@@ -41,6 +41,9 @@ import {
   UsedJsHeapSize,
 } from './used-js-heap-size.js';
 import {
+  UserTimingObserver,
+} from './user-timing.js';
+import {
   WebVitalsObserver,
 } from './web-vitals.js';
 
@@ -59,5 +62,6 @@ export const nativeChromiumObservers = {
   totalJsHeapSize: TotalJsHeapSize,
   traceCapture: TraceCaptureObserver,
   usedJsHeapSize: UsedJsHeapSize,
+  userTiming: UserTimingObserver,
   webVitals: WebVitalsObserver,
 } as const;

@@ -63,6 +63,8 @@ export const ignoredMetrics = new Set([
   'traceDataLoss',
   // Constant flag whether the browser supports long animation frames
   'loafSupported',
+  // Bound of the output of the user timing observer, not a measurement
+  'userTimingDroppedNames',
 ]);
 
 /**
@@ -92,12 +94,17 @@ export const webVitalsAttributionMetrics = new Set([
 ]);
 
 /**
+ * Prefix of the marks, measures and element timings of the user timing observer, e.g. `userTiming:measure:editor-ready`
+ */
+export const userTimingMetricPrefix = 'userTiming:';
+
+/**
  * Decide on how to condense a metric
  *
  * @param metricName name of the metric
  */
 export function classifyMetric(metricName: string): MetricKind {
-  if (metricName.startsWith(totalMetricPrefix) || isRequestDuration(metricName) || metricName === 'performanceScore' || webVitalsMetrics.has(metricName) || webVitalsAttributionMetrics.has(metricName) || navigationTimingMetrics.has(metricName)) {
+  if (metricName.startsWith(totalMetricPrefix) || metricName.startsWith(userTimingMetricPrefix) || isRequestDuration(metricName) || metricName === 'performanceScore' || webVitalsMetrics.has(metricName) || webVitalsAttributionMetrics.has(metricName) || navigationTimingMetrics.has(metricName)) {
     return 'total';
   }
 
@@ -150,6 +157,11 @@ export function metricUnit(metricName: string): MetricUnit {
   // Area of the largest contentful paint in pixels
   if (metricName === 'lcpSize') {
     return 'count';
+  }
+
+  // Names are chosen by the application, so their suffix says nothing about the unit
+  if (metricName.startsWith(userTimingMetricPrefix)) {
+    return 'ms';
   }
 
   if (/(?:Size|Bytes)$/.test(metricName)) {
