@@ -29,6 +29,8 @@ import {
   type BudgetSample,
   type AppliedConditions,
   supportedBrowsers,
+  type BudgetViolation,
+  type RunMetadata,
 } from '../types/index.js';
 import {
   evaluateBudgets,
@@ -40,6 +42,7 @@ import {
   buildTestStepIdentifier,
   Logger,
   createStepFilter,
+  collectRunMetadata,
 } from '../helpers/index.js';
 import {
   nativePresenters,
@@ -139,6 +142,11 @@ export class PerformanceReporter implements Reporter {
    */
   private readonly isMeasuredStep: (step: TestStep) => boolean;
 
+  /**
+   * Information about the run, written to every test
+   */
+  private readonly metadata: RunMetadata;
+
   constructor(private readonly options: Options) {
     if (options.maxListeners !== undefined) {
       EventEmitter.setMaxListeners(options.maxListeners);
@@ -163,6 +171,7 @@ export class PerformanceReporter implements Reporter {
       Logger.warning(`The fixture mode only measures test.step(), the step categories ${fixtureIgnoredCategories.join(', ')} are ignored`);
     }
 
+    this.metadata = collectRunMetadata(options.metadata);
     this.metricsEngine = new MetricsEngine();
     this.presenters = options.presenters && options.presenters.length > 0
       ? options.presenters
@@ -192,7 +201,10 @@ export class PerformanceReporter implements Reporter {
     await Promise.all([...this.workers.values()].map(async worker => worker.hookQueue));
 
     // Enforce budgets before closing presenters, so a failing presenter can't skip it
-    this.enforceBudgets(result);
+    const violations = this.enforceBudgets(result);
+    if (violations) {
+      await Promise.allSettled(this.presenters.map(async presenter => presenter.onBudgetViolations?.(violations)));
+    }
 
     let closeStatus: boolean;
 
@@ -272,6 +284,7 @@ export class PerformanceReporter implements Reporter {
     const testPerformance = results?.[id]?.[testCaseParent];
     if (testPerformance) {
       testPerformance.execution = {repeatEachIndex: test.repeatEachIndex, retry: result.retry};
+      testPerformance.metadata = this.metadata;
       const conditions = this.conditions[browserName];
       if (conditions) {
         testPerformance.conditions = conditions;
@@ -477,9 +490,9 @@ export class PerformanceReporter implements Reporter {
    *
    * @param result result of the full test run
    */
-  private enforceBudgets(result: FullResult) {
+  private enforceBudgets(result: FullResult): BudgetViolation[] | undefined {
     if (!this.options.budgets) {
-      return;
+      return undefined;
     }
 
     try {
@@ -496,8 +509,11 @@ export class PerformanceReporter implements Reporter {
       if (shouldFail && violations.length > 0 && result.status === 'passed') {
         result.status = 'failed';
       }
+
+      return violations;
     } catch (error) {
       Logger.error('Error evaluating budgets', String(error));
+      return undefined;
     }
   }
 

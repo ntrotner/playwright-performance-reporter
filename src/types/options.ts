@@ -4,6 +4,7 @@ import {
 } from '../browsers/chromium/observers/index.js';
 import {
   type BudgetOptions,
+  type BudgetViolation,
   type MeasurePlugin,
   type OnSamplingMeasure,
   type OnStartMeasure,
@@ -120,6 +121,13 @@ export type PresenterWriter = {
    * Delete created target
    */
   delete(): Promise<boolean>;
+
+  /**
+   * Receive the budget violations of the run, before `close` is called. Only called if budgets are configured.
+   *
+   * @param violations violations of all budget rules, empty if every budget is met
+   */
+  onBudgetViolations?(violations: BudgetViolation[]): Promise<void>;
 };
 
 /**
@@ -161,6 +169,11 @@ export type StepSelection = {
 };
 
 /**
+ * Information about a run, e.g. `{commit: 'abc123', branch: 'main'}`
+ */
+export type RunMetadata = Record<string, string>;
+
+/**
  * Customize the reporter with desired browser and (custom) metrics
  */
 export type Options = {
@@ -192,6 +205,12 @@ export type Options = {
    * Which steps are measured by `onTestStep` and sampling. Defaults to every `test.step()`.
    */
   steps?: StepSelection;
+
+  /**
+   * Information about the run, e.g. the commit, written to every test. Merged over the detected
+   * metadata of the CI provider, git and the machine. A function is called once when the reporter is created.
+   */
+  metadata?: RunMetadata | (() => RunMetadata);
 
   presenters?: PresenterWriter[];
   browsers: BrowserOptions;

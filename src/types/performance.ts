@@ -70,6 +70,11 @@ export type PerformanceMetrics = {
   samplingMetrics: TargetMetric[];
 
   /**
+   * Information about the run, e.g. commit and machine. Only set on the test itself, at its start.
+   */
+  metadata?: Record<string, string>;
+
+  /**
    * Throttling the test was measured under, only set on the test itself if configured
    */
   conditions?: AppliedConditions;

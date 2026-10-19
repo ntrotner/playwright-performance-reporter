@@ -943,4 +943,61 @@ describe('Playwright Performance Reporter', () => {
       expect((reporter as any).budgetStore).toContainEqual({name: 'title > path', testName: 'title > path', metric: {value: 2}});
     });
   });
+
+  describe('metadata and budget violations', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should write the metadata to the test', async () => {
+      const reporter = new PlaywrightPerformanceReporter({...options, metadata: {release: '1.2.3'}});
+      (reporter as any).metricsEngine = mockMetricsEngine;
+      mockMetricsEngine.getBrowser.mockReturnValue('chromium');
+      mockMetricsEngine.getMetric.mockResolvedValue([]);
+
+      await reporter.onTestBegin(mockTestCase, mockTestResult);
+
+      const [[chunk]] = (options.presenters![0].write as jest.Mock).mock.calls as Array<[Record<string, Record<string, {metadata?: Record<string, string>}>>]>;
+      expect(chunk['1f'].TEST_CASE_PARENT.metadata).toEqual(expect.objectContaining({release: '1.2.3', node: process.version}));
+    });
+
+    it('should pass the budget violations to the presenters before closing them', async () => {
+      jest.spyOn(Logger, 'error').mockImplementation(() => {});
+      jest.spyOn(Logger, 'info').mockImplementation(() => {});
+      const calls: string[] = [];
+      const presenter: PresenterWriter = {
+        write: jest.fn().mockResolvedValue(true),
+        close: jest.fn(async () => {
+          calls.push('close');
+          return true;
+        }),
+        delete: jest.fn().mockResolvedValue(true),
+        onBudgetViolations: jest.fn(async () => {
+          calls.push('violations');
+        }),
+      };
+      const withoutHook: PresenterWriter = {write: jest.fn(), close: jest.fn().mockResolvedValue(true), delete: jest.fn()};
+      const reporter = new PlaywrightPerformanceReporter({
+        ...options, presenters: [presenter, withoutHook], budgets: {rules: [{metric: 'value', max: 1}]},
+      });
+      (reporter as any).budgetStore.push({name: 'step', metric: {value: 2}});
+
+      await reporter.onEnd({status: 'passed', startTime: new Date(0), duration: 0});
+
+      expect(presenter.onBudgetViolations).toHaveBeenCalledWith([expect.objectContaining({metric: 'value', actual: 2, limit: 1})]);
+      expect(calls).toEqual(['violations', 'close']);
+    });
+
+    it('should not pass violations without budgets', async () => {
+      jest.spyOn(Logger, 'info').mockImplementation(() => {});
+      const onBudgetViolations = jest.fn();
+      const reporter = new PlaywrightPerformanceReporter({
+        ...options, presenters: [{write: jest.fn(), close: jest.fn().mockResolvedValue(true), delete: jest.fn(), onBudgetViolations}],
+      });
+
+      await reporter.onEnd({status: 'passed', startTime: new Date(0), duration: 0});
+
+      expect(onBudgetViolations).not.toHaveBeenCalled();
+    });
+  });
 });

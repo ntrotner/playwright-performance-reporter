@@ -131,4 +131,5 @@ example/performance-history/
 # Generated presenter output in the example
 example/example-*.json
 example/example-*.html
+example/example-*.md
 example/performance-comparison.html

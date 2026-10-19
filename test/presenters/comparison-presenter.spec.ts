@@ -553,6 +553,28 @@ describe('Comparison presenter', () => {
       expect(mergeRepeats(entities, new Map(), 0.05)).toEqual(entities);
     });
 
+    it('should provide the report and the metadata of the runs', async () => {
+      const withMetadata = (chunks: ResultAccumulator[]) => {
+        const [first, ...rest] = chunks;
+        return [{case: {TEST_CASE_PARENT: {...first.case.TEST_CASE_PARENT, metadata: {commit: 'abc123'}}}}, ...rest];
+      };
+
+      writeHistory('run-0.json', withMetadata(buildRun(baselineInputs[0])));
+      const presenter = new nativePresenters.comparisonPresenter({historyDir, outputDir});
+      for (const chunk of withMetadata(buildRun({...baselineInputs[1], start: 10_000}))) {
+        // eslint-disable-next-line no-await-in-loop
+        await presenter.write(chunk);
+      }
+
+      const report = await presenter.getReport();
+      const [history] = (await loadHistory(historyDir, [], [], 0.05)).runs;
+
+      expect(report?.status).toBe('low-confidence');
+      expect(await presenter.getReport()).toBe(report);
+      expect(history.metadata).toEqual({commit: 'abc123'});
+      expect(await new nativePresenters.comparisonPresenter({historyDir, outputDir}).getReport()).toBeUndefined();
+    });
+
     it('should mark the current run as baseline without history', async () => {
       const {closed, report} = await runPresenter(buildRun(baselineInputs[0]));
 

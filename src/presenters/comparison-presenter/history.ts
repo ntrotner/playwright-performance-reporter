@@ -518,6 +518,24 @@ export function mergeRepeats(entities: Record<string, EntitySummary>, repeats: M
 }
 
 /**
+ * Metadata of a run, taken from the first test that recorded it
+ *
+ * @param chunks json chunks of a run
+ */
+function metadataOf(chunks: ResultAccumulator[]): {metadata?: Record<string, string>} {
+  for (const chunk of chunks) {
+    for (const steps of Object.values(chunk)) {
+      const metadata = steps?.[testCaseParent]?.metadata;
+      if (metadata && typeof metadata === 'object') {
+        return {metadata};
+      }
+    }
+  }
+
+  return {};
+}
+
+/**
  * Read a history file and verify it contains the necessary metrics
  *
  * @param filePath json chunk file of a run
@@ -558,6 +576,7 @@ export async function loadRun(filePath: string, requiredMetrics: string[], bandP
       file,
       startedAt,
       conditions: conditionsOf(results),
+      ...metadataOf(results),
       entities: mergeRepeats(summarizeEntities(results, bandPercentile), repeatsOf(results), bandPercentile),
     },
   };
