@@ -110,7 +110,7 @@ The package is ESM-only (`"type": "module"`).
 
 This is a complete `playwright.config.ts`. Three parts are required:
 
-1. `workers: 1` and `fullyParallel: false`. All browsers would share one debugging port.
+1. `workers: 1` and `fullyParallel: false`. All browsers would share one debugging port. To run multiple workers, see [Multiple workers](#multiple-workers).
 2. A project whose `use` comes from a `devices[...]` preset. The preset sets `defaultBrowserType`, and the reporter uses it to detect the browser.
 3. `--remote-debugging-port=<port>` in `launchOptions.args`. The reporter reads the port from there.
 
@@ -205,6 +205,7 @@ The options are the second element of the reporter tuple: `['playwright-performa
 | `presenters`      | `PresenterWriter[]` | no       | one `jsonChunkPresenter` writing `./performance-report-<epochMs>.json` | Output writers. Every chunk is sent to every presenter.                                                                                                                                     |
 | `budgets`         | `BudgetOptions`     | no       | none (purely passive)                                            | Performance budgets checked against the final (`onStop`) metrics. A violation fails the run by default. See [Budgets](#budgets).                                                           |
 | `maxListeners`    | `number`            | no       | Node default (`10`)                                              | Sets `EventEmitter.setMaxListeners()` globally. Raise it if many presenters cause a `MaxListenersExceededWarning`. `0` removes the limit.                                                  |
+| `debuggingPort`   | `{perWorker: boolean; base?: number}` | no | one port from `launchOptions.args` | With `perWorker: true`, each test is measured on port `base + parallelIndex` of its worker. `base` defaults to the port in `launchOptions.args`, or `9222`. See [Multiple workers](#multiple-workers). |
 
 `defaultOptions` is exported as a ready-made starting point. It runs `allPerformanceMetrics` on `onTest` and samples `usedJsHeapSize` every 1000 ms. It is **not** applied automatically, so you have to pass it yourself: `['playwright-performance-reporter', defaultOptions]`.
 
@@ -236,6 +237,41 @@ Only `chromium` collects data today. The `firefox` and `webkit` keys are accepte
 > `onTest` start and stop measurements are often empty. At test begin, the page under test may not exist yet. At test end, it is already closed. For reliable data, use `onTestStep` and `sampling`.
 
 > Observers can keep state between calls. For example, `cpuProfiler` holds a lock and `networkActivity` keeps running counters. Use a **separate instance** for each hook and for each sampling entry, as in [`example/playwright.config.ts`](example/playwright.config.ts).
+
+### Multiple workers
+
+By default all tests share the browser on the one debugging port of the launch options, so only one worker can run. To measure multiple workers in parallel, give every worker's browser its own port with the `perWorkerDebuggingPort` fixture, and let the reporter connect to the port of the worker that runs a test:
+
+```ts
+// tests/fixtures.ts
+import {test as base} from '@playwright/test';
+import {perWorkerDebuggingPort} from 'playwright-performance-reporter/fixture';
+
+// Worker n launches its browser with --remote-debugging-port=9222 + n
+export const test = base.extend(perWorkerDebuggingPort({base: 9222}));
+```
+
+```ts
+// playwright.config.ts
+const performanceReporterOptions: Options = {
+  deleteOnFailure: false,
+  debuggingPort: {perWorker: true, base: 9222},
+  browsers: {chromium: {onTestStep: {metrics: [new nativeChromiumObservers.allPerformanceMetrics()]}}},
+};
+
+export default defineConfig({
+  fullyParallel: true,
+  workers: 4,
+  reporter: [['playwright-performance-reporter', performanceReporterOptions]],
+  projects: [{name: 'chromium', use: {...devices['Desktop Chrome']}}],
+});
+```
+
+- Specs have to import `test` from the fixtures file, otherwise their browser has no debugging port.
+- `base` must be the same in the fixture and in the reporter. The ports `base` to `base + workers - 1` must be free.
+- Each worker keeps its own browser connection, active test and step, and sampling, so measurements of parallel tests don't mix.
+- Workers on other machines (sharding) are not reachable. Merge the outputs of the shards instead.
+- A runnable setup is in [`example/playwright.multi-worker.config.ts`](example/playwright.multi-worker.config.ts) (`cd example && npm run test:multi-worker`).
 
 ### Sampling
 
@@ -648,7 +684,7 @@ Use it with `presenters: [new NdjsonPresenter('./performance.ndjson')]`. If any 
 | Firefox  | Accepted in `browsers`, but the client is a stub that returns no metrics.               |
 | WebKit   | Accepted in `browsers`, but the client is a stub that returns no metrics.               |
 
-- **One worker.** The reporter connects to one fixed debugging port, so run with `workers: 1` and `fullyParallel: false`.
+- **One worker by default.** The reporter connects to one fixed debugging port, so run with `workers: 1` and `fullyParallel: false`, or use [`debuggingPort.perWorker`](#multiple-workers) with the `perWorkerDebuggingPort` fixture.
 - **Browser detection.** The reporter uses `project.use.defaultBrowserType` and `project.use.launchOptions.args`. `devices[...]` presets set `defaultBrowserType`. Without it, nothing is measured.
 - **Asynchronous measurements.** Playwright does not wait for reporter hooks. The browser may already run the next action while metrics are fetched. `startMeasurementOffset` and `endMeasurementOffset` (ms) show how long a fetch took. High values mean the measurement drifted into later work.
 - **Hook order.** The reporter measures the hooks one after another, in the order Playwright calls them. A step starts measuring only after the previous step's `onStop` finished, so stateful observers like `cpuProfiler` don't overlap. Playwright closes the page right after the last step, so slow `onStop` observers of the last step, for example `cpuProfiler`, can miss it.
@@ -700,6 +736,7 @@ Project layout:
 ```text
 src/
   index.ts                        # public exports: default reporter, nativeChromiumObservers, nativeChromiumPlugins, nativePresenters, types
+  fixture/index.ts                # `playwright-performance-reporter/fixture`: perWorkerDebuggingPort
   engines/reporter.ts             # Playwright Reporter: hooks, sampling timers, presenter fan-out
   engines/metrics.ts              # selects the browser client
   browsers/chromium/client.ts     # CDP connection, target discovery, plugin execution
