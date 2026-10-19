@@ -10,6 +10,7 @@ import {
   type OnStopMeasure,
   type ResultAccumulator,
   type ThrottlingOptions,
+  type StepCategory,
 } from './index.js';
 
 /**
@@ -137,6 +138,29 @@ export type DebuggingPortOptions = {
 };
 
 /**
+ * Select the steps to measure
+ */
+export type StepSelection = {
+  /**
+   * Step categories to measure, e.g. `pw:api` for Playwright API calls like navigations. Defaults to `['test.step']`.
+   * The fixture mode only measures `test.step()`.
+   */
+  categories?: StepCategory[];
+
+  /**
+   * Glob pattern (supports `*` and `?`) matched against the title of the step. Defaults to `'*'`.
+   */
+  titlePattern?: string;
+
+  /**
+   * Also measure selected steps within other selected steps. Defaults to false,
+   * e.g. a navigation within a measured `test.step()` is not measured on its own.
+   * `test.step()` blocks are always measured, also nested ones.
+   */
+  nested?: boolean;
+};
+
+/**
  * Customize the reporter with desired browser and (custom) metrics
  */
 export type Options = {
@@ -163,6 +187,11 @@ export type Options = {
    *   test attachments. Works with any amount of workers and with sharding.
    */
   mode?: 'port' | 'fixture';
+
+  /**
+   * Which steps are measured by `onTestStep` and sampling. Defaults to every `test.step()`.
+   */
+  steps?: StepSelection;
 
   presenters?: PresenterWriter[];
   browsers: BrowserOptions;

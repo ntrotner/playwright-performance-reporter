@@ -890,4 +890,35 @@ describe('Playwright Performance Reporter', () => {
       expect(chunk['1f'].TEST_CASE_PARENT.conditions).toBe(conditions);
     });
   });
+
+  describe('step selection', () => {
+    it('should throw on invalid steps', () => {
+      expect(() => new PlaywrightPerformanceReporter({...options, steps: {categories: ['unknown' as 'hook']}})).toThrow('Invalid steps');
+    });
+
+    it('should warn about categories the fixture mode does not measure', () => {
+      const warningSpy = jest.spyOn(Logger, 'warning').mockImplementation(() => {});
+
+      new PlaywrightPerformanceReporter({...options, mode: 'fixture', steps: {categories: ['test.step', 'pw:api']}});
+
+      expect(warningSpy).toHaveBeenCalledWith('The fixture mode only measures test.step(), the step categories pw:api are ignored');
+      warningSpy.mockRestore();
+    });
+
+    it('should measure the selected Playwright API steps', async () => {
+      const reporter = new PlaywrightPerformanceReporter({...options, steps: {categories: ['pw:api'], titlePattern: 'Navigate to *'}});
+      (reporter as any).metricsEngine = mockMetricsEngine;
+      mockMetricsEngine.getBrowser.mockReturnValue('chromium');
+      (reporter as any).executeMetrics = jest.fn();
+      const navigation = {...mockTestStep, category: 'pw:api', title: 'Navigate to "/"', titlePath: () => ['Navigate to "/"']} as TestStep;
+      const click = {...mockTestStep, category: 'pw:api', title: 'Click button', titlePath: () => ['Click button']} as TestStep;
+
+      await reporter.onStepBegin(mockTestCase, mockTestResult, navigation);
+      await reporter.onStepBegin(mockTestCase, mockTestResult, click);
+      await reporter.onStepBegin(mockTestCase, mockTestResult, {...mockTestStep, category: 'test.step'} as TestStep);
+
+      expect((reporter as any).executeMetrics).toHaveBeenCalledTimes(2);
+      expect((reporter as any).executeMetrics).toHaveBeenCalledWith(expect.anything(), '1f', expect.any(String), 'onTestStep', 'onStart', 'chromium');
+    });
+  });
 });

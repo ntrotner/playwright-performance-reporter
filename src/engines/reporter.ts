@@ -39,6 +39,7 @@ import {
   buildTestPerformance,
   buildTestStepIdentifier,
   Logger,
+  createStepFilter,
 } from '../helpers/index.js';
 import {
   nativePresenters,
@@ -128,6 +129,11 @@ export class PerformanceReporter implements Reporter {
    */
   private readonly conditions: Partial<Record<SupportedBrowsers, AppliedConditions>> = {};
 
+  /**
+   * Whether a step is measured
+   */
+  private readonly isMeasuredStep: (step: TestStep) => boolean;
+
   constructor(private readonly options: Options) {
     if (options.maxListeners !== undefined) {
       EventEmitter.setMaxListeners(options.maxListeners);
@@ -144,6 +150,12 @@ export class PerformanceReporter implements Reporter {
       } else if (conditions) {
         this.conditions[browser] = conditions;
       }
+    }
+
+    this.isMeasuredStep = createStepFilter(options.steps);
+    const fixtureIgnoredCategories = options.steps?.categories?.filter(category => category !== 'test.step') ?? [];
+    if (options.mode === 'fixture' && fixtureIgnoredCategories.length > 0) {
+      Logger.warning(`The fixture mode only measures test.step(), the step categories ${fixtureIgnoredCategories.join(', ')} are ignored`);
     }
 
     this.metricsEngine = new MetricsEngine();
@@ -309,7 +321,7 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    if (step.category !== 'test.step') {
+    if (!this.isMeasuredStep(step)) {
       return;
     }
 
@@ -346,7 +358,7 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    if (step.category !== 'test.step') {
+    if (!this.isMeasuredStep(step)) {
       return;
     }
 
