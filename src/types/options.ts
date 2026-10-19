@@ -139,6 +139,14 @@ export type Options = {
    */
   debuggingPort?: DebuggingPortOptions;
 
+  /**
+   * - `port` (default): the reporter connects to the browsers via their remote debugging port
+   * - `fixture`: the `withPerformance` fixture of `playwright-performance-reporter/fixture` measures every test
+   *   inside its worker via Playwright's CDP session, and the reporter only reads the measurements from the
+   *   test attachments. Works with any amount of workers and with sharding.
+   */
+  mode?: 'port' | 'fixture';
+
   presenters?: PresenterWriter[];
   browsers: BrowserOptions;
 

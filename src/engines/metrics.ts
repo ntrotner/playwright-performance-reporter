@@ -64,6 +64,15 @@ export class MetricsEngine {
   }
 
   /**
+   * Use an already connected client, e.g. on CDP sessions opened by Playwright
+   *
+   * @param client connected browser client
+   */
+  public useBrowser(client: BrowserClient) {
+    this.browser = client;
+  }
+
+  /**
    * Shutdown client
    */
   public destroy() {

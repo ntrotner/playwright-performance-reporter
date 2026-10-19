@@ -24,6 +24,8 @@ import {
   type BrowserDeveloperToolsClient,
   type MetricObserver,
   type MetricSampling,
+  defaultDebuggingPort,
+  fixtureAttachmentName,
   type BudgetSample,
 } from '../types/index.js';
 import {
@@ -39,8 +41,8 @@ import {
   nativePresenters,
 } from '../presenters/index.js';
 import {
-  defaultDebuggingPort,
-} from '../fixture/index.js';
+  type BrowserClient,
+} from '../browsers/client.js';
 import {
   MetricsEngine,
 } from './index.js';
@@ -140,6 +142,17 @@ export class PerformanceReporter implements Reporter {
 
   onBegin(config: FullConfig, suite: Suite) {}
 
+  /**
+   * Measure with an already connected browser client instead of connecting via the debugging port.
+   * Used inside the worker by the fixture mode.
+   *
+   * @internal
+   * @param client connected browser client
+   */
+  public useBrowserClient(client: BrowserClient) {
+    this.metricsEngine.useBrowser(client);
+  }
+
   async onEnd(result: FullResult) {
     // Playwright doesn't await the other hooks, so the last test can still be measured
     await Promise.all([...this.workers.values()].map(async worker => worker.hookQueue));
@@ -171,25 +184,30 @@ export class PerformanceReporter implements Reporter {
   }
 
   async onTestBegin(test: TestCase, result: TestResult) {
-    return this.enqueue(this.getWorker(result), 'testBegin', async () => this.measureTestBegin(test, result));
+    return this.enqueue(this.getWorker(result), 'testBegin', async () => this.handleTestBegin(test, result));
   }
 
   async onTestEnd(test: TestCase, result: TestResult) {
-    return this.enqueue(this.getWorker(result), 'testEnd', async () => this.measureTestEnd(test, result));
+    return this.enqueue(this.getWorker(result), 'testEnd', async () => this.handleTestEnd(test, result));
   }
 
   async onStepBegin(test: TestCase, result: TestResult, step: TestStep) {
-    return this.enqueue(this.getWorker(result), 'stepBegin', async () => this.measureStepBegin(test, result, step));
+    return this.enqueue(this.getWorker(result), 'stepBegin', async () => this.handleStepBegin(test, result, step));
   }
 
   async onStepEnd(test: TestCase, result: TestResult, step: TestStep) {
-    return this.enqueue(this.getWorker(result), 'stepEnd', async () => this.measureStepEnd(test, result, step));
+    return this.enqueue(this.getWorker(result), 'stepEnd', async () => this.handleStepEnd(test, result, step));
   }
 
   /**
-   * Measure the start of a test and start its sampling
+   * Measure at onTestBegin
    */
-  private async measureTestBegin(test: TestCase, result: TestResult) {
+  private async handleTestBegin(test: TestCase, result: TestResult) {
+    if (this.options.mode === 'fixture') {
+      // Measured inside the worker
+      return;
+    }
+
     const worker = this.getWorker(result);
     const browserDetails = test.parent.project()?.use;
     if (browserDetails && browserDetails.defaultBrowserType) {
@@ -224,9 +242,14 @@ export class PerformanceReporter implements Reporter {
   }
 
   /**
-   * Measure the end of a test and close the connection to the browser
+   * Measure at onTestEnd
    */
-  private async measureTestEnd(test: TestCase, result: TestResult) {
+  private async handleTestEnd(test: TestCase, result: TestResult) {
+    if (this.options.mode === 'fixture') {
+      await this.readFixtureMeasurements(result);
+      return;
+    }
+
     const worker = this.getWorker(result);
     const browserName = worker.metricsEngine.getBrowser();
     if (!browserName) {
@@ -250,9 +273,13 @@ export class PerformanceReporter implements Reporter {
   }
 
   /**
-   * Measure the start of a step and start its sampling
+   * Measure at onStepBegin
    */
-  private async measureStepBegin(test: TestCase, result: TestResult, step: TestStep) {
+  private async handleStepBegin(test: TestCase, result: TestResult, step: TestStep) {
+    if (this.options.mode === 'fixture') {
+      return;
+    }
+
     const worker = this.getWorker(result);
     const browserName = worker.metricsEngine.getBrowser();
     if (!browserName) {
@@ -284,9 +311,13 @@ export class PerformanceReporter implements Reporter {
   }
 
   /**
-   * Measure the end of a step
+   * Measure at onStepEnd
    */
-  private async measureStepEnd(test: TestCase, result: TestResult, step: TestStep) {
+  private async handleStepEnd(test: TestCase, result: TestResult, step: TestStep) {
+    if (this.options.mode === 'fixture') {
+      return;
+    }
+
     const browserName = this.getWorker(result).metricsEngine.getBrowser();
     if (!browserName) {
       // Browser not stable
@@ -528,6 +559,38 @@ export class PerformanceReporter implements Reporter {
         clearInterval(interval);
       }
     });
+  }
+
+  /**
+   * Forward the measurements, which the fixture attached to the test, to the presenters
+   *
+   * @param result result of the test with the attachments
+   */
+  private async readFixtureMeasurements(result: TestResult) {
+    const attachment = result.attachments.find(attachment => attachment.name === fixtureAttachmentName);
+    if (!attachment?.body) {
+      return;
+    }
+
+    let chunks: unknown;
+    try {
+      chunks = JSON.parse(attachment.body.toString('utf8'));
+    } catch (error) {
+      Logger.error('Invalid measurements attached to test', String(error));
+      return;
+    }
+
+    if (!Array.isArray(chunks)) {
+      Logger.error('Invalid measurements attached to test', 'Not a list of chunks');
+      return;
+    }
+
+    // Sequentially, as presenters expect the chunks in order of measurement
+    for (const chunk of chunks as ResultAccumulator[]) {
+      this.captureFinalMetrics(chunk);
+      // eslint-disable-next-line no-await-in-loop
+      await this.writeToPresenters(chunk);
+    }
   }
 
   /**
