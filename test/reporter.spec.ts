@@ -763,4 +763,92 @@ describe('Playwright Performance Reporter', () => {
       expect(mockMetricsEngine.getMetric).not.toHaveBeenCalled();
     });
   });
+
+  describe('fixture mode', () => {
+    const chunk = (stepId: string, value: number) => ({
+      '1f': {
+        [stepId]: {
+          name: stepId, startMetrics: [], stopMetrics: [{metric: {largestContentfulPaint: value}}], samplingMetrics: [], startMeasurement: 0, endMeasurement: 0,
+        },
+      },
+    });
+    const withAttachment = (body: string | undefined): TestResult => ({
+      ...mockTestResult,
+      attachments: [{name: 'playwright-performance-reporter', contentType: 'application/json', body: body === undefined ? undefined : Buffer.from(body)}],
+    });
+
+    let presenter: {write: jest.Mock; close: jest.Mock; delete: jest.Mock};
+    let reporter: PlaywrightPerformanceReporter;
+
+    beforeEach(() => {
+      presenter = {
+        write: jest.fn().mockResolvedValue(true),
+        close: jest.fn().mockResolvedValue(true),
+        delete: jest.fn().mockResolvedValue(true),
+      };
+      reporter = new PlaywrightPerformanceReporter({
+        ...options, mode: 'fixture', presenters: [presenter], budgets: {rules: [{metric: 'largestContentfulPaint', max: 2500}]},
+      });
+      (reporter as any).metricsEngine = mockMetricsEngine;
+      jest.spyOn(Logger, 'info').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should not measure in the test runner', async () => {
+      const testCase = {...mockTestCase, parent: {...mockSuite, project: () => ({use: {defaultBrowserType: 'chromium'}})}} as unknown as TestCase;
+
+      await reporter.onTestBegin(testCase, mockTestResult);
+      await reporter.onStepBegin(testCase, mockTestResult, mockTestStep);
+      await reporter.onStepEnd(testCase, mockTestResult, mockTestStep);
+
+      expect(mockMetricsEngine.setupBrowser).not.toHaveBeenCalled();
+      expect(mockMetricsEngine.getMetric).not.toHaveBeenCalled();
+      expect(presenter.write).not.toHaveBeenCalled();
+    });
+
+    it('should forward the attached chunks in order and evaluate budgets on them', async () => {
+      const chunks = [chunk('a', 1000), chunk('b', 3000)];
+
+      await reporter.onTestEnd(mockTestCase, withAttachment(JSON.stringify(chunks)));
+      const {status} = await reporter.onEnd({status: 'passed', startTime: new Date(0), duration: 0}) as {status: string};
+
+      expect(presenter.write.mock.calls).toEqual([[chunks[0]], [chunks[1]]]);
+      expect(status).toBe('failed');
+      expect(mockMetricsEngine.destroy).not.toHaveBeenCalled();
+    });
+
+    it('should ignore tests without measurements and log invalid ones', async () => {
+      const errorSpy = jest.spyOn(Logger, 'error').mockImplementation(() => {});
+
+      await reporter.onTestEnd(mockTestCase, mockTestResult);
+      await reporter.onTestEnd(mockTestCase, withAttachment(undefined));
+      await reporter.onTestEnd(mockTestCase, withAttachment('{not json'));
+      await reporter.onTestEnd(mockTestCase, withAttachment('{"a": 1}'));
+
+      expect(presenter.write).not.toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('should finish running hooks before closing the presenters', async () => {
+      let releaseWrite = () => {};
+      presenter.write.mockImplementationOnce(async () => new Promise(resolve => {
+        releaseWrite = () => {
+          resolve(true);
+        };
+      }));
+
+      // Playwright doesn't await onTestEnd, e.g. when merging reports
+      void reporter.onTestEnd(mockTestCase, withAttachment(JSON.stringify([chunk('a', 1000)])));
+      const end = reporter.onEnd({status: 'passed', startTime: new Date(0), duration: 0});
+      await new Promise(setImmediate);
+      expect(presenter.close).not.toHaveBeenCalled();
+
+      releaseWrite();
+      await end;
+      expect(presenter.close).toHaveBeenCalled();
+    });
+  });
 });
