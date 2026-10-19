@@ -25,4 +25,13 @@ export class ChromiumCDPFixture {
     loadingFinished: jest.fn().mockReturnValue(() => {}),
     loadingFailed: jest.fn().mockReturnValue(() => {}),
   }
+  public Tracing = {
+    start: jest.fn().mockReturnValue(Promise.resolve({})),
+    end: jest.fn().mockReturnValue(Promise.resolve({})),
+    tracingComplete: jest.fn().mockReturnValue(() => {}),
+  }
+  public IO = {
+    read: jest.fn().mockReturnValue(Promise.resolve({data: '', eof: true})),
+    close: jest.fn().mockReturnValue(Promise.resolve({})),
+  }
 }

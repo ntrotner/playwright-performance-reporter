@@ -133,3 +133,6 @@ example/example-*.json
 example/example-*.html
 example/example-*.md
 example/performance-comparison.html
+
+# Chrome traces of the trace capture observer in the example
+example/traces/

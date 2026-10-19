@@ -30,7 +30,7 @@ export class TimelineDataPresenter implements PresenterWriter {
   /**
    * Locator where to store the output
    */
-  private readonly filePath: string | undefined;
+  protected readonly filePath: string | undefined;
 
   /**
    * File writer
