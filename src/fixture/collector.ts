@@ -29,6 +29,9 @@ import {
   type ResultAccumulator,
 } from '../types/index.js';
 import {
+  resolveConditions,
+} from '../helpers/conditions.js';
+import {
   RequestRecorder,
 } from './request-recorder.js';
 
@@ -58,7 +61,7 @@ export class PerformanceCollector {
   /**
    * Browser client on the CDP sessions of the pages
    */
-  private readonly developmentTools = new ChromiumSessionDevelopmentTools();
+  private readonly developmentTools: ChromiumSessionDevelopmentTools;
 
   /**
    * Running steps, the innermost last
@@ -78,6 +81,8 @@ export class PerformanceCollector {
   private readonly requestRecorder = new RequestRecorder();
 
   constructor(options: Options, private readonly testInfo: TestInfo) {
+    this.developmentTools = new ChromiumSessionDevelopmentTools(resolveConditions(options.browsers.chromium?.conditions));
+
     const collector: PresenterWriter = {
       write: async content => {
         // The reporter reuses objects across chunks, e.g. while sampling
@@ -182,8 +187,10 @@ export class PerformanceCollector {
     const targetId = `page-${this.pageCounter}`;
     const pending = (async () => {
       try {
-        const session = await context.newCDPSession(page);
-        this.developmentTools.addTarget({id: targetId, type: 'page', url: page.url()} as CDP.Target, createCdpSessionClient(session as unknown as CdpSessionLike));
+        const client = createCdpSessionClient(await context.newCDPSession(page) as unknown as CdpSessionLike);
+        // Throttle before the page is measured for the first time
+        await this.developmentTools.throttlePage(client, page.url());
+        this.developmentTools.addTarget({id: targetId, type: 'page', url: page.url()} as CDP.Target, client);
         page.on('framenavigated', frame => {
           if (frame === page.mainFrame()) {
             this.developmentTools.updateTarget(targetId, {url: frame.url()});

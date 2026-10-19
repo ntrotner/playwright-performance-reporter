@@ -16,6 +16,7 @@ import {
   type TargetMetric,
   type MetricObserver,
   type BrowserDeveloperToolsClient,
+  type AppliedConditions,
 } from '../types/index.js';
 
 export class MetricsEngine {
@@ -33,13 +34,15 @@ export class MetricsEngine {
    * Starts client
    *
    * @param browser which client to setup
+   * @param options project settings of playwright, e.g. launch options
+   * @param conditions throttling to apply to every target
    */
-  public async setupBrowser(browser: SupportedBrowsers | string, options: Record<string, any>) {
+  public async setupBrowser(browser: SupportedBrowsers | string, options: Record<string, any>, conditions?: AppliedConditions) {
     this.browserOptions = options;
 
     switch (browser) {
       case 'chromium': {
-        this.browser = new ChromiumDevelopmentTools(this.browserOptions);
+        this.browser = new ChromiumDevelopmentTools(this.browserOptions, conditions);
         break;
       }
 

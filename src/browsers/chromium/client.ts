@@ -7,11 +7,20 @@ import {
   type HookOrder,
   type TargetMetric,
   type ChromiumMetricObserver,
+  type AppliedConditions,
 } from '../../types/index.js';
 import {
   Lock,
   Logger,
 } from '../../helpers/index.js';
+import {
+  createThrottlingPlugin,
+} from './plugins/throttling.js';
+
+/**
+ * Targets that load content and therefore can be throttled
+ */
+const throttledTargetTypes = new Set(['page', 'iframe']);
 
 export class ChromiumDevelopmentTools implements BrowserClient {
   /**
@@ -37,7 +46,7 @@ export class ChromiumDevelopmentTools implements BrowserClient {
   /**
    * @inheritdoc
    */
-  constructor(private readonly options: Record<string, any>) {}
+  constructor(private readonly options: Record<string, any>, private readonly conditions?: AppliedConditions) {}
 
   /**
    * @inheritdoc
@@ -133,6 +142,24 @@ export class ChromiumDevelopmentTools implements BrowserClient {
   }
 
   /**
+   * Apply the throttling conditions to a newly connected page or frame
+   *
+   * @param client CDP client of the target
+   * @param target target to throttle
+   */
+  protected async applyConditions(client: CDP.Client, target: CDP.Target) {
+    if (!this.conditions || !throttledTargetTypes.has(target.type)) {
+      return;
+    }
+
+    try {
+      await createThrottlingPlugin(this.conditions)(client);
+    } catch (error: unknown) {
+      Logger.warning(`Failed to apply conditions "${this.conditions.description}" to target`, target.url, String(error));
+    }
+  }
+
+  /**
    * Targets an observer is measured on, by default all connected targets
    *
    * @param metric observer to measure
@@ -211,9 +238,12 @@ export class ChromiumDevelopmentTools implements BrowserClient {
 
     try {
       const customOptions = this.buildOptions(target.id);
-      this.clients[target.id] = await CDP(customOptions);
+      const client = await CDP(customOptions);
+      // Throttle before the target is measured for the first time
+      await this.applyConditions(client, target);
+      this.clients[target.id] = client;
       this.targets[target.id] = target;
-      this.clients[target.id].on('disconnect', async () => {
+      client.on('disconnect', async () => {
         await this.destroy(target.id);
       });
     } catch {}

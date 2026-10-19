@@ -223,6 +223,7 @@ type BrowserOptions = {
         metric: MetricObserver;
       }>;
     };
+    conditions?: ThrottlingOptions;             // CPU and network throttling, chromium only
   };
 };
 ```
@@ -366,6 +367,41 @@ const options: Options = {
 };
 ```
 
+### Conditions
+
+CI runners and laptops are fast, so regressions on mid-range phones and mobile networks stay hidden. `conditions` throttles every page and frame before it's measured:
+
+```ts
+const options: Options = {
+  deleteOnFailure: false,
+  browsers: {
+    chromium: {
+      conditions: {cpuSlowdown: 4, network: 'slow-4g', disableCache: true},
+      onTestStep: {metrics: [new nativeChromiumObservers.allPerformanceMetrics()]},
+    },
+  },
+};
+```
+
+| Field          | Type                                    | Description                                                                                                     |
+|----------------|-----------------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| `cpuSlowdown`  | `number` (at least 1)                   | CPU slowdown factor via `Emulation.setCPUThrottlingRate`. Lighthouse uses `4` for mobile.                       |
+| `network`      | preset name or `NetworkProfile`         | Latency and throughput via `Network.emulateNetworkConditions`. Custom profile: `{latencyInMilliseconds, downloadKilobitsPerSecond, uploadKilobitsPerSecond}` (1 kbit = 1024 bit). |
+| `disableCache` | `boolean`                               | Disable the HTTP cache via `Network.setCacheDisabled` to measure a cold cache.                                  |
+
+| Preset    | Latency  | Download        | Upload       | Source                                  |
+|-----------|----------|-----------------|--------------|-----------------------------------------|
+| `slow-3g` | 2000 ms  | 400 kbit/s      | 400 kbit/s   | DevTools network panel                  |
+| `fast-3g` | 562.5 ms | 1440 kbit/s     | 675 kbit/s   | DevTools network panel                  |
+| `slow-4g` | 562.5 ms | 1474.56 kbit/s  | 675 kbit/s   | Lighthouse mobile (applied throttling)  |
+| `fast-4g` | 165 ms   | 8100 kbit/s     | 1350 kbit/s  | DevTools network panel                  |
+| `offline` | none     | none            | none         | Requests fail                           |
+
+- Invalid conditions throw when the reporter is created. Conditions for `firefox` or `webkit` are ignored with a warning.
+- Throttling is applied when the reporter connects to a target, which is at the first measurement of a test. The first navigation of a test can run unthrottled if it happens before that, e.g. before the first `test.step()`.
+- Service workers and other workers are not throttled.
+- The applied conditions are written to the `conditions` field of the test entry (`TEST_CASE_PARENT`). `comparisonPresenter` only compares runs measured under the same conditions and lists the others in `excludedRuns`.
+
 ### Budgets
 Budgets turn measured metrics into a pass/fail gate. Each rule is checked against the final (`onStop`) metrics
 of every test and step. By default, a violation sets the status of the run to `failed`, so Playwright exits with a non-zero code.
@@ -458,6 +494,7 @@ Notes:
 | `profilerDomainPlugin`       | `Profiler.enable`            |
 | `networkDomainPlugin`        | `Network.enable`             |
 | `heapGarbageCollectorPlugin` | `HeapProfiler.collectGarbage` |
+| `createThrottlingPlugin(conditions)` | Factory for a plugin that applies resolved `conditions` (`Emulation.setCPUThrottlingRate`, `Network.emulateNetworkConditions`, `Network.setCacheDisabled`). Used by the reporter for `conditions`. |
 
 ## Presenters
 
@@ -506,6 +543,8 @@ The workflow has four steps:
 2. Keep the `historyDir` between runs, for example as a cached CI artifact.
 3. Runs 2 to 3 report `low-confidence`.
 4. From `minBaselineRuns + 1` runs on, noise is separated from real changes.
+
+Only runs measured under the same [conditions](#conditions) are compared. Runs without conditions count as `unthrottled`.
 
 Tests are matched across runs by the Playwright test id. Steps are matched by test id, step name and occurrence.
 
@@ -617,6 +656,7 @@ The output is compact JSON unless `pretty: true` is set.
   "status": "ok",
   "message": "Compared 10 step(s) of the latest 3 run(s) to the median of 20 earlier run(s): 3 regressed, 0 improved, 7 mixed, 0 missing, 0 new.",
   "currentRun": {"id": "performance-run-2026-09-27T07-47-41.627Z", "file": "performance-run-2026-09-27T07-47-41.627Z.json", "startedAt": "2026-09-27T07:47:42.435Z"},
+  "conditions": "unthrottled",
   "recentRuns": [{"id": "...", "file": "...", "startedAt": "..."}],
   "baselineRuns": [{"id": "...", "file": "...", "startedAt": "..."}],
   "excludedRuns": [],
@@ -653,6 +693,7 @@ The output is compact JSON unless `pretty: true` is set.
 | Field                | Values                                                                                                                         |
 |----------------------|--------------------------------------------------------------------------------------------------------------------------------|
 | `status`             | `ok`, `low-confidence` (fewer than `minBaselineRuns` baseline runs), `no-baseline`, `invalid-current-run` (missing `requiredMetrics`) |
+| `conditions`         | Description of the throttling of the current run, e.g. `CPU 4x slowdown, network slow-4g (562.5 ms, 1474.56/675 kbit/s)`, or `unthrottled` |
 | `steps[].status`     | `regressed` (only increases), `improved` (only decreases), `mixed`, `unchanged`, `noisy` (only changes within the noise of the baseline), `new`, `missing` |
 | `changes[].kind`     | `cumulative` (counters and durations, compared by growth within the step), `gauge` (point-in-time values, time-weighted mean), `total` (CPU profile and Web Vitals, compared as is) |
 | `changes[].unit`     | `bytes`, `ms`, `s`, `count`, `score`                                                                                           |

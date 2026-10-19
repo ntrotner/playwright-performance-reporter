@@ -4,6 +4,9 @@ import {
   createCdpSessionClient,
 } from '../../src/browsers/chromium/session-client.js';
 import {
+  resolveConditions,
+} from '../../src/helpers/index.js';
+import {
   nativeChromiumObservers,
 } from '../../src/index.js';
 
@@ -80,5 +83,14 @@ describe('CDP session client', () => {
     const metrics = await developmentTools.getMetric(new nativeChromiumObservers.usedJsHeapSize(), 'onStop');
 
     expect(metrics).toEqual([{metric: {usedJsHeapSize: 10}, id: 'page-1', type: 'page', url: 'https://example.com'}]);
+  });
+
+  it('should throttle pages with the conditions', async () => {
+    const developmentTools = new ChromiumSessionDevelopmentTools(resolveConditions({cpuSlowdown: 4}));
+
+    await developmentTools.throttlePage(createCdpSessionClient(session), 'https://example.com');
+    await new ChromiumSessionDevelopmentTools().throttlePage(createCdpSessionClient(session), 'https://example.com');
+
+    expect(session.send.mock.calls).toEqual([['Emulation.setCPUThrottlingRate', {rate: 4}]]);
   });
 });

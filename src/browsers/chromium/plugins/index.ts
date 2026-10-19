@@ -8,6 +8,9 @@ import {
   networkDomainPlugin,
 } from './network-domain.js';
 import {
+  createThrottlingPlugin,
+} from './throttling.js';
+import {
   performanceDomainPlugin,
 } from './performance-domain.js';
 import {
@@ -20,4 +23,5 @@ export const nativeChromiumPlugins = {
   networkDomainPlugin,
   performanceDomainPlugin,
   profilerDomainPlugin,
+  createThrottlingPlugin,
 } as const;

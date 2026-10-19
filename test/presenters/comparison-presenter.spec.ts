@@ -515,6 +515,23 @@ describe('Comparison presenter', () => {
       expect(step('case|renamed step|0')?.status).toBe('new');
     });
 
+    it('should only compare runs measured under the same conditions', async () => {
+      const throttled = (chunks: ResultAccumulator[]) => {
+        const [first, ...rest] = chunks;
+        return [{case: {TEST_CASE_PARENT: {...first.case.TEST_CASE_PARENT, conditions: {cpuSlowdown: 4, disableCache: false, description: 'CPU 4x slowdown'}}}}, ...rest];
+      };
+
+      writeHistory('run-0.json', buildRun(baselineInputs[0]));
+      writeHistory('run-1.json', throttled(buildRun(baselineInputs[1])));
+
+      const {report, html} = await runPresenter(throttled(buildRun({...baselineInputs[2], start: 10_000})));
+
+      expect(report.conditions).toBe('CPU 4x slowdown');
+      expect(report.baselineRuns.map(run => run.file)).toEqual(['run-1.json']);
+      expect(report.excludedRuns).toEqual([{file: 'run-0.json', reason: 'Different measurement conditions: unthrottled'}]);
+      expect(html).toContain('Measured under: CPU 4x slowdown.');
+    });
+
     it('should mark the current run as baseline without history', async () => {
       const {closed, report} = await runPresenter(buildRun(baselineInputs[0]));
 

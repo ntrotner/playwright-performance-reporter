@@ -6,6 +6,9 @@ import {
   type TargetMetric,
 } from '../../types/index.js';
 import {
+  unthrottledDescription,
+} from '../../helpers/conditions.js';
+import {
   classifyMetric,
   entityDurationMetric,
   ignoredMetrics,
@@ -423,6 +426,24 @@ export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile: n
 }
 
 /**
+ * Throttling a run was measured under, taken from the first test that recorded it
+ *
+ * @param chunks json chunks of a run
+ */
+function conditionsOf(chunks: ResultAccumulator[]): string {
+  for (const chunk of chunks) {
+    for (const steps of Object.values(chunk)) {
+      const description = steps?.[testCaseParent]?.conditions?.description;
+      if (typeof description === 'string') {
+        return description;
+      }
+    }
+  }
+
+  return unthrottledDescription;
+}
+
+/**
  * Read a history file and verify it contains the necessary metrics
  *
  * @param filePath json chunk file of a run
@@ -462,6 +483,7 @@ export async function loadRun(filePath: string, requiredMetrics: string[], bandP
       id: file.replace(/\.json$/, ''),
       file,
       startedAt,
+      conditions: conditionsOf(results),
       entities: summarizeEntities(results, bandPercentile),
     },
   };

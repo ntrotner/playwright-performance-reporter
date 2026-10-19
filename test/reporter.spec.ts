@@ -709,8 +709,8 @@ describe('Playwright Performance Reporter', () => {
       await reporter.onTestBegin(projectTest('first', ['--remote-debugging-port=9300']), resultOf(0));
       await reporter.onTestBegin(projectTest('second', ['--remote-debugging-port=9300']), resultOf(1));
 
-      expect(firstEngine.setupBrowser).toHaveBeenCalledWith('chromium', {defaultBrowserType: 'chromium', launchOptions: {args: ['--headless', '--remote-debugging-port=9300']}});
-      expect(secondEngine.setupBrowser).toHaveBeenCalledWith('chromium', {defaultBrowserType: 'chromium', launchOptions: {args: ['--headless', '--remote-debugging-port=9301']}});
+      expect(firstEngine.setupBrowser).toHaveBeenCalledWith('chromium', {defaultBrowserType: 'chromium', launchOptions: {args: ['--headless', '--remote-debugging-port=9300']}}, undefined);
+      expect(secondEngine.setupBrowser).toHaveBeenCalledWith('chromium', {defaultBrowserType: 'chromium', launchOptions: {args: ['--headless', '--remote-debugging-port=9301']}}, undefined);
       expect(firstEngine.getMetric).toHaveBeenCalledTimes(2);
       expect(secondEngine.getMetric).toHaveBeenCalledTimes(2);
 
@@ -849,6 +849,45 @@ describe('Playwright Performance Reporter', () => {
       releaseWrite();
       await end;
       expect(presenter.close).toHaveBeenCalled();
+    });
+  });
+
+  describe('conditions', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    const createReporter = (browsers: Options['browsers']) => {
+      const reporter = new PlaywrightPerformanceReporter({...options, browsers});
+      (reporter as any).metricsEngine = mockMetricsEngine;
+      return reporter;
+    };
+
+    it('should throw on invalid conditions', () => {
+      expect(() => createReporter({chromium: {conditions: {cpuSlowdown: 0}}})).toThrow('Invalid conditions');
+    });
+
+    it('should ignore conditions for other browsers than chromium', () => {
+      const warningSpy = jest.spyOn(Logger, 'warning').mockImplementation(() => {});
+      const reporter = createReporter({webkit: {conditions: {cpuSlowdown: 4}}});
+
+      expect((reporter as any).conditions).toEqual({});
+      expect(warningSpy).toHaveBeenCalledWith('Conditions are only supported for chromium and are ignored for webkit');
+    });
+
+    it('should pass the conditions to the browser and record them on the test', async () => {
+      const reporter = createReporter({chromium: {conditions: {cpuSlowdown: 4}}});
+      const testCase = {...mockTestCase, parent: {...mockSuite, project: () => ({use: {defaultBrowserType: 'chromium'}})}} as unknown as TestCase;
+      mockMetricsEngine.getBrowser.mockReturnValue('chromium');
+      mockMetricsEngine.getMetric.mockResolvedValue([]);
+
+      await reporter.onTestBegin(testCase, mockTestResult);
+
+      const conditions = (reporter as any).conditions.chromium;
+      expect(conditions).toEqual(expect.objectContaining({cpuSlowdown: 4, description: 'CPU 4x slowdown'}));
+      expect(mockMetricsEngine.setupBrowser).toHaveBeenCalledWith('chromium', {defaultBrowserType: 'chromium'}, conditions);
+      const [[chunk]] = (options.presenters![0].write as jest.Mock).mock.calls as Array<[Record<string, Record<string, {conditions?: unknown}>>]>;
+      expect(chunk['1f'].TEST_CASE_PARENT.conditions).toBe(conditions);
     });
   });
 });

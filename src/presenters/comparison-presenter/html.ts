@@ -281,6 +281,20 @@ renderSelectors();
 `;
 
 /**
+ * Escape text for HTML content
+ *
+ * @param text text to escape
+ */
+function escapeHtml(text: string): string {
+  return text
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('\'', '&#039;');
+}
+
+/**
  * Generate the visual comparison report focused on test steps
  *
  * @param report machine readable report
@@ -322,11 +336,13 @@ export function renderComparisonHtml(report: ComparisonReport, runs: RunSummary[
     .controls label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 600; }
     .controls select { min-width: 220px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; background: #fff; }
     .chart-box { position: relative; height: 420px; }
+    .conditions { margin: 0; font-size: 13px; color: var(--muted); }
   </style>
 </head>
 <body>
   <section>
     <h1>Step Performance Comparison</h1>
+    ${report.conditions ? `<p class="conditions">Measured under: ${escapeHtml(report.conditions)}. Only runs under the same conditions are compared.</p>` : ''}
   </section>
 
   <section>
