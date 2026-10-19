@@ -1,6 +1,7 @@
 export * from './budget.js';
 export * from './conditions.js';
 export * from './config.js';
+export * from './har.js';
 export * from './hash.js';
 export * from './lock.js';
 export * from './observers.js';
