@@ -78,12 +78,24 @@ function isRequestDuration(metricName: string): boolean {
 }
 
 /**
+ * Numeric attribution of the Web Vitals, which like the Web Vitals describe the whole page
+ */
+export const webVitalsAttributionMetrics = new Set([
+  'lcpRenderDelay',
+  'lcpSize',
+  'clsLargestShiftValue',
+  'inpInputDelay',
+  'inpProcessingDuration',
+  'inpPresentationDelay',
+]);
+
+/**
  * Decide on how to condense a metric
  *
  * @param metricName name of the metric
  */
 export function classifyMetric(metricName: string): MetricKind {
-  if (metricName.startsWith(totalMetricPrefix) || isRequestDuration(metricName) || metricName === 'performanceScore' || webVitalsMetrics.has(metricName) || navigationTimingMetrics.has(metricName)) {
+  if (metricName.startsWith(totalMetricPrefix) || isRequestDuration(metricName) || metricName === 'performanceScore' || webVitalsMetrics.has(metricName) || webVitalsAttributionMetrics.has(metricName) || navigationTimingMetrics.has(metricName)) {
     return 'total';
   }
 
@@ -108,6 +120,10 @@ const millisecondMetrics = new Set([
   'totalLongTasksDuration',
   'totalBlockingTime',
   'maxLongTaskDuration',
+  'lcpRenderDelay',
+  'inpInputDelay',
+  'inpProcessingDuration',
+  'inpPresentationDelay',
 ]);
 
 /**
@@ -116,13 +132,18 @@ const millisecondMetrics = new Set([
  * @param metricName name of the metric
  */
 export function metricUnit(metricName: string): MetricUnit {
-  if (metricName === 'cumulativeLayoutShift' || metricName === 'performanceScore') {
+  if (metricName === 'cumulativeLayoutShift' || metricName === 'clsLargestShiftValue' || metricName === 'performanceScore') {
     return 'score';
   }
 
   // Names of endpoints are chosen by the user, so their suffix says nothing about the unit
   if (isRequestDuration(metricName)) {
     return 'ms';
+  }
+
+  // Area of the largest contentful paint in pixels
+  if (metricName === 'lcpSize') {
+    return 'count';
   }
 
   if (/(?:Size|Bytes)$/.test(metricName)) {

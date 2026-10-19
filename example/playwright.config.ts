@@ -41,7 +41,7 @@ const PlaywrightPerformanceReporterOptions: Options = {
         metrics: [
           new nativeChromiumObservers.allPerformanceMetrics(),
           new nativeChromiumObservers.cpuProfiler({triggerGarbageCollectionOnObserve: false}),
-          new nativeChromiumObservers.webVitals(),
+          new nativeChromiumObservers.webVitals({attribution: true}),
           new nativeChromiumObservers.navigationTiming(),
           new nativeChromiumObservers.resourceTiming(),
           new nativeChromiumObservers.longTasks(),

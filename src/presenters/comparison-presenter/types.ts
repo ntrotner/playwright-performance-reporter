@@ -167,6 +167,45 @@ export type EntitySummary = ComparisonEntity & {
    */
   duration: number;
   metrics: Record<string, MetricSummary>;
+
+  /**
+   * What caused the Web Vitals, if `webVitals` was configured with `attribution`
+   */
+  attribution?: WebVitalsAttribution;
+};
+
+/**
+ * Cause of the Web Vitals of a test or step, from its latest measurement
+ */
+export type WebVitalsAttribution = {
+  lcp?: {
+    /**
+     * Selector of the element, e.g. `img#hero.banner`
+     */
+    element: string;
+
+    /**
+     * Url of the image, empty for text
+     */
+    url: string;
+  };
+  cls?: {
+    /**
+     * Selector of the element that moved in the largest layout shift
+     */
+    source: string;
+  };
+  inp?: {
+    /**
+     * Selector of the target of the slowest interaction
+     */
+    target: string;
+
+    /**
+     * Event of the slowest interaction, e.g. `click`
+     */
+    eventType: string;
+  };
 };
 
 /**
