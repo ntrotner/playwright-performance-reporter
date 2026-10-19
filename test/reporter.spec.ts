@@ -382,9 +382,7 @@ describe('Playwright Performance Reporter', () => {
           },
         },
       };
-      (playwrightPerformanceReporter as any).latestStepId = 'Test';
-      (playwrightPerformanceReporter as any).latestCaseId = 'Case';
-      (playwrightPerformanceReporter as any).latestName = 'Test';
+      Object.assign((playwrightPerformanceReporter as any).getWorkerOfCase('1f'), {latestStepId: 'Test', latestCaseId: 'Case', latestName: 'Test'});
       (playwrightPerformanceReporter as any).options = optionsWithSamplingMetrics;
       mockMetricsEngine.getMetric.mockReturnValue(Promise.resolve([{metric1: 123}]));
       const results = (playwrightPerformanceReporter as any).createTestPerformance(pivot, customTest, customName);
@@ -682,6 +680,87 @@ describe('Playwright Performance Reporter', () => {
       expect(result.status).toEqual('passed');
       expect(errorSpy).toHaveBeenCalledWith('Error evaluating budgets', expect.any(String));
       expect(presenter.close).toHaveBeenCalled();
+    });
+  });
+
+  describe('workers', () => {
+    const resultOf = (parallelIndex: number): TestResult => ({...mockTestResult, parallelIndex});
+    const projectTest = (id: string, args: string[]) => ({
+      ...mockTestCase,
+      id,
+      parent: {...mockSuite, project: () => ({use: {defaultBrowserType: 'chromium', launchOptions: {args: ['--headless', ...args]}}})},
+    }) as unknown as TestCase;
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should measure every worker with its own browser connection and port', async () => {
+      const reporter = new PlaywrightPerformanceReporter({...options, debuggingPort: {perWorker: true}});
+      const firstEngine = new MetricsEngineFixture();
+      const secondEngine = new MetricsEngineFixture();
+      (reporter as any).metricsEngine = firstEngine;
+      (reporter as any).workers.set(1, {metricsEngine: secondEngine});
+      for (const engine of [firstEngine, secondEngine]) {
+        engine.getBrowser.mockReturnValue('chromium');
+        engine.getMetric.mockResolvedValue([{metric: {}}]);
+      }
+
+      await reporter.onTestBegin(projectTest('first', ['--remote-debugging-port=9300']), resultOf(0));
+      await reporter.onTestBegin(projectTest('second', ['--remote-debugging-port=9300']), resultOf(1));
+
+      expect(firstEngine.setupBrowser).toHaveBeenCalledWith('chromium', {defaultBrowserType: 'chromium', launchOptions: {args: ['--headless', '--remote-debugging-port=9300']}});
+      expect(secondEngine.setupBrowser).toHaveBeenCalledWith('chromium', {defaultBrowserType: 'chromium', launchOptions: {args: ['--headless', '--remote-debugging-port=9301']}});
+      expect(firstEngine.getMetric).toHaveBeenCalledTimes(2);
+      expect(secondEngine.getMetric).toHaveBeenCalledTimes(2);
+
+      // Steps of the second test are measured in the browser of the second worker
+      firstEngine.getMetric.mockClear();
+      secondEngine.getMetric.mockClear();
+      await reporter.onStepBegin(projectTest('second', []), resultOf(1), {...mockTestStep, category: 'test.step'} as TestStep);
+      expect(firstEngine.getMetric).not.toHaveBeenCalled();
+      expect((reporter as any).workers.get(1).latestCaseId).toBe('second');
+    });
+
+    it('should use the configured base port', () => {
+      const reporter = new PlaywrightPerformanceReporter({...options, debuggingPort: {perWorker: true, base: 10_000}});
+
+      expect((reporter as any).withDebuggingPort({launchOptions: {args: []}}, resultOf(2))).toEqual({launchOptions: {args: ['--remote-debugging-port=10002']}});
+      expect((reporter as any).withDebuggingPort({}, resultOf(0))).toEqual({launchOptions: {args: ['--remote-debugging-port=10000']}});
+    });
+
+    it('should share the connection of the first worker without perWorker', () => {
+      const reporter = new PlaywrightPerformanceReporter(options);
+      const details = {launchOptions: {args: ['--remote-debugging-port=9222']}};
+
+      expect((reporter as any).getWorker(resultOf(3))).toBe((reporter as any).getWorker(resultOf(0)));
+      expect((reporter as any).withDebuggingPort(details, resultOf(3))).toBe(details);
+    });
+
+    it('should stop every sampling interval of a step', async () => {
+      jest.useFakeTimers();
+      const reporter = new PlaywrightPerformanceReporter({
+        ...options,
+        browsers: {
+          chromium: {
+            sampling: {
+              metrics: [
+                {samplingTimeoutInMilliseconds: 10, metric: new nativeChromiumObservers.usedJsHeapSize()},
+                {samplingTimeoutInMilliseconds: 10, metric: new nativeChromiumObservers.totalJsHeapSize()},
+              ],
+            },
+          },
+        },
+      });
+      (reporter as any).metricsEngine = mockMetricsEngine;
+      mockMetricsEngine.getMetric.mockResolvedValue([]);
+      const results = (reporter as any).createTestPerformance('1f', '2f', 'step');
+
+      await (reporter as any).executeSamplingMetrics(results, '1f', '2f', 'onTestStep', 'chromium');
+      (reporter as any).destroySamplingRunner('1f', '2f', 'onTestStep');
+      await jest.advanceTimersByTimeAsync(100);
+
+      expect(mockMetricsEngine.getMetric).not.toHaveBeenCalled();
     });
   });
 });
