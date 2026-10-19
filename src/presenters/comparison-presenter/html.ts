@@ -5,6 +5,7 @@ import {
 } from './constants.js';
 import {
   type ComparisonReport,
+  type LongAnimationFrameScript,
   type RunSummary,
   type WebVitalsAttribution,
 } from './types.js';
@@ -45,7 +46,7 @@ const metricLabels: Record<string, string> = {
 type EmbeddedData = {
   currentRunId: string | undefined;
   runs: Array<{id: string; label: string}>;
-  steps: Array<{key: string; name: string; kind: string; attribution?: WebVitalsAttribution}>;
+  steps: Array<{key: string; name: string; kind: string; attribution?: WebVitalsAttribution; scripts?: LongAnimationFrameScript[]}>;
   metrics: Array<{name: string; label: string; unit: string}>;
   thresholds: Record<string, {good: number; poor: number}>;
   bandPercentile: number;
@@ -141,9 +142,21 @@ function renderAttribution(step) {
   container.hidden = lines.length === 0;
 }
 
+function renderScripts(step) {
+  const container = document.getElementById('scripts');
+  const scripts = (data.steps.find(function (candidate) { return candidate.key === step; }) || {}).scripts || [];
+  const items = scripts.map(function (script) {
+    const source = (script.sourceURL || 'inline') + (script.sourceFunctionName ? ' ' + script.sourceFunctionName : '');
+    return el('li', {text: source + ' via ' + (script.invoker || script.invokerType || 'unknown') + ': ' + script.duration.toFixed(1) + ' ms in ' + script.count + ' frame(s)'});
+  });
+  container.replaceChildren(el('div', {text: 'Slowest scripts in long animation frames of the current run:'}), el('ol', {}, items));
+  container.hidden = items.length === 0;
+}
+
 function updateMetrics() {
   const step = document.getElementById('stepSelect').value;
   renderAttribution(step);
+  renderScripts(step);
   const metricSelect = document.getElementById('metricSelect');
   const selected = metricSelect.value;
   const metrics = Object.keys(data.values[step] || {}).map(function (name) {
@@ -326,7 +339,7 @@ export function renderComparisonHtml(report: ComparisonReport, runs: RunSummary[
     currentRunId: report.currentRun?.id,
     runs: sortedRuns.map(run => ({id: run.id, label: runAxis.label(run)})),
     steps: report.steps.map(step => ({
-      key: step.key, name: step.name, kind: step.kind, attribution: currentRun?.entities[step.key]?.attribution,
+      key: step.key, name: step.name, kind: step.kind, attribution: currentRun?.entities[step.key]?.attribution, scripts: currentRun?.entities[step.key]?.longAnimationFrameScripts,
     })),
     metrics: metricNames.map(name => ({name, label: metricLabels[name] ?? name, unit: metricUnit(name)})),
     thresholds: webVitalThresholds,
@@ -354,6 +367,8 @@ export function renderComparisonHtml(report: ComparisonReport, runs: RunSummary[
     .chart-box { position: relative; height: 420px; }
     .conditions { margin: 0; font-size: 13px; color: var(--muted); }
     .attribution { margin-top: 12px; font-size: 13px; color: var(--muted); }
+    .scripts { margin-top: 12px; font-size: 13px; color: var(--muted); }
+    .scripts ol { margin: 4px 0 0; padding-left: 20px; }
   </style>
 </head>
 <body>
@@ -373,6 +388,7 @@ export function renderComparisonHtml(report: ComparisonReport, runs: RunSummary[
     </div>
     <div class="chart-box"><canvas id="historyChart"></canvas></div>
     <div id="attribution" class="attribution" hidden></div>
+    <div id="scripts" class="scripts" hidden></div>
   </section>
 
   <script id="comparisonData" type="application/json">${serializeForScript(data)}</script>

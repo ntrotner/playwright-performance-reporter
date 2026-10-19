@@ -45,7 +45,8 @@ const PlaywrightPerformanceReporterOptions: Options = {
           new nativeChromiumObservers.navigationTiming(),
           new nativeChromiumObservers.resourceTiming(),
           new nativeChromiumObservers.longTasks(),
-          new nativeChromiumObservers.traceCapture({outputDir: './traces'})
+          new nativeChromiumObservers.traceCapture({outputDir: './traces'}),
+          new nativeChromiumObservers.longAnimationFrames()
         ],
       },
       sampling: {

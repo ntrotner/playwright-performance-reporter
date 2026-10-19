@@ -14,6 +14,9 @@ import {
   HeapProfilerSampling,
 } from './heap-profiler-sampling.js';
 import {
+  LongAnimationFramesObserver,
+} from './long-animation-frames.js';
+import {
   LongTasksObserver,
 } from './long-tasks.js';
 import {
@@ -47,6 +50,7 @@ export const nativeChromiumObservers = {
   heapDump: HeapDump,
   heapObjectsTracking: HeapObjectsTracking,
   heapProfilerSampling: HeapProfilerSampling,
+  longAnimationFrames: LongAnimationFramesObserver,
   longTasks: LongTasksObserver,
   navigationTiming: NavigationTimingObserver,
   networkActivity: NetworkActivityObserver,
