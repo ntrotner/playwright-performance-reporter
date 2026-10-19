@@ -14,6 +14,7 @@ import {
   ignoredMetrics,
 } from './constants.js';
 import {
+  median,
   percentile,
 } from './comparison.js';
 import {
@@ -444,6 +445,79 @@ function conditionsOf(chunks: ResultAccumulator[]): string {
 }
 
 /**
+ * Repeat index per test id, for tests that recorded their execution
+ *
+ * @param chunks json chunks of a run
+ */
+function repeatsOf(chunks: ResultAccumulator[]): Map<string, number> {
+  const repeats = new Map<string, number>();
+  for (const chunk of chunks) {
+    for (const [caseId, steps] of Object.entries(chunk)) {
+      const repeatEachIndex = steps?.[testCaseParent]?.execution?.repeatEachIndex;
+      if (typeof repeatEachIndex === 'number') {
+        repeats.set(caseId, repeatEachIndex);
+      }
+    }
+  }
+
+  return repeats;
+}
+
+/**
+ * Merge the repeats of a test, e.g. with `repeatEach`, into the entities of its first repeat.
+ * Every repeat has its own test id, so they are matched by the name of the test and the step.
+ * A metric is condensed to the median across the repeats, with the band across the repeats.
+ *
+ * @param entities entities of a run
+ * @param repeats repeat index per test id
+ * @param bandPercentile percentile of the lower band
+ */
+export function mergeRepeats(entities: Record<string, EntitySummary>, repeats: Map<string, number>, bandPercentile: number): Record<string, EntitySummary> {
+  const groups = new Map<string, EntitySummary[]>();
+  for (const entity of Object.values(entities)) {
+    if (!repeats.has(entity.testId)) {
+      continue;
+    }
+
+    const key = [entity.testName, entity.kind, entity.stepName ?? '', entity.occurrence ?? 0].join('|');
+    groups.set(key, [...(groups.get(key) ?? []), entity]);
+  }
+
+  const merged = {...entities};
+  for (const group of groups.values()) {
+    if (group.length < 2) {
+      continue;
+    }
+
+    const [first, ...others] = [...group].sort((a, b) => (repeats.get(a.testId) ?? 0) - (repeats.get(b.testId) ?? 0));
+    const metricNames = new Set(group.flatMap(entity => Object.keys(entity.metrics)));
+    const metrics: Record<string, MetricSummary> = {};
+    for (const metricName of metricNames) {
+      const summaries = group.map(entity => entity.metrics[metricName]).filter(summary => summary !== undefined);
+      const values = summaries.map(summary => summary.value);
+      const rates = summaries.map(summary => summary.rate).filter(rate => rate !== undefined);
+      metrics[metricName] = {
+        kind: summaries[0].kind,
+        value: median(values),
+        rate: rates.length > 0 ? median(rates) : undefined,
+        lower: percentile(values, bandPercentile),
+        upper: percentile(values, 1 - bandPercentile),
+        median: median(values),
+        observations: summaries.reduce((total, summary) => total + summary.observations, 0),
+      };
+    }
+
+    merged[first.key] = {...first, duration: median(group.map(entity => entity.duration)), metrics};
+    for (const other of others) {
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete merged[other.key];
+    }
+  }
+
+  return merged;
+}
+
+/**
  * Read a history file and verify it contains the necessary metrics
  *
  * @param filePath json chunk file of a run
@@ -484,7 +558,7 @@ export async function loadRun(filePath: string, requiredMetrics: string[], bandP
       file,
       startedAt,
       conditions: conditionsOf(results),
-      entities: summarizeEntities(results, bandPercentile),
+      entities: mergeRepeats(summarizeEntities(results, bandPercentile), repeatsOf(results), bandPercentile),
     },
   };
 }

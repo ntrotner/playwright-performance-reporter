@@ -7,6 +7,7 @@ import {
 } from '../../src/presenters';
 import {
   loadHistory,
+  mergeRepeats,
   summarizeEntities,
 } from '../../src/presenters/comparison-presenter/history';
 import {
@@ -530,6 +531,26 @@ describe('Comparison presenter', () => {
       expect(report.baselineRuns.map(run => run.file)).toEqual(['run-1.json']);
       expect(report.excludedRuns).toEqual([{file: 'run-0.json', reason: 'Different measurement conditions: unthrottled'}]);
       expect(html).toContain('Measured under: CPU 4x slowdown.');
+    });
+
+    it('should merge the repeats of a test into its first repeat by the median', async () => {
+      const repeat = (caseId: string, repeatEachIndex: number, taskDuration: number) => buildRun({...baselineInputs[0], start: 10_000 + (repeatEachIndex * 5000), taskDuration}).map(chunk => {
+        const steps = structuredClone(chunk.case);
+        if (steps.TEST_CASE_PARENT && steps.TEST_CASE_PARENT.startMetrics.length > 0) {
+          steps.TEST_CASE_PARENT.execution = {repeatEachIndex, retry: 0};
+        }
+
+        return {[caseId]: steps};
+      });
+
+      writeHistory('run-0.json', buildRun(baselineInputs[0]));
+      const {report} = await runPresenter([...repeat('case', 0, 1), ...repeat('case-repeat-1', 1, 3), ...repeat('case-repeat-2', 2, 2)]);
+
+      const openPage = report.steps.find(step => step.key === 'case|open page|0');
+      expect(report.steps.map(step => step.key)).not.toContain('case-repeat-1');
+      expect(openPage?.changes.find(change => change.metric === 'TaskDuration')).toEqual(expect.objectContaining({current: 2, status: 'increased'}));
+      const entities = summarizeEntities(repeat('case', 0, 1), 0.05);
+      expect(mergeRepeats(entities, new Map(), 0.05)).toEqual(entities);
     });
 
     it('should mark the current run as baseline without history', async () => {

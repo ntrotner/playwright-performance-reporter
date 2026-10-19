@@ -90,6 +90,11 @@ export class PerformanceReporter implements Reporter {
    */
   private readonly idToNameMapping = new Map<string, string>();
 
+  /**
+   * Maps unique playwright test ids to the name of the test
+   */
+  private readonly testNames = new Map<string, string>();
+
   /*
    * Metrics engine to retrieve metrics from the browser of the first worker
    */
@@ -262,10 +267,15 @@ export class PerformanceReporter implements Reporter {
     worker.latestStepId = testCaseParent;
     worker.latestName = name;
 
+    this.testNames.set(id, name);
     const results = this.createTestPerformance(id, testCaseParent, name);
-    const conditions = this.conditions[browserName];
-    if (conditions) {
-      results[id][testCaseParent].conditions = conditions;
+    const testPerformance = results?.[id]?.[testCaseParent];
+    if (testPerformance) {
+      testPerformance.execution = {repeatEachIndex: test.repeatEachIndex, retry: result.retry};
+      const conditions = this.conditions[browserName];
+      if (conditions) {
+        testPerformance.conditions = conditions;
+      }
     }
 
     await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onStart', browserName);
@@ -280,6 +290,9 @@ export class PerformanceReporter implements Reporter {
    */
   private async handleTestEnd(test: TestCase, result: TestResult) {
     if (this.options.mode === 'fixture') {
+      // Groups the repeats of the test for aggregated budgets, as in port mode
+      const {id, name} = buildTestCaseIdentifier(test);
+      this.testNames.set(id, name);
       await this.readFixtureMeasurements(result);
       return;
     }
@@ -444,13 +457,15 @@ export class PerformanceReporter implements Reporter {
     }
 
     const budgetMetrics = this.options.budgets.rules.map(rule => rule.metric);
-    for (const steps of Object.values(results)) {
+    for (const [caseId, steps] of Object.entries(results)) {
+      // Repeats of a test have their own id, but the same name, which groups them for aggregated budgets
+      const testName = this.testNames.get(caseId);
       for (const performance of Object.values(steps)) {
         for (const targetMetric of performance.stopMetrics) {
           const metric = Object.fromEntries(budgetMetrics
             .filter(key => Object.hasOwn(targetMetric.metric, key))
             .map(key => [key, targetMetric.metric[key]]));
-          this.budgetStore.push({name: performance.name, metric});
+          this.budgetStore.push({name: performance.name, testName, metric});
         }
       }
     }

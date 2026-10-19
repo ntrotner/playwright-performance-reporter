@@ -229,6 +229,7 @@ export class PerformanceCollector {
     const titlePath = ['', this.testInfo.project.name, ...this.testInfo.titlePath];
     return {
       id: this.testInfo.testId,
+      repeatEachIndex: this.testInfo.repeatEachIndex,
       titlePath: () => titlePath,
       parent: {project: () => undefined},
     } as unknown as TestCase;
@@ -238,7 +239,7 @@ export class PerformanceCollector {
    * The worker measures a single test at a time, so it's always the first worker of its reporter
    */
   private buildTestResult(): TestResult {
-    return {parallelIndex: 0, attachments: []} as unknown as TestResult;
+    return {parallelIndex: 0, retry: this.testInfo.retry, attachments: []} as unknown as TestResult;
   }
 
   /**

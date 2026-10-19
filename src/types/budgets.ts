@@ -27,7 +27,19 @@ export type BudgetRule = {
    * Fail if any matching value is less than this. At least one of `max`/`min` is required.
    */
   min?: number;
+
+  /**
+   * - `each` (default): every execution of a test or step is checked
+   * - `median`, `mean`, `p75`, `p95`, `min`, `max`: the values of all executions of the same test or step,
+   *   e.g. with `repeatEach`, are condensed first, so a single noisy execution doesn't fail the run
+   */
+  aggregate?: BudgetAggregate;
 };
+
+/**
+ * How the values of the executions of a test or step are condensed before checking a budget
+ */
+export type BudgetAggregate = 'each' | 'median' | 'mean' | 'p75' | 'p95' | 'min' | 'max';
 
 /**
  * Performance budgets enforced at the end of the run
@@ -46,6 +58,11 @@ export type BudgetOptions = {
  */
 export type BudgetSample = {
   name: string;
+
+  /**
+   * Name of the test the sample belongs to, identical for all repeats of a test
+   */
+  testName?: string;
   metric: Metric;
 };
 
@@ -63,4 +80,14 @@ export type BudgetViolation = {
   limit: number;
   direction: 'max' | 'min';
   unit?: string;
+
+  /**
+   * How the values were condensed, if not checked per execution
+   */
+  aggregate?: Exclude<BudgetAggregate, 'each'>;
+
+  /**
+   * Amount of executions the aggregate is based on
+   */
+  executions?: number;
 };
