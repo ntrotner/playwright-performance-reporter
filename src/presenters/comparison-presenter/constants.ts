@@ -41,6 +41,11 @@ export const navigationTimingMetrics = new Set([
 ]);
 
 /**
+ * Metrics where a higher value is an improvement, unlike durations, sizes and counts
+ */
+export const higherIsBetterMetrics = new Set(['performanceScore']);
+
+/**
  * Synthetic metric for the wall time of a test or step
  */
 export const entityDurationMetric = 'entityDuration';
@@ -75,7 +80,7 @@ function isRequestDuration(metricName: string): boolean {
  * @param metricName name of the metric
  */
 export function classifyMetric(metricName: string): MetricKind {
-  if (metricName.startsWith(totalMetricPrefix) || isRequestDuration(metricName) || webVitalsMetrics.has(metricName) || navigationTimingMetrics.has(metricName)) {
+  if (metricName.startsWith(totalMetricPrefix) || isRequestDuration(metricName) || metricName === 'performanceScore' || webVitalsMetrics.has(metricName) || navigationTimingMetrics.has(metricName)) {
     return 'total';
   }
 
@@ -108,7 +113,7 @@ const millisecondMetrics = new Set([
  * @param metricName name of the metric
  */
 export function metricUnit(metricName: string): MetricUnit {
-  if (metricName === 'cumulativeLayoutShift') {
+  if (metricName === 'cumulativeLayoutShift' || metricName === 'performanceScore') {
     return 'score';
   }
 

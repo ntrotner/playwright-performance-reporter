@@ -26,6 +26,8 @@ import {
   type MetricSampling,
   defaultDebuggingPort,
   fixtureAttachmentName,
+  type Metric,
+  type TargetMetric,
   type BudgetSample,
   type AppliedConditions,
   supportedBrowsers,
@@ -43,6 +45,7 @@ import {
   Logger,
   createStepFilter,
   collectRunMetadata,
+  performanceScore,
 } from '../helpers/index.js';
 import {
   nativePresenters,
@@ -576,6 +579,42 @@ export class PerformanceReporter implements Reporter {
     results[caseId][stepId][HookOrderToMeasurementOrder[hookOrder]] = endOfTrigger;
     results[caseId][stepId][HookOrderToMeasurementOffsetOrder[hookOrder]] = endOfTrigger - startOfTrigger;
     results[caseId][stepId][HookOrderToMetricOrder[hookOrder]].push(...resolvedMetrics.filter(m => m !== undefined).flat());
+    if (hookOrder === 'onStop') {
+      results[caseId][stepId].stopMetrics.push(...this.scorePages(results[caseId][stepId].stopMetrics));
+    }
+  }
+
+  /**
+   * Lighthouse-like performance score of every page, from the metrics of all observers of the page
+   *
+   * @param stopMetrics stop measurements of a test or step
+   */
+  private scorePages(stopMetrics: TargetMetric[]): TargetMetric[] {
+    const {scoring} = this.options;
+    if (scoring === false) {
+      return [];
+    }
+
+    const pages = new Map<string, {target: TargetMetric; metrics: Metric}>();
+    for (const targetMetric of stopMetrics) {
+      if (targetMetric.type !== 'page' || !targetMetric.id) {
+        continue;
+      }
+
+      const page = pages.get(targetMetric.id) ?? {target: targetMetric, metrics: {}};
+      Object.assign(page.metrics, targetMetric.metric);
+      pages.set(targetMetric.id, page);
+    }
+
+    return [...pages.values()].flatMap(({target, metrics}) => {
+      const result = performanceScore(metrics, scoring?.device ?? 'desktop');
+      if (!result) {
+        return [];
+      }
+
+      const {metric, ...metadata} = target;
+      return [{...metadata, metric: {performanceScore: result.score, performanceScoreMissing: result.missing.join(',')}}];
+    });
   }
 
   /**

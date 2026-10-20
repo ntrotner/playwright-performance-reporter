@@ -1000,4 +1000,41 @@ describe('Playwright Performance Reporter', () => {
       expect(onBudgetViolations).not.toHaveBeenCalled();
     });
   });
+
+  describe('performance score', () => {
+    const page = (metric: Record<string, number>) => ({id: 'page-1', type: 'page', url: 'https://example.com', metric});
+    const stopOf = async (reporter: PlaywrightPerformanceReporter, metrics: unknown[][]) => {
+      for (const resolved of metrics) {
+        mockMetricsEngine.getMetric.mockResolvedValueOnce(resolved);
+      }
+
+      const results = (reporter as any).createTestPerformance('1f', 'step', 'step');
+      (reporter as any).options = {...(reporter as any).options, browsers: {chromium: {onTestStep: {metrics: metrics.map(() => ({name: 'observer'}))}}}};
+      await (reporter as any).executeMetrics(results, '1f', 'step', 'onTestStep', 'onStop', 'chromium');
+      return results['1f'].step.stopMetrics as Array<{id?: string; type?: string; metric: Record<string, unknown>}>;
+    };
+
+    it('should score every page from the metrics of all observers', async () => {
+      const reporter = new PlaywrightPerformanceReporter({...options, scoring: {device: 'mobile'}});
+      (reporter as any).metricsEngine = mockMetricsEngine;
+
+      const stopMetrics = await stopOf(reporter, [
+        [page({largestContentfulPaint: 4000, firstContentfulPaint: 3000, cumulativeLayoutShift: 0.25}), {id: 'worker', type: 'worker', metric: {largestContentfulPaint: 1}}],
+        [page({totalBlockingTime: 600})],
+      ]);
+
+      expect(stopMetrics.at(-1)).toEqual({id: 'page-1', type: 'page', url: 'https://example.com', metric: {performanceScore: 50, performanceScoreMissing: 'speedIndex'}});
+      expect(stopMetrics.filter(entry => 'performanceScore' in entry.metric)).toHaveLength(1);
+    });
+
+    it('should not score without enough inputs or when disabled', async () => {
+      const reporter = new PlaywrightPerformanceReporter(options);
+      (reporter as any).metricsEngine = mockMetricsEngine;
+      expect((await stopOf(reporter, [[page({largestContentfulPaint: 1000})]])).some(entry => 'performanceScore' in entry.metric)).toBe(false);
+
+      const disabled = new PlaywrightPerformanceReporter({...options, scoring: false});
+      (disabled as any).metricsEngine = mockMetricsEngine;
+      expect((await stopOf(disabled, [[page({largestContentfulPaint: 1000, totalBlockingTime: 0})]])).some(entry => 'performanceScore' in entry.metric)).toBe(false);
+    });
+  });
 });
