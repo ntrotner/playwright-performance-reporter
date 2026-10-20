@@ -440,6 +440,20 @@ describe('Chromium client', () => {
     expect((response[0].metric as any).networkActivities).toBeDefined();
   });
 
+  it('should subscribe to the network events of every client', async () => {
+    const testObserver = new nativeChromiumObservers.networkActivity();
+    const firstClient = new ChromiumCDPFixture();
+    const secondClient = new ChromiumCDPFixture();
+
+    await testObserver.onStart({}, firstClient as any);
+    await testObserver.onStop({}, firstClient as any);
+    await testObserver.onStart({}, secondClient as any);
+    await testObserver.onStart({}, secondClient as any);
+
+    expect(firstClient.Network.requestWillBeSent).toHaveBeenCalledTimes(1);
+    expect(secondClient.Network.requestWillBeSent).toHaveBeenCalledTimes(1);
+  });
+
   it('should include details when includeDetailsInSampling is true', async () => {
     const testObserver = new nativeChromiumObservers.networkActivity({triggerGarbageCollectionOnObserve: false, includeDetailsInSampling: true});
     const networkCallbacks: Record<string, any> = {};

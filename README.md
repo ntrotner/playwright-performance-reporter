@@ -651,6 +651,7 @@ Use it with `presenters: [new NdjsonPresenter('./performance.ndjson')]`. If any 
 - **One worker.** The reporter connects to one fixed debugging port, so run with `workers: 1` and `fullyParallel: false`.
 - **Browser detection.** The reporter uses `project.use.defaultBrowserType` and `project.use.launchOptions.args`. `devices[...]` presets set `defaultBrowserType`. Without it, nothing is measured.
 - **Asynchronous measurements.** Playwright does not wait for reporter hooks. The browser may already run the next action while metrics are fetched. `startMeasurementOffset` and `endMeasurementOffset` (ms) show how long a fetch took. High values mean the measurement drifted into later work.
+- **Hook order.** The reporter measures the hooks one after another, in the order Playwright calls them. A step starts measuring only after the previous step's `onStop` finished, so stateful observers like `cpuProfiler` don't overlap. Playwright closes the page right after the last step, so slow `onStop` observers of the last step, for example `cpuProfiler`, can miss it.
 - **Steps.** Only `test.step()` is measured. Playwright API calls, `expect`, fixtures and hooks are not.
 - **Units.** `allPerformanceMetrics` reports durations in **seconds** (Chromium's convention). `cpuProfile*`, `webVitals`, `longTasks` and `networkActivity` durations are in **milliseconds**.
 - **Viewing HTML reports.** `chartPresenter` and `comparisonPresenter` load Chart.js from `cdn.jsdelivr.net`, so viewing them needs internet access.
