@@ -69,7 +69,7 @@ export class ChromiumDevelopmentTools implements BrowserClient {
         newConnectionRequests = this.connect();
       }
 
-      const currentAvailableTargets = Object.keys(this.clients);
+      const currentAvailableTargets = this.targetsFor(metric);
       const targetMetric: Record<string, TargetMetric> = {};
       const metricRequests = [];
 
@@ -78,7 +78,7 @@ export class ChromiumDevelopmentTools implements BrowserClient {
 
       // Check if new targets were yielded from connection
       await newConnectionRequests;
-      const newTargets = Object.keys(this.clients).filter(targetId => !currentAvailableTargets.includes(targetId));
+      const newTargets = this.targetsFor(metric).filter(targetId => !currentAvailableTargets.includes(targetId));
       if (newTargets.length > 0) {
         metricRequests.push(...newTargets.map(async targetId => this.runPredefinedMetricFetch(targetId, targetMetric, metric, hookOrder)));
       }
@@ -130,6 +130,15 @@ export class ChromiumDevelopmentTools implements BrowserClient {
    */
   public getBrowserName(): SupportedBrowsers {
     return 'chromium';
+  }
+
+  /**
+   * Targets an observer is measured on, by default all connected targets
+   *
+   * @param metric observer to measure
+   */
+  protected targetsFor(metric: ChromiumMetricObserver): string[] {
+    return Object.keys(this.clients);
   }
 
   /**

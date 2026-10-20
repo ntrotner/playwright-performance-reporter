@@ -1,5 +1,6 @@
 import type CDP from 'chrome-remote-interface';
 import type {
+  APIRequestContext,
   BrowserContext,
   Page,
   TestInfo,
@@ -13,15 +14,23 @@ import {
   type CdpSessionLike,
   ChromiumSessionDevelopmentTools,
   createCdpSessionClient,
+  createRecordingClient,
+  playwrightTargetType,
 } from '../browsers/chromium/session-client.js';
 import {
   PerformanceReporter,
 } from '../engines/reporter.js';
 import {
+  registerRequestSource,
+} from '../browsers/chromium/observers/request-timing.js';
+import {
   type Options,
   type PresenterWriter,
   type ResultAccumulator,
 } from '../types/index.js';
+import {
+  RequestRecorder,
+} from './request-recorder.js';
 
 /**
  * Step that is currently running
@@ -63,6 +72,11 @@ export class PerformanceCollector {
 
   private pageCounter = 0;
 
+  /**
+   * Requests of the pages and the API request context of the test
+   */
+  private readonly requestRecorder = new RequestRecorder();
+
   constructor(options: Options, private readonly testInfo: TestInfo) {
     const collector: PresenterWriter = {
       write: async content => {
@@ -83,6 +97,11 @@ export class PerformanceCollector {
       presenters: [collector],
     });
     this.reporter.useBrowserClient(this.developmentTools);
+
+    // Virtual target for observers of what Playwright records, so they also measure tests without a page
+    const recordingClient = createRecordingClient();
+    registerRequestSource(recordingClient, this.requestRecorder);
+    this.developmentTools.addTarget({id: 'playwright', type: playwrightTargetType, url: ''} as CDP.Target, recordingClient);
   }
 
   /**
@@ -91,6 +110,7 @@ export class PerformanceCollector {
    * @param context browser context of the test
    */
   public observeContext(context: BrowserContext): void {
+    this.requestRecorder.observeContext(context);
     for (const page of context.pages()) {
       this.trackPage(context, page);
     }
@@ -98,6 +118,15 @@ export class PerformanceCollector {
     context.on('page', page => {
       this.trackPage(context, page);
     });
+  }
+
+  /**
+   * API request context that records its requests
+   *
+   * @param request API request context of the test
+   */
+  public wrapApiRequest(request: APIRequestContext): APIRequestContext {
+    return this.requestRecorder.wrapApiRequest(request);
   }
 
   /**

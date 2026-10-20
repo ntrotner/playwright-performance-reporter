@@ -25,11 +25,22 @@ export type HookOrder = typeof hookOrder[number];
  */
 export type MetricObserver<T> = {
   name: string;
+
+  /**
+   * What the observer needs: `cdp` observers use the Chrome DevTools Protocol, `playwright` observers read
+   * what the fixture recorded with Playwright, e.g. requests, and only run in the fixture mode. Defaults to `['cdp']`.
+   */
+  capabilities?: readonly ObserverCapability[];
   plugins: Array<MeasurePlugin<T>>;
   onStart: OnStartMeasure<T>;
   onSampling: OnSamplingMeasure<T>;
   onStop: OnStopMeasure<T>;
 };
+
+/**
+ * What an observer needs: the Chrome DevTools Protocol, or the recordings of Playwright in the fixture mode
+ */
+export type ObserverCapability = 'cdp' | 'playwright';
 
 /**
  * Define which metric should regularly be requested

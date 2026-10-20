@@ -86,11 +86,15 @@ type BaseTestType = TestType<PlaywrightTestArgs & PlaywrightTestOptions, Playwri
  * @param options same options as passed to the reporter
  */
 export function withPerformance<T extends BaseTestType>(base: T, options: Options): T {
-  const test = (base as BaseTestType).extend<{performanceCollector: void}>({
+  const test = (base as BaseTestType).extend<{performanceCollector: PerformanceCollector | undefined}>({
+    // The requests of the API request context are recorded for `requestTiming`
+    async request({request, performanceCollector}, use) {
+      await use(performanceCollector ? performanceCollector.wrapApiRequest(request) : request);
+    },
     performanceCollector: [async ({context, browserName}, use, testInfo) => {
       if (browserName !== 'chromium') {
         // CDP sessions are only available in Chromium
-        await use();
+        await use(undefined);
         return;
       }
 
@@ -99,7 +103,7 @@ export function withPerformance<T extends BaseTestType>(base: T, options: Option
       activeCollector = collector;
       try {
         await collector.testBegin();
-        await use();
+        await use(collector);
       } finally {
         activeCollector = undefined;
         const chunks = await collector.testEnd();
