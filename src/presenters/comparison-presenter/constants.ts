@@ -99,12 +99,26 @@ export const webVitalsAttributionMetrics = new Set([
 export const userTimingMetricPrefix = 'userTiming:';
 
 /**
+ * Memory kept alive by a test or step, measured once between its start and stop
+ */
+export const memoryGrowthMetrics = new Set([
+  'heapGrowthBytes',
+  'nodeGrowth',
+  'listenerGrowth',
+  'documentGrowth',
+  'heapGrowthPerSecond',
+  'heapDiffAddedObjects',
+  'heapDiffAddedBytes',
+  'heapDiffDetachedNodes',
+]);
+
+/**
  * Decide on how to condense a metric
  *
  * @param metricName name of the metric
  */
 export function classifyMetric(metricName: string): MetricKind {
-  if (metricName.startsWith(totalMetricPrefix) || metricName.startsWith(userTimingMetricPrefix) || isRequestDuration(metricName) || metricName === 'performanceScore' || webVitalsMetrics.has(metricName) || webVitalsAttributionMetrics.has(metricName) || navigationTimingMetrics.has(metricName)) {
+  if (metricName.startsWith(totalMetricPrefix) || metricName.startsWith(userTimingMetricPrefix) || memoryGrowthMetrics.has(metricName) || isRequestDuration(metricName) || metricName === 'performanceScore' || webVitalsMetrics.has(metricName) || webVitalsAttributionMetrics.has(metricName) || navigationTimingMetrics.has(metricName)) {
     return 'total';
   }
 
