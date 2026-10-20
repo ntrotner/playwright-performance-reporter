@@ -496,7 +496,7 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    const metrics = (this.options.browsers[browser]?.[hook]?.metrics ?? []) as Array<MetricObserver<BrowserDeveloperToolsClient[SupportedBrowsers]>>;
+    const metrics = this.options.browsers[browser]?.[hook]?.metrics ?? [];
     if (metrics.length > 0) {
       Logger.info('Fetching metrics', ...metrics.map(m => m.name));
     }
@@ -523,7 +523,7 @@ export class PerformanceReporter implements Reporter {
    * @param browser which settings and metrics to use
    */
   private async executeSamplingMetrics(results: ResultAccumulator, caseId: string, stepId: string, hook: Hooks, browser: SupportedBrowsers) {
-    const samplingConfig = this.options.browsers[browser]?.sampling?.metrics as Array<MetricSampling<BrowserDeveloperToolsClient[SupportedBrowsers]>>;
+    const samplingConfig = this.options.browsers[browser]?.sampling?.metrics;
     if (!samplingConfig) {
       return;
     }

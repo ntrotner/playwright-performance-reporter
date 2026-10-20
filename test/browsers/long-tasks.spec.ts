@@ -28,6 +28,8 @@ function createPage(supportsLongTasks = true): Page {
   const context = vm.createContext({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     PerformanceObserver: class {
+      static supportedEntryTypes = supportsLongTasks ? ['longtask'] : ['paint'];
+
       observe = observe;
 
       constructor(callback: (list: {getEntries: () => Array<{duration: number}>}) => void) {
@@ -142,14 +144,14 @@ describe('LongTasksObserver', () => {
     expect(page.observe).toHaveBeenCalledWith({type: 'longtask', buffered: true});
   });
 
-  it('should report zeros if long tasks are not supported', async () => {
-    evaluateIn(createPage(false), client);
+  it('should leave out the long tasks if the browser has no long task entries', async () => {
+    const page = createPage(false);
+    evaluateIn(page, client);
     const accumulator = {};
 
     await expect(observer.onStop(accumulator, cdp)).resolves.toBeUndefined();
-    expect(accumulator).toEqual({
-      longTaskCount: 0, totalLongTasksDuration: 0, totalBlockingTime: 0, maxLongTaskDuration: 0,
-    });
+    expect(accumulator).toEqual({});
+    expect(page.observe).not.toHaveBeenCalled();
   });
 
   it.each([

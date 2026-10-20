@@ -102,7 +102,7 @@ Requirements:
 
 - Node.js `>= 20`
 - `@playwright/test`
-- Chromium. Other browsers run, but no metrics are collected for them (see [limitations](#browser-support-and-limitations)).
+- Chromium for all observers. Firefox and WebKit collect the Web Performance API based observers in the [fixture mode](#fixture-mode) (see [limitations](#browser-support-and-limitations)).
 
 The package is ESM-only (`"type": "module"`).
 
@@ -233,7 +233,7 @@ type BrowserOptions = {
 | `onTestStep` | `onStart` at `test.step()` begin, `onStop` at its end. Only steps of category `test.step`. | `startMetrics` / `stopMetrics` of the step entry                              |
 | `sampling`   | `onSampling` every `samplingTimeoutInMilliseconds`, while a test or step is running   | `samplingMetrics` of the step (or test) that is active at that moment         |
 
-Only `chromium` collects data today. The `firefox` and `webkit` keys are accepted, but those clients return no metrics.
+In port mode only `chromium` collects data. In the [fixture mode](#fixture-mode), `firefox` and `webkit` run the observers that only evaluate JavaScript in the page, see [Firefox and WebKit](#firefox-and-webkit).
 
 > `onTest` start and stop measurements are often empty. At test begin, the page under test may not exist yet. At test end, it is already closed. For reliable data, use `onTestStep` and `sampling`.
 
@@ -315,10 +315,46 @@ export default defineConfig({
 - Specs import `test` from the fixtures file. Its `test.step()` measures the step, so apply `withPerformance` after all other `extend` calls: a later `extend` creates a new `test.step` without measurement.
 - Measurements are awaited: a step starts after its start metrics are taken, and ends after its stop metrics are taken. This removes the drift of the port mode, but adds the measurement time to the test duration.
 - Every page of the test's browser context is measured, also pages opened later. `onTest` stop metrics are taken before the context closes, so they contain data, unlike in port mode.
-- Only Chromium has CDP sessions. Tests of other browsers run unmeasured.
+- Only Chromium has CDP sessions. In Firefox and WebKit the observers that evaluate JavaScript in the page run, see [Firefox and WebKit](#firefox-and-webkit).
 - Sharding: run the shards with `--reporter=blob`, then `npx playwright merge-reports --config playwright.config.ts ./blob-report`. The presenters run during the merge.
 - `deleteOnFailure`, budgets and all presenters work as in port mode. The measurements are also visible as an attachment named `playwright-performance-reporter` in Playwright's HTML report.
 - A runnable setup is in [`example/playwright.fixture-mode.config.ts`](example/playwright.fixture-mode.config.ts) (`cd example && npm run test:fixture-mode`).
+
+### Firefox and WebKit
+
+Firefox and WebKit have no Chrome DevTools Protocol, but several observers only evaluate JavaScript in the page with the Web Performance APIs. In the [fixture mode](#fixture-mode) they run in every browser, as the fixture evaluates them with `page.evaluate`. Configure them per browser:
+
+```ts
+const evaluateOnly = () => [
+  new nativeChromiumObservers.webVitals(),
+  new nativeChromiumObservers.navigationTiming(),
+  new nativeChromiumObservers.resourceTiming({includeDetails: false}),
+  new nativeChromiumObservers.longTasks(),
+];
+
+export const performanceOptions: Options = {
+  deleteOnFailure: false,
+  mode: 'fixture',
+  browsers: {
+    chromium: {onTestStep: {metrics: [...evaluateOnly(), new nativeChromiumObservers.cpuProfiler()]}},
+    firefox: {onTestStep: {metrics: evaluateOnly()}},
+    webkit: {onTestStep: {metrics: evaluateOnly()}},
+  },
+};
+```
+
+| Observer | Chromium | Firefox | WebKit |
+|---|---|---|---|
+| `webVitals` | all | LCP, FCP, CLS and INP as far as the browser reports them | LCP, FCP, CLS and INP as far as the browser reports them |
+| `navigationTiming` | yes | yes | yes |
+| `resourceTiming` | yes | yes | yes |
+| `longTasks` | yes | left out, no long task entries | left out, no long task entries |
+| every other observer | yes | `{unsupported: '<observer>'}` | `{unsupported: '<observer>'}` |
+
+- Observers declare `capabilities: ['evaluate']` when they only evaluate JavaScript. Custom observers can do the same.
+- Observers that need CDP are skipped with one warning, and their stop measurement is `{unsupported: '<observer name>'}`, so the gap is visible in the output.
+- LCP and FCP are left out until the browser recorded them, e.g. WebKit can record the first paint after the load event. CLS and INP that a browser doesn't report are `0`. Compare the engines with care, the browsers measure differently.
+- Tests of every project have their own test id, so `comparisonPresenter` never compares one engine with another.
 
 ### Sampling
 
@@ -641,7 +677,7 @@ The full type is `ComparisonReport` in [`src/presenters/comparison-presenter/typ
 
 ### Custom observer
 
-Implement `ChromiumMetricObserver`. `FirefoxMetricObserver` and `WebkitMetricObserver` exist too, but those browsers are not measured yet. Write your values into `accumulator`. `client` is a connected [`chrome-remote-interface`](https://github.com/cyrus-and/chrome-remote-interface) client for one target.
+Implement `ChromiumMetricObserver`. `FirefoxMetricObserver` and `WebkitMetricObserver` exist too. Those browsers only run observers with `capabilities: ['evaluate']`, in the [fixture mode](#fixture-mode). Write your values into `accumulator`. `client` is a connected [`chrome-remote-interface`](https://github.com/cyrus-and/chrome-remote-interface) client for one target.
 
 ```ts
 import {
@@ -728,8 +764,8 @@ Use it with `presenters: [new NdjsonPresenter('./performance.ndjson')]`. If any 
 | Browser  | Status                                                                                  |
 |----------|-----------------------------------------------------------------------------------------|
 | Chromium | Supported via CDP for projects with `defaultBrowserType: 'chromium'` that launch with `--remote-debugging-port`. |
-| Firefox  | Accepted in `browsers`, but the client is a stub that returns no metrics.               |
-| WebKit   | Accepted in `browsers`, but the client is a stub that returns no metrics.               |
+| Firefox  | [Fixture mode](#fixture-mode): observers that evaluate JavaScript in the page. Port mode: no metrics. |
+| WebKit   | [Fixture mode](#fixture-mode): observers that evaluate JavaScript in the page. Port mode: no metrics. |
 
 - **One worker by default.** The reporter connects to one fixed debugging port, so run with `workers: 1` and `fullyParallel: false`, or use [`debuggingPort.perWorker`](#multiple-workers) with the `perWorkerDebuggingPort` fixture, or the [fixture mode](#fixture-mode).
 - **Browser detection.** The reporter uses `project.use.defaultBrowserType` and `project.use.launchOptions.args`. `devices[...]` presets set `defaultBrowserType`. Without it, nothing is measured.

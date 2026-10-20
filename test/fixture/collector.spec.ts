@@ -107,3 +107,25 @@ describe('Performance collector', () => {
     expect(urls).toEqual(['https://example.com', 'https://example.com']);
   });
 });
+
+describe('Performance collector without CDP', () => {
+  it('should evaluate the observers in the page of Firefox and WebKit', async () => {
+    const page = Object.assign(new PageFixture('https://example.com'), {
+      evaluate: jest.fn(async () => ({navigationType: 'navigate', timeToFirstByte: 120})),
+    });
+    const context = new ContextFixture([page]);
+    const collector = new PerformanceCollector({
+      deleteOnFailure: false,
+      browsers: {webkit: {onTestStep: {metrics: [new nativeChromiumObservers.navigationTiming()]}}},
+    }, testInfo as any, 'webkit');
+
+    collector.observeContext(context as any);
+    await collector.stepBegin('Open');
+    await collector.stepEnd();
+    const chunks = await collector.testEnd();
+
+    expect(context.newCDPSession).not.toHaveBeenCalled();
+    const stop = chunks.flatMap(chunk => Object.values(chunk['test-1'])).find(performance => performance.stopMetrics.length > 0);
+    expect(stop?.stopMetrics).toEqual([{id: 'page-1', type: 'page', url: 'https://example.com', metric: expect.objectContaining({timeToFirstByte: 120}) as unknown}]);
+  });
+});

@@ -1,5 +1,14 @@
 import type CDP from 'chrome-remote-interface';
 import {
+  type HookOrder,
+  type MetricObserver,
+  type SupportedBrowsers,
+  type TargetMetric,
+} from '../../types/index.js';
+import {
+  Logger,
+} from '../../helpers/index.js';
+import {
   ChromiumDevelopmentTools,
 } from './client.js';
 
@@ -106,5 +115,74 @@ export class ChromiumSessionDevelopmentTools extends ChromiumDevelopmentTools {
     if (this.targets[targetId]) {
       Object.assign(this.targets[targetId], target);
     }
+  }
+}
+
+/**
+ * Client for browsers without CDP, e.g. Firefox and WebKit, which only supports `Runtime.evaluate` by
+ * running the expression in the page. Every other command fails, and events are never emitted.
+ *
+ * @param evaluate runs an expression in the page and returns its value, e.g. `page.evaluate`
+ * @param browser name of the browser, for error messages
+ */
+export function createEvaluateClient(evaluate: (expression: string) => Promise<unknown>, browser: string): CDP.Client {
+  const run = async (method: string, parameters?: Record<string, unknown>): Promise<unknown> => {
+    if (method !== 'Runtime.evaluate') {
+      throw new Error(`${method} is not available in ${browser}`);
+    }
+
+    try {
+      const expression = typeof parameters?.expression === 'string' ? parameters.expression : '';
+      const value = await evaluate(expression);
+      return {result: {type: typeof value === 'object' && value !== null ? 'object' : typeof value, value}};
+    } catch (error: unknown) {
+      return {result: {type: 'object', subtype: 'error'}, exceptionDetails: {text: String(error)}};
+    }
+  };
+
+  return createCdpSessionClient({
+    send: run,
+    on() {},
+    off() {},
+  });
+}
+
+/**
+ * Browser client on pages without CDP, which only runs observers that evaluate JavaScript in the page
+ */
+export class EvaluateDevelopmentTools extends ChromiumSessionDevelopmentTools {
+  /**
+   * Observers that were reported as unsupported once
+   */
+  private readonly warned = new Set<string>();
+
+  constructor(private readonly browser: Exclude<SupportedBrowsers, 'chromium'>) {
+    super();
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public override getBrowserName(): SupportedBrowsers {
+    return this.browser;
+  }
+
+  /**
+   * Run evaluate-only observers, and mark the others as unsupported at their stop
+   *
+   * @param metric observer to run
+   * @param hookOrder hook order
+   */
+  public override async getMetric(metric: MetricObserver<CDP.Client>, hookOrder: HookOrder): Promise<TargetMetric[]> {
+    if (metric.capabilities?.includes('evaluate')) {
+      return super.getMetric(metric, hookOrder);
+    }
+
+    if (!this.warned.has(metric.name)) {
+      this.warned.add(metric.name);
+      Logger.warning(`Observer "${metric.name}" needs the Chrome DevTools Protocol and is not supported in ${this.browser}`);
+    }
+
+    return hookOrder === 'onStop' ? Object.values(this.targets).map(target => ({...target, metric: {unsupported: metric.name}})) : [];
   }
 }

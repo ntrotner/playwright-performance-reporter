@@ -71,6 +71,11 @@ export class ResourceTimingObserver implements ChromiumMetricObserver {
   public readonly name = 'resourceTiming';
   public readonly plugins = [];
 
+  /**
+   * Only evaluates JavaScript in the page, so it also works in Firefox and WebKit
+   */
+  public readonly capabilities = ['evaluate'] as const;
+
   private readonly includeDetails: boolean;
   private readonly bufferSize: number;
 

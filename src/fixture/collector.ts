@@ -13,6 +13,8 @@ import {
   type CdpSessionLike,
   ChromiumSessionDevelopmentTools,
   createCdpSessionClient,
+  createEvaluateClient,
+  EvaluateDevelopmentTools,
 } from '../browsers/chromium/session-client.js';
 import {
   PerformanceReporter,
@@ -21,6 +23,7 @@ import {
   type Options,
   type PresenterWriter,
   type ResultAccumulator,
+  type SupportedBrowsers,
 } from '../types/index.js';
 
 /**
@@ -49,7 +52,7 @@ export class PerformanceCollector {
   /**
    * Browser client on the CDP sessions of the pages
    */
-  private readonly developmentTools = new ChromiumSessionDevelopmentTools();
+  private readonly developmentTools: ChromiumSessionDevelopmentTools;
 
   /**
    * Running steps, the innermost last
@@ -63,7 +66,10 @@ export class PerformanceCollector {
 
   private pageCounter = 0;
 
-  constructor(options: Options, private readonly testInfo: TestInfo) {
+  constructor(options: Options, private readonly testInfo: TestInfo, private readonly browser: SupportedBrowsers = 'chromium') {
+    // Only Chromium has CDP sessions, the other browsers run the observers that evaluate JavaScript in the page
+    this.developmentTools = browser === 'chromium' ? new ChromiumSessionDevelopmentTools() : new EvaluateDevelopmentTools(browser);
+
     const collector: PresenterWriter = {
       write: async content => {
         // The reporter reuses objects across chunks, e.g. while sampling
@@ -153,8 +159,10 @@ export class PerformanceCollector {
     const targetId = `page-${this.pageCounter}`;
     const pending = (async () => {
       try {
-        const session = await context.newCDPSession(page);
-        this.developmentTools.addTarget({id: targetId, type: 'page', url: page.url()} as CDP.Target, createCdpSessionClient(session as unknown as CdpSessionLike));
+        const client = this.browser === 'chromium'
+          ? createCdpSessionClient(await context.newCDPSession(page) as unknown as CdpSessionLike)
+          : createEvaluateClient(async expression => page.evaluate(expression), this.browser);
+        this.developmentTools.addTarget({id: targetId, type: 'page', url: page.url()} as CDP.Target, client);
         page.on('framenavigated', frame => {
           if (frame === page.mainFrame()) {
             this.developmentTools.updateTarget(targetId, {url: frame.url()});

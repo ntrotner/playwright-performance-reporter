@@ -27,6 +27,11 @@ export class NavigationTimingObserver implements ChromiumMetricObserver {
   public readonly name = 'navigationTiming';
   public readonly plugins = [];
 
+  /**
+   * Only evaluates JavaScript in the page, so it also works in Firefox and WebKit
+   */
+  public readonly capabilities = ['evaluate'] as const;
+
   private readonly excludedMetrics: Set<string>;
 
   constructor(protected options?: NavigationTimingObserverOptions) {

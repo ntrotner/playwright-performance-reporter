@@ -25,11 +25,22 @@ export type HookOrder = typeof hookOrder[number];
  */
 export type MetricObserver<T> = {
   name: string;
+
+  /**
+   * What the observer needs of the browser. `evaluate` observers only run JavaScript in the page,
+   * so they also work in Firefox and WebKit with the fixture mode. Defaults to `['cdp']`.
+   */
+  capabilities?: readonly ObserverCapability[];
   plugins: Array<MeasurePlugin<T>>;
   onStart: OnStartMeasure<T>;
   onSampling: OnSamplingMeasure<T>;
   onStop: OnStopMeasure<T>;
 };
+
+/**
+ * Capability of a browser that an observer needs: the Chrome DevTools Protocol, or only JavaScript evaluation in the page
+ */
+export type ObserverCapability = 'cdp' | 'evaluate';
 
 /**
  * Define which metric should regularly be requested
@@ -44,8 +55,16 @@ export type MetricSampling<T> = {
  */
 export type BrowserDeveloperToolsClient = {
   chromium: CDP.Client;
-  webkit: Record<string, unknown>;
-  firefox: Record<string, unknown>;
+
+  /**
+   * In fixture mode, a client that only supports `Runtime.evaluate`, which runs in the page
+   */
+  webkit: CDP.Client;
+
+  /**
+   * In fixture mode, a client that only supports `Runtime.evaluate`, which runs in the page
+   */
+  firefox: CDP.Client;
 };
 
 /**

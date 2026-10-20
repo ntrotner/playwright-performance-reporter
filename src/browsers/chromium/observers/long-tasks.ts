@@ -16,6 +16,11 @@ export class LongTasksObserver implements ChromiumMetricObserver {
   public readonly plugins = [];
 
   /**
+   * Only evaluates JavaScript in the page, so it also works in Firefox and WebKit
+   */
+  public readonly capabilities = ['evaluate'] as const;
+
+  /**
    * @inheritdoc
    */
   async onStart(accumulator: Metric, developmentTools: CDP.Client): Promise<void> {
@@ -67,6 +72,9 @@ export class LongTasksObserver implements ChromiumMetricObserver {
   private getLongTasksExpression(reset: boolean) {
     return `
   ((reset) => {
+    // Firefox and WebKit have no long task entries, so there's nothing to report instead of 0
+    if (!(PerformanceObserver.supportedEntryTypes ?? []).includes('longtask')) return {};
+
     const KEY = '__performanceReporterLongTasks';
     const buf = window[KEY] ?? {durations: []};
     window[KEY] = buf;

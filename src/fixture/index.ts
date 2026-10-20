@@ -72,6 +72,7 @@ type BaseTestType = TestType<PlaywrightTestArgs & PlaywrightTestOptions, Playwri
 
 /**
  * Measure every test inside its worker on Playwright's CDP session, for the reporter option `mode: 'fixture'`.
+ * Firefox and WebKit have no CDP, so only observers that evaluate JavaScript in the page run there.
  * Works with any amount of workers and with sharding, as no debugging port is needed.
  * `test.step()` of the returned test type measures the step, so apply it after all other `extend` calls.
  *
@@ -88,13 +89,7 @@ type BaseTestType = TestType<PlaywrightTestArgs & PlaywrightTestOptions, Playwri
 export function withPerformance<T extends BaseTestType>(base: T, options: Options): T {
   const test = (base as BaseTestType).extend<{performanceCollector: void}>({
     performanceCollector: [async ({context, browserName}, use, testInfo) => {
-      if (browserName !== 'chromium') {
-        // CDP sessions are only available in Chromium
-        await use();
-        return;
-      }
-
-      const collector = new PerformanceCollector(options, testInfo);
+      const collector = new PerformanceCollector(options, testInfo, browserName);
       collector.observeContext(context);
       activeCollector = collector;
       try {

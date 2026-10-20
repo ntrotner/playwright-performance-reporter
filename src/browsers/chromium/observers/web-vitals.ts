@@ -10,6 +10,11 @@ export class WebVitalsObserver implements ChromiumMetricObserver {
   public readonly plugins = [];
 
   /**
+   * Only evaluates JavaScript in the page, so it also works in Firefox and WebKit
+   */
+  public readonly capabilities = ['evaluate'] as const;
+
+  /**
    * @inheritdoc
    */
   async onStart(accumulator: Metric, developmentTools: CDP.Client): Promise<void> {
