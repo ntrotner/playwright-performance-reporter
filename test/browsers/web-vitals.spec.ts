@@ -96,8 +96,19 @@ describe('Web vitals observer', () => {
 
     expect(first.largestContentfulPaint).toBe(1000);
     expect(second).toEqual({
-      largestContentfulPaint: 1500, firstContentfulPaint: 0, cumulativeLayoutShift: 0.1, interactionToNextPaint: 120,
+      largestContentfulPaint: 1500, cumulativeLayoutShift: 0.1, interactionToNextPaint: 120,
     });
+  });
+
+  it('should leave out paints that were not recorded yet', async () => {
+    const page = createPage([]);
+    evaluateIn(page);
+    const observer = new nativeChromiumObservers.webVitals();
+    const accumulator: Record<string, number> = {};
+
+    await observer.onStop(accumulator, cdp);
+
+    expect(Object.keys(accumulator)).toEqual(['cumulativeLayoutShift', 'interactionToNextPaint']);
   });
 
   it('should leave the accumulator empty if the evaluation fails', async () => {

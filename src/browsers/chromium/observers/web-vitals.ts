@@ -93,16 +93,18 @@ export class WebVitalsObserver implements ChromiumMetricObserver {
       buf.record(buf.observer.takeRecords());
     } catch {}
 
-    const last = values => values.length > 0 ? values[values.length - 1] : 0;
+    const last = values => values.length > 0 ? values[values.length - 1] : undefined;
     const max = values => values.length > 0 ? Math.max(...values) : 0;
     const sum = values => values.reduce((total, value) => total + value, 0);
 
-    return {
+    // A paint that wasn't recorded yet is left out instead of reported as 0, e.g. WebKit can record it after the load event
+    const vitals = {
       largestContentfulPaint: last(buf.lcp),
       firstContentfulPaint: last(buf.fcp),
       cumulativeLayoutShift: sum(buf.cls),
       interactionToNextPaint: max(buf.inp),
     };
+    return Object.fromEntries(Object.entries(vitals).filter(([, value]) => value !== undefined));
   })()
 `;
   }
