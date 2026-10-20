@@ -468,6 +468,46 @@ describe('Playwright Performance Reporter', () => {
       expect(calls).toEqual(['onStop:begin', 'onStop:end', 'onStart:begin', 'onStart:end', 'onSampling:begin', 'onSampling:end']);
     });
 
+    it('should end nested steps concurrently and end the test after them', async () => {
+      mockMetricsEngine.getBrowser.mockReturnValue('chromium');
+      const flushMicrotasks = async () => {
+        for (let index = 0; index < 20; index++) {
+          // eslint-disable-next-line no-await-in-loop
+          await Promise.resolve();
+        }
+      };
+
+      const calls: string[] = [];
+      const pending: Array<() => void> = [];
+      (playwrightPerformanceReporter as any).executeMetrics = jest.fn(async (_results: unknown, _caseId: string, stepId: string, hook: string) => {
+        calls.push(`${hook}:${stepId}`);
+        await new Promise<void>(resolve => {
+          pending.push(resolve);
+        });
+      });
+      const outer = {...mockTestStep, titlePath: () => ['outer']} as TestStep;
+      const inner = {...mockTestStep, titlePath: () => ['outer', 'inner']} as TestStep;
+
+      const hooks = [
+        playwrightPerformanceReporter.onStepEnd(mockTestCase, mockTestResult, inner),
+        playwrightPerformanceReporter.onStepEnd(mockTestCase, mockTestResult, outer),
+        playwrightPerformanceReporter.onTestEnd(mockTestCase, mockTestResult),
+      ];
+      await flushMicrotasks();
+
+      expect(calls).toHaveLength(2);
+
+      for (const resolve of pending.splice(0)) {
+        resolve();
+      }
+
+      await flushMicrotasks();
+      expect(calls).toHaveLength(3);
+      expect(calls[2]).toBe('onTest:TEST_CASE_PARENT');
+      pending[0]();
+      await Promise.all(hooks);
+    });
+
     it('should run the next hook when a hook failed', async () => {
       mockMetricsEngine.getBrowser.mockReturnValue('chromium');
       (playwrightPerformanceReporter as any).executeMetrics = jest.fn()

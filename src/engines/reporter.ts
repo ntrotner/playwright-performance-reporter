@@ -42,6 +42,16 @@ import {
   MetricsEngine,
 } from './index.js';
 
+/**
+ * Playwright hook of a measurement
+ */
+type HookKind = 'testBegin' | 'stepBegin' | 'stepEnd' | 'testEnd';
+
+/**
+ * Hooks that may measure concurrently when Playwright calls them one after another, e.g. the ends of nested steps
+ */
+const concurrentHookKinds = new Set<HookKind>(['stepBegin', 'stepEnd']);
+
 export class PerformanceReporter implements Reporter {
   /**
    * Maps unique playwright test ids to the computed name
@@ -93,6 +103,11 @@ export class PerformanceReporter implements Reporter {
    * connection before the last step was measured.
    */
   private hookQueue: Promise<void> = Promise.resolve();
+
+  /**
+   * Consecutive hooks of the same kind, which start after all hooks before them
+   */
+  private hookBatch: {kind: HookKind; start: Promise<void>} | undefined;
 
   constructor(private readonly options: Options) {
     if (options.maxListeners !== undefined) {
@@ -147,19 +162,19 @@ export class PerformanceReporter implements Reporter {
   }
 
   async onTestBegin(test: TestCase, result: TestResult) {
-    return this.enqueue(async () => this.measureTestBegin(test, result));
+    return this.enqueue('testBegin', async () => this.measureTestBegin(test, result));
   }
 
   async onTestEnd(test: TestCase, result: TestResult) {
-    return this.enqueue(async () => this.measureTestEnd(test, result));
+    return this.enqueue('testEnd', async () => this.measureTestEnd(test, result));
   }
 
   async onStepBegin(test: TestCase, result: TestResult, step: TestStep) {
-    return this.enqueue(async () => this.measureStepBegin(test, result, step));
+    return this.enqueue('stepBegin', async () => this.measureStepBegin(test, result, step));
   }
 
   async onStepEnd(test: TestCase, result: TestResult, step: TestStep) {
-    return this.enqueue(async () => this.measureStepEnd(test, result, step));
+    return this.enqueue('stepEnd', async () => this.measureStepEnd(test, result, step));
   }
 
   /**
@@ -283,19 +298,28 @@ export class PerformanceReporter implements Reporter {
   }
 
   /**
-   * Run a hook after all hooks that were called before it
+   * Run a hook after all hooks that were called before it.
+   * Consecutive step begins or step ends run concurrently, as nested steps begin and end at the same time,
+   * e.g. the end of an outer step doesn't wait for the end of its inner step while the page closes.
    *
+   * @param kind kind of the hook
    * @param hook measurement of the hook
    */
-  private async enqueue(hook: () => Promise<void>): Promise<void> {
-    const previous = this.hookQueue;
+  private async enqueue(kind: HookKind, hook: () => Promise<void>): Promise<void> {
+    if (this.hookBatch?.kind !== kind || !concurrentHookKinds.has(kind)) {
+      this.hookBatch = {kind, start: this.hookQueue};
+    }
+
+    const {start} = this.hookBatch;
     const running = (async () => {
-      await previous;
+      await start;
       await hook();
     })();
 
     // A failing hook must not stop the following hooks
+    const previous = this.hookQueue;
     this.hookQueue = (async () => {
+      await previous;
       try {
         await running;
       } catch {}
