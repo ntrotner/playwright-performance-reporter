@@ -29,4 +29,10 @@ export type TimelineDataPoint = {
 export type ChartPresenterOptions = {
   outputDir: string;
   outputFile: string;
+
+  /**
+   * HTML reports only: embed Chart.js, so the report works offline. `false` loads the
+   * installed version from cdn.jsdelivr.net instead. Defaults to true.
+   */
+  inlineAssets?: boolean;
 };

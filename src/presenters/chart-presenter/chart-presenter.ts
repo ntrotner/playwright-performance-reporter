@@ -7,6 +7,10 @@ import {
   type TimelineDataPoint,
 } from '../timeline-data-presenter/index.js';
 import {
+  chartJsScriptTag,
+  reportContentSecurityPolicy,
+} from '../html-assets.js';
+import {
   type ArtifactLink,
   type MetricSummary,
 } from './types.js';
@@ -70,7 +74,8 @@ export class ChartPresenter extends TimelineDataPresenter {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Performance Report Chart</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  ${reportContentSecurityPolicy(this.options.inlineAssets ?? true)}
+  ${chartJsScriptTag(this.options.inlineAssets ?? true)}
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;

@@ -1,4 +1,8 @@
 import {
+  chartJsScriptTag,
+  reportContentSecurityPolicy,
+} from '../html-assets.js';
+import {
   entityDurationMetric,
   metricUnit,
   webVitalThresholds,
@@ -16,6 +20,11 @@ import {
 type RunAxis = {
   sortValue: (run: RunSummary) => number;
   label: (run: RunSummary) => string;
+
+  /**
+   * Embed Chart.js instead of loading it from the CDN, defaults to true
+   */
+  inlineAssets?: boolean;
 };
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -353,7 +362,8 @@ export function renderComparisonHtml(report: ComparisonReport, runs: RunSummary[
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Step Performance Comparison</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  ${reportContentSecurityPolicy(runAxis.inlineAssets ?? true)}
+  ${chartJsScriptTag(runAxis.inlineAssets ?? true)}
   <style>
     :root {
       --bg: #f5f5f5; --panel: #ffffff; --text: #1f2937; --muted: #6b7280; --border: #e5e7eb;

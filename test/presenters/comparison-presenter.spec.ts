@@ -700,6 +700,21 @@ describe('Comparison presenter', () => {
       expect(html).toContain('<div id="scripts" class="scripts" hidden></div>');
     });
 
+    it('should embed Chart.js into the visual report unless disabled', async () => {
+      const {html} = await runPresenter(buildRun(baselineInputs[0]));
+      expect(html).toContain('Chart.js v4');
+      expect(html).not.toContain('cdn.jsdelivr.net');
+
+      const presenter = new nativePresenters.comparisonPresenter({historyDir, outputDir, inlineAssets: false, visualReportOutputFile: 'cdn.html'});
+      for (const chunk of buildRun({...baselineInputs[1], start: 10_000})) {
+        // eslint-disable-next-line no-await-in-loop
+        await presenter.write(chunk);
+      }
+
+      await presenter.close();
+      expect(fs.readFileSync(path.join(outputDir, 'cdn.html'), 'utf8')).toMatch(/cdn\.jsdelivr\.net\/npm\/chart\.js@4\.\d+\.\d+\//);
+    });
+
     it('should escape data embedded into the html', async () => {
       const run = buildRun(baselineInputs[0]);
       (run[0].case.TEST_CASE_PARENT as any).name = '</script><script>alert(1)</script>';

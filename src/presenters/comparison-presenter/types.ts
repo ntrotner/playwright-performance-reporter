@@ -23,6 +23,12 @@ export type ComparisonPresenterOptions = {
   visualReportOutputFile?: string;
 
   /**
+   * Embed Chart.js into the visual report, so it works offline. `false` loads the installed version
+   * from cdn.jsdelivr.net instead. Defaults to true.
+   */
+  inlineAssets?: boolean;
+
+  /**
    * Json report. Defaults to `performance-comparison.json`.
    */
   jsonReportOutputFile?: string;
