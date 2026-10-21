@@ -5,8 +5,14 @@ import {
   CpuProfilerObserver,
 } from './cpu-profiler.js';
 import {
+  HeapDiffObserver,
+} from './heap-diff.js';
+import {
   HeapDump,
 } from './heap-dump.js';
+import {
+  HeapGrowthObserver,
+} from './heap-growth.js';
 import {
   HeapObjectsTracking,
 } from './heap-objects-tracking.js';
@@ -50,7 +56,9 @@ import {
 export const nativeChromiumObservers = {
   allPerformanceMetrics: AllPerformanceMetrics,
   cpuProfiler: CpuProfilerObserver,
+  heapDiff: HeapDiffObserver,
   heapDump: HeapDump,
+  heapGrowth: HeapGrowthObserver,
   heapObjectsTracking: HeapObjectsTracking,
   heapProfilerSampling: HeapProfilerSampling,
   longAnimationFrames: LongAnimationFramesObserver,
