@@ -47,7 +47,7 @@ export class TimelineDataPresenter implements PresenterWriter {
    *
    * @param options defines target output
    */
-  constructor(options: ChartPresenterOptions) {
+  constructor(protected readonly options: ChartPresenterOptions) {
     this.filePath = path.join(options.outputDir, options.outputFile);
     this.fileStream = fs.createWriteStream(this.filePath, {flags: 'w'});
   }

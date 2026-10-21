@@ -89,6 +89,7 @@ export class ComparisonPresenter implements PresenterWriter {
     zScoreThreshold: 2,
     minBaselineRuns: 3,
     visualReportOutputFile: 'performance-comparison.html',
+    inlineAssets: true,
     jsonReportOutputFile: 'performance-comparison.json',
     runFilePrefix: 'performance-run',
     runSortValue: ((run: RunSummary) => run.startedAt),
@@ -184,7 +185,7 @@ export class ComparisonPresenter implements PresenterWriter {
       const {report, runs} = await this.compare();
       this.report = report;
       await fs.promises.writeFile(this.getJsonReportPath(), JSON.stringify(report, null, 2));
-      await fs.promises.writeFile(this.getVisualReportPath(), renderComparisonHtml(report, runs, {sortValue: this.options.runSortValue, label: this.options.runLabel}));
+      await fs.promises.writeFile(this.getVisualReportPath(), renderComparisonHtml(report, runs, {sortValue: this.options.runSortValue, label: this.options.runLabel, inlineAssets: this.options.inlineAssets}));
       Logger.info(report.message);
       return true;
     } catch (error) {
