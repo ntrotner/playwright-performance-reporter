@@ -11,6 +11,7 @@ import {
   summarizeEntities,
 } from '../../src/presenters/comparison-presenter/history';
 import {
+  buildStepComparisons,
   compareRuns,
   median,
   percentile,
@@ -167,6 +168,20 @@ describe('Comparison presenter', () => {
       expect(scaledMedianAbsoluteDeviation([1, 2, 3])).toBeCloseTo(1.4826);
       expect(percentile([1, 2, 3, 4, 5], 0.05)).toBeCloseTo(1.2);
       expect(percentile([5, 1, 3], 1)).toBe(5);
+    });
+  });
+
+  describe('direction of metrics', () => {
+    const comparison = (metric: string, status: 'increased' | 'decreased') => ({entityKey: 'case', metric, status}) as any;
+    const statusOf = (...comparisons: unknown[]) => buildStepComparisons([{key: 'case', kind: 'test', testId: 'case', testName: 'test', order: 0}], comparisons as any)[0].status;
+
+    it('should treat a higher performance score as improvement', () => {
+      expect(statusOf(comparison('performanceScore', 'increased'))).toBe('improved');
+      expect(statusOf(comparison('performanceScore', 'decreased'))).toBe('regressed');
+      expect(statusOf(comparison('performanceScore', 'increased'), comparison('TaskDuration', 'decreased'))).toBe('improved');
+      expect(statusOf(comparison('performanceScore', 'decreased'), comparison('TaskDuration', 'decreased'))).toBe('mixed');
+      expect(classifyMetric('performanceScore')).toBe('total');
+      expect(metricUnit('performanceScore')).toBe('score');
     });
   });
 

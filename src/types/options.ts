@@ -212,6 +212,12 @@ export type Options = {
    */
   metadata?: RunMetadata | (() => RunMetadata);
 
+  /**
+   * Lighthouse-like `performanceScore` (0-100) of every page at the stop of a test or step, computed from
+   * Web Vitals and Total Blocking Time. Defaults to the desktop curves. `false` disables it.
+   */
+  scoring?: {device?: 'mobile' | 'desktop'} | false;
+
   presenters?: PresenterWriter[];
   browsers: BrowserOptions;
 

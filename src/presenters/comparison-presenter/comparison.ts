@@ -1,5 +1,6 @@
 import {
   entityDurationMetric,
+  higherIsBetterMetrics,
   metricUnit,
 } from './constants.js';
 import {
@@ -269,15 +270,18 @@ function stepStatusOf(comparisons: MetricComparison[]): StepStatus {
     return 'noisy';
   }
 
-  if (statuses.has('increased') && statuses.has('decreased')) {
+  // For most metrics more is worse, e.g. durations, for some it's better, e.g. a score
+  const worse = comparisons.some(comparison => comparison.status === (higherIsBetterMetrics.has(comparison.metric) ? 'decreased' : 'increased'));
+  const better = comparisons.some(comparison => comparison.status === (higherIsBetterMetrics.has(comparison.metric) ? 'increased' : 'decreased'));
+  if (worse && better) {
     return 'mixed';
   }
 
-  if (statuses.has('increased')) {
+  if (worse) {
     return 'regressed';
   }
 
-  return statuses.has('decreased') ? 'improved' : 'unchanged';
+  return better ? 'improved' : 'unchanged';
 }
 
 /**

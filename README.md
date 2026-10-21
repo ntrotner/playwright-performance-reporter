@@ -209,6 +209,7 @@ The options are the second element of the reporter tuple: `['playwright-performa
 | `mode`            | `'port' \| 'fixture'` | no | `'port'` | `fixture`: tests are measured inside their worker by the `withPerformance` fixture, and the reporter only writes the attached measurements. See [Fixture mode](#fixture-mode). |
 | `steps`           | `{categories?: StepCategory[]; titlePattern?: string; nested?: boolean}` | no | every `test.step()` | Steps measured by `onTestStep` and sampling. See [Measuring without `test.step()`](#measuring-without-teststep). |
 | `metadata`        | `Record<string, string> \| () => Record<string, string>` | no | detected | Information about the run, written to the `metadata` field of every test entry. Merged over the detected values: `ci`, `commit`, `branch`, `ciRunId`, `ciRunUrl` (GitHub Actions, GitLab CI, else git), `platform`, `cpu`, `memory`, `node`. |
+| `scoring`         | `{device?: 'mobile' \| 'desktop'} \| false` | no | `{device: 'desktop'}` | Lighthouse-like `performanceScore` of every page at the stop of a test or step. See [Performance score](#performance-score). |
 
 `defaultOptions` is exported as a ready-made starting point. It runs `allPerformanceMetrics` on `onTest` and samples `usedJsHeapSize` every 1000 ms. It is **not** applied automatically, so you have to pass it yourself: `['playwright-performance-reporter', defaultOptions]`.
 
@@ -451,6 +452,29 @@ const options: Options = {
 - Throttling is applied when the reporter connects to a target, which is at the first measurement of a test. The first navigation of a test can run unthrottled if it happens before that, e.g. before the first `test.step()`.
 - Service workers and other workers are not throttled.
 - The applied conditions are written to the `conditions` field of the test entry (`TEST_CASE_PARENT`). `comparisonPresenter` only compares runs measured under the same conditions and lists the others in `excludedRuns`.
+
+### Performance score
+
+The reporter condenses the Web Vitals and the Total Blocking Time of every page into a Lighthouse-like score from 0 to 100, with the curves and weights of Lighthouse 10 to 12. It's written as an extra `stopMetrics` entry of the page with `performanceScore` and `performanceScoreMissing`. It works like any other metric, e.g. in a budget:
+
+```ts
+budgets: {rules: [{metric: 'performanceScore', min: 80, namePattern: '*checkout*'}]},
+scoring: {device: 'mobile'},
+```
+
+| Metric | Observer | Weight |
+|---|---|---|
+| `totalBlockingTime` | `longTasks` | 30 % |
+| `largestContentfulPaint` | `webVitals` | 25 % |
+| `cumulativeLayoutShift` | `webVitals` | 25 % |
+| `firstContentfulPaint` | `webVitals` | 10 % |
+| Speed Index | not measured | 10 % |
+
+- It's not a Lighthouse audit. It's computed from the measurements of the real, possibly logged in, page in your test. Values differ from Lighthouse, as the page state, throttling and timing differ.
+- Missing metrics are listed in `performanceScoreMissing`, and their weight is distributed over the measured ones. Speed Index is always missing.
+- A score needs LCP or FCP, and at least two metrics. Paints of `0` count as not measured, e.g. right after a navigation.
+- `device` selects the curves. `mobile` expects slower values, so use it together with [`conditions`](#conditions) throttling, if available, to compare with Lighthouse mobile.
+- `comparisonPresenter` treats a lower score as regression.
 
 ### Budgets
 Budgets turn measured metrics into a pass/fail gate. Each rule is checked against the final (`onStop`) metrics
@@ -821,7 +845,7 @@ The output is compact JSON unless `pretty: true` is set.
 |----------------------|--------------------------------------------------------------------------------------------------------------------------------|
 | `status`             | `ok`, `low-confidence` (fewer than `minBaselineRuns` baseline runs), `no-baseline`, `invalid-current-run` (missing `requiredMetrics`) |
 | `conditions`         | Description of the throttling of the current run, e.g. `CPU 4x slowdown, network slow-4g (562.5 ms, 1474.56/675 kbit/s)`, or `unthrottled` |
-| `steps[].status`     | `regressed` (only increases), `improved` (only decreases), `mixed`, `unchanged`, `noisy` (only changes within the noise of the baseline), `new`, `missing` |
+| `steps[].status`     | `regressed` (only increases, or decreases of `performanceScore`), `improved` (only decreases, or increases of `performanceScore`), `mixed`, `unchanged`, `noisy` (only changes within the noise of the baseline), `new`, `missing` |
 | `changes[].kind`     | `cumulative` (counters and durations, compared by growth within the step), `gauge` (point-in-time values, time-weighted mean), `total` (CPU profile and Web Vitals, compared as is) |
 | `changes[].unit`     | `bytes`, `ms`, `s`, `count`, `score`                                                                                           |
 
