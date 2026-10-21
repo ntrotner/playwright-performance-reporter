@@ -24,6 +24,8 @@ import {
   type BrowserDeveloperToolsClient,
   type MetricObserver,
   type MetricSampling,
+  defaultDebuggingPort,
+  fixtureAttachmentName,
   type BudgetSample,
 } from '../types/index.js';
 import {
@@ -39,6 +41,9 @@ import {
   nativePresenters,
 } from '../presenters/index.js';
 import {
+  type BrowserClient,
+} from '../browsers/client.js';
+import {
   MetricsEngine,
 } from './index.js';
 
@@ -52,6 +57,29 @@ type HookKind = 'testBegin' | 'stepBegin' | 'stepEnd' | 'testEnd';
  */
 const concurrentHookKinds = new Set<HookKind>(['stepBegin', 'stepEnd']);
 
+/**
+ * Browser connection and active test or step of a worker
+ */
+type WorkerContext = {
+  metricsEngine: MetricsEngine;
+  latestCaseId?: string;
+  latestStepId?: string;
+  latestName?: string;
+
+  /**
+   * Hooks of the worker that ran or are still running, in the order Playwright called them.
+   * Playwright doesn't await the hooks, so without the queue the start of a step could run
+   * while the stop of the previous step is still measuring, or the test end could close the
+   * connection before the last step was measured.
+   */
+  hookQueue: Promise<void>;
+
+  /**
+   * Consecutive hooks of the same kind, which start after all hooks of the worker before them
+   */
+  hookBatch?: {kind: HookKind; start: Promise<void>};
+};
+
 export class PerformanceReporter implements Reporter {
   /**
    * Maps unique playwright test ids to the computed name
@@ -59,29 +87,25 @@ export class PerformanceReporter implements Reporter {
   private readonly idToNameMapping = new Map<string, string>();
 
   /*
-   * Metrics engine to retrieve metrics from a browser
+   * Metrics engine to retrieve metrics from the browser of the first worker
    */
   private readonly metricsEngine: MetricsEngine;
+
+  /**
+   * Browser connection and active test or step per worker.
+   * Without `debuggingPort.perWorker`, every test uses the context of the first worker.
+   */
+  private readonly workers = new Map<number, WorkerContext>();
+
+  /**
+   * Maps unique playwright test ids to the context of the worker that runs the test
+   */
+  private readonly caseToWorker = new Map<string, WorkerContext>();
 
   /**
    * Writers to stream data to different outputs
    */
   private readonly presenters: PresenterWriter[];
-
-  /**
-   * Latest test step identifier
-   */
-  private latestStepId: string | undefined;
-
-  /**
-   * Latest case identifier
-   */
-  private latestCaseId: string | undefined;
-
-  /**
-   * Latest test name
-   */
-  private latestName: string | undefined;
 
   /**
    * Reference to the unsubscribe function for a hook and test id
@@ -95,19 +119,6 @@ export class PerformanceReporter implements Reporter {
    * Final metrics of tests and steps, used to evaluate budgets
    */
   private readonly budgetStore: BudgetSample[] = [];
-
-  /**
-   * Hooks that ran or are still running, in the order Playwright called them.
-   * Playwright doesn't await the hooks, so without the queue the start of a step could run
-   * while the stop of the previous step is still measuring, or the test end could close the
-   * connection before the last step was measured.
-   */
-  private hookQueue: Promise<void> = Promise.resolve();
-
-  /**
-   * Consecutive hooks of the same kind, which start after all hooks before them
-   */
-  private hookBatch: {kind: HookKind; start: Promise<void>} | undefined;
 
   constructor(private readonly options: Options) {
     if (options.maxListeners !== undefined) {
@@ -131,9 +142,20 @@ export class PerformanceReporter implements Reporter {
 
   onBegin(config: FullConfig, suite: Suite) {}
 
+  /**
+   * Measure with an already connected browser client instead of connecting via the debugging port.
+   * Used inside the worker by the fixture mode.
+   *
+   * @internal
+   * @param client connected browser client
+   */
+  public useBrowserClient(client: BrowserClient) {
+    this.metricsEngine.useBrowser(client);
+  }
+
   async onEnd(result: FullResult) {
     // Playwright doesn't await the other hooks, so the last test can still be measured
-    await this.hookQueue;
+    await Promise.all([...this.workers.values()].map(async worker => worker.hookQueue));
 
     // Enforce budgets before closing presenters, so a failing presenter can't skip it
     this.enforceBudgets(result);
@@ -162,33 +184,39 @@ export class PerformanceReporter implements Reporter {
   }
 
   async onTestBegin(test: TestCase, result: TestResult) {
-    return this.enqueue('testBegin', async () => this.measureTestBegin(test, result));
+    return this.enqueue(this.getWorker(result), 'testBegin', async () => this.handleTestBegin(test, result));
   }
 
   async onTestEnd(test: TestCase, result: TestResult) {
-    return this.enqueue('testEnd', async () => this.measureTestEnd(test, result));
+    return this.enqueue(this.getWorker(result), 'testEnd', async () => this.handleTestEnd(test, result));
   }
 
   async onStepBegin(test: TestCase, result: TestResult, step: TestStep) {
-    return this.enqueue('stepBegin', async () => this.measureStepBegin(test, result, step));
+    return this.enqueue(this.getWorker(result), 'stepBegin', async () => this.handleStepBegin(test, result, step));
   }
 
   async onStepEnd(test: TestCase, result: TestResult, step: TestStep) {
-    return this.enqueue('stepEnd', async () => this.measureStepEnd(test, result, step));
+    return this.enqueue(this.getWorker(result), 'stepEnd', async () => this.handleStepEnd(test, result, step));
   }
 
   /**
-   * Measure the start of a test and start its sampling
+   * Measure at onTestBegin
    */
-  private async measureTestBegin(test: TestCase, result: TestResult) {
+  private async handleTestBegin(test: TestCase, result: TestResult) {
+    if (this.options.mode === 'fixture') {
+      // Measured inside the worker
+      return;
+    }
+
+    const worker = this.getWorker(result);
     const browserDetails = test.parent.project()?.use;
     if (browserDetails && browserDetails.defaultBrowserType) {
       try {
-        await this.metricsEngine.setupBrowser(browserDetails.defaultBrowserType, browserDetails);
+        await worker.metricsEngine.setupBrowser(browserDetails.defaultBrowserType, this.withDebuggingPort(browserDetails, result));
       } catch {}
     }
 
-    const browserName = this.metricsEngine.getBrowser();
+    const browserName = worker.metricsEngine.getBrowser();
     if (!browserName) {
       // Browser not stable
       return;
@@ -200,9 +228,10 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    this.latestCaseId = id;
-    this.latestStepId = testCaseParent;
-    this.latestName = name;
+    this.caseToWorker.set(id, worker);
+    worker.latestCaseId = id;
+    worker.latestStepId = testCaseParent;
+    worker.latestName = name;
 
     const results = this.createTestPerformance(id, testCaseParent, name);
     await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onStart', browserName);
@@ -213,10 +242,16 @@ export class PerformanceReporter implements Reporter {
   }
 
   /**
-   * Measure the end of a test and close the connection to the browser
+   * Measure at onTestEnd
    */
-  private async measureTestEnd(test: TestCase, result: TestResult) {
-    const browserName = this.metricsEngine.getBrowser();
+  private async handleTestEnd(test: TestCase, result: TestResult) {
+    if (this.options.mode === 'fixture') {
+      await this.readFixtureMeasurements(result);
+      return;
+    }
+
+    const worker = this.getWorker(result);
+    const browserName = worker.metricsEngine.getBrowser();
     if (!browserName) {
       // Browser not stable
       return;
@@ -232,15 +267,21 @@ export class PerformanceReporter implements Reporter {
     const results = this.createTestPerformance(id, testCaseParent, name);
     await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onStop', browserName);
     this.captureFinalMetrics(results);
-    this.metricsEngine.destroy();
+    worker.metricsEngine.destroy();
+    this.caseToWorker.delete(id);
     await this.writeToPresenters(results);
   }
 
   /**
-   * Measure the start of a step and start its sampling
+   * Measure at onStepBegin
    */
-  private async measureStepBegin(test: TestCase, result: TestResult, step: TestStep) {
-    const browserName = this.metricsEngine.getBrowser();
+  private async handleStepBegin(test: TestCase, result: TestResult, step: TestStep) {
+    if (this.options.mode === 'fixture') {
+      return;
+    }
+
+    const worker = this.getWorker(result);
+    const browserName = worker.metricsEngine.getBrowser();
     if (!browserName) {
       // Browser not stable
       return;
@@ -257,9 +298,9 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
-    this.latestCaseId = caseIdentifier.id;
-    this.latestStepId = stepIdentifier.id;
-    this.latestName = stepIdentifier.name;
+    worker.latestCaseId = caseIdentifier.id;
+    worker.latestStepId = stepIdentifier.id;
+    worker.latestName = stepIdentifier.name;
 
     const results = this.createTestPerformance(caseIdentifier.id, stepIdentifier.id, stepIdentifier.name);
     await this.executeMetrics(results, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStart', browserName);
@@ -270,10 +311,14 @@ export class PerformanceReporter implements Reporter {
   }
 
   /**
-   * Measure the end of a step
+   * Measure at onStepEnd
    */
-  private async measureStepEnd(test: TestCase, result: TestResult, step: TestStep) {
-    const browserName = this.metricsEngine.getBrowser();
+  private async handleStepEnd(test: TestCase, result: TestResult, step: TestStep) {
+    if (this.options.mode === 'fixture') {
+      return;
+    }
+
+    const browserName = this.getWorker(result).metricsEngine.getBrowser();
     if (!browserName) {
       // Browser not stable
       return;
@@ -298,27 +343,28 @@ export class PerformanceReporter implements Reporter {
   }
 
   /**
-   * Run a hook after all hooks that were called before it.
+   * Run a hook after all hooks of the worker that were called before it.
    * Consecutive step begins or step ends run concurrently, as nested steps begin and end at the same time,
    * e.g. the end of an outer step doesn't wait for the end of its inner step while the page closes.
    *
+   * @param worker context of the worker that runs the test
    * @param kind kind of the hook
    * @param hook measurement of the hook
    */
-  private async enqueue(kind: HookKind, hook: () => Promise<void>): Promise<void> {
-    if (this.hookBatch?.kind !== kind || !concurrentHookKinds.has(kind)) {
-      this.hookBatch = {kind, start: this.hookQueue};
+  private async enqueue(worker: WorkerContext, kind: HookKind, hook: () => Promise<void>): Promise<void> {
+    if (worker.hookBatch?.kind !== kind || !concurrentHookKinds.has(kind)) {
+      worker.hookBatch = {kind, start: worker.hookQueue};
     }
 
-    const {start} = this.hookBatch;
+    const {start} = worker.hookBatch;
     const running = (async () => {
       await start;
       await hook();
     })();
 
     // A failing hook must not stop the following hooks
-    const previous = this.hookQueue;
-    this.hookQueue = (async () => {
+    const previous = worker.hookQueue;
+    worker.hookQueue = (async () => {
       await previous;
       try {
         await running;
@@ -455,8 +501,9 @@ export class PerformanceReporter implements Reporter {
       Logger.info('Fetching metrics', ...metrics.map(m => m.name));
     }
 
+    const {metricsEngine} = this.getWorkerOfCase(caseId);
     const startOfTrigger = Date.now();
-    const metricsPromises = metrics.map(async metric => this.metricsEngine.getMetric(metric, hookOrder));
+    const metricsPromises = metrics.map(async metric => metricsEngine.getMetric(metric, hookOrder));
 
     const resolvedMetrics = await Promise.all(metricsPromises);
     const endOfTrigger = Date.now();
@@ -481,20 +528,23 @@ export class PerformanceReporter implements Reporter {
       return;
     }
 
+    const worker = this.getWorkerOfCase(caseId);
     const samplingArguments: Array<{callback: () => Promise<void>; delay: number}> = samplingConfig.map(samplingItem => ({
       callback: async () => {
         const startOfTrigger = Date.now();
-        const metricsResponse = await this.metricsEngine.getMetric(samplingItem.metric, 'onSampling');
+        const metricsResponse = await worker.metricsEngine.getMetric(samplingItem.metric, 'onSampling');
         const endOfTrigger = Date.now();
 
-        if (metricsResponse && this.latestCaseId && this.latestStepId && this.latestName) {
+        // The worker runs one test at a time, so its latest test or step is the one being sampled
+        const {latestCaseId, latestStepId, latestName} = worker;
+        if (metricsResponse && latestCaseId && latestStepId && latestName) {
           const clonedResults = structuredClone(results);
 
-          clonedResults[this.latestCaseId] ||= {};
-          clonedResults[this.latestCaseId][this.latestStepId] ||= buildTestPerformance(this.latestName);
-          clonedResults[this.latestCaseId][this.latestStepId][HookOrderToMeasurementOrder.onStop] = endOfTrigger;
-          clonedResults[this.latestCaseId][this.latestStepId][HookOrderToMeasurementOffsetOrder.onStop] = endOfTrigger - startOfTrigger;
-          clonedResults[this.latestCaseId][this.latestStepId].samplingMetrics.push(...metricsResponse);
+          clonedResults[latestCaseId] ||= {};
+          clonedResults[latestCaseId][latestStepId] ||= buildTestPerformance(latestName);
+          clonedResults[latestCaseId][latestStepId][HookOrderToMeasurementOrder.onStop] = endOfTrigger;
+          clonedResults[latestCaseId][latestStepId][HookOrderToMeasurementOffsetOrder.onStop] = endOfTrigger - startOfTrigger;
+          clonedResults[latestCaseId][latestStepId].samplingMetrics.push(...metricsResponse);
 
           await this.writeToPresenters(clonedResults);
         }
@@ -502,16 +552,96 @@ export class PerformanceReporter implements Reporter {
       delay: samplingItem.samplingTimeoutInMilliseconds,
     }));
 
-    const intervals = samplingArguments
-      .filter(Boolean)
-      .map(sampling => setInterval(sampling.callback, sampling.delay));
-
-    // Clear every interval of the test or step, not only the last one
+    // Every sampling metric has its own interval, which all have to be cleared at the end of the test or step
+    const intervals = samplingArguments.map(sampling => setInterval(sampling.callback, sampling.delay));
     this.samplingRunner.get(hook)?.set(caseId + stepId, () => {
       for (const interval of intervals) {
         clearInterval(interval);
       }
     });
+  }
+
+  /**
+   * Forward the measurements, which the fixture attached to the test, to the presenters
+   *
+   * @param result result of the test with the attachments
+   */
+  private async readFixtureMeasurements(result: TestResult) {
+    const attachment = result.attachments.find(attachment => attachment.name === fixtureAttachmentName);
+    if (!attachment?.body) {
+      return;
+    }
+
+    let chunks: unknown;
+    try {
+      chunks = JSON.parse(attachment.body.toString('utf8'));
+    } catch (error) {
+      Logger.error('Invalid measurements attached to test', String(error));
+      return;
+    }
+
+    if (!Array.isArray(chunks)) {
+      Logger.error('Invalid measurements attached to test', 'Not a list of chunks');
+      return;
+    }
+
+    // Sequentially, as presenters expect the chunks in order of measurement
+    for (const chunk of chunks as ResultAccumulator[]) {
+      this.captureFinalMetrics(chunk);
+      // eslint-disable-next-line no-await-in-loop
+      await this.writeToPresenters(chunk);
+    }
+  }
+
+  /**
+   * Context of the worker that runs a test
+   *
+   * @param result result of the test, which contains the parallel index of the worker
+   */
+  private getWorker(result: TestResult): WorkerContext {
+    const index = this.options.debuggingPort?.perWorker ? result.parallelIndex : 0;
+    let worker = this.workers.get(index);
+    if (!worker) {
+      worker = {metricsEngine: index === 0 ? this.metricsEngine : new MetricsEngine(), hookQueue: Promise.resolve()};
+      this.workers.set(index, worker);
+    }
+
+    return worker;
+  }
+
+  /**
+   * Context of the worker that runs a test, falling back to the first worker
+   *
+   * @param caseId identifier for case
+   */
+  private getWorkerOfCase(caseId: string): WorkerContext {
+    return this.caseToWorker.get(caseId) ?? this.getWorker({parallelIndex: 0} as TestResult);
+  }
+
+  /**
+   * Point the browser connection to the debugging port of the worker
+   *
+   * @param browserDetails project settings of playwright
+   * @param result result of the test, which contains the parallel index of the worker
+   */
+  private withDebuggingPort(browserDetails: Record<string, any>, result: TestResult): Record<string, any> {
+    const {debuggingPort} = this.options;
+    if (!debuggingPort?.perWorker) {
+      return browserDetails;
+    }
+
+    const launchOptions = browserDetails.launchOptions as {args?: string[]} | undefined;
+    const args = launchOptions?.args ?? [];
+    const configuredPort = args.find(argument => argument.startsWith('--remote-debugging-port='))?.split('=')[1];
+    const base = debuggingPort.base ?? (configuredPort ? Number(configuredPort) : defaultDebuggingPort);
+
+    return {
+      ...browserDetails,
+      launchOptions: {
+        ...launchOptions,
+        args: [...args.filter(argument => !argument.startsWith('--remote-debugging-port')), `--remote-debugging-port=${base + result.parallelIndex}`],
+      },
+    };
   }
 }
 

@@ -105,6 +105,21 @@ export type PresenterWriter = {
 };
 
 /**
+ * Connect to a separate browser per worker, e.g. with `perWorkerDebuggingPort` of `playwright-performance-reporter/fixture`
+ */
+export type DebuggingPortOptions = {
+  /**
+   * Connect to port `base + parallelIndex` of the worker that runs the test
+   */
+  perWorker: boolean;
+
+  /**
+   * First port. Defaults to the port in the launch options, or 9222.
+   */
+  base?: number;
+};
+
+/**
  * Customize the reporter with desired browser and (custom) metrics
  */
 export type Options = {
@@ -117,6 +132,20 @@ export type Options = {
    * entirely. Defaults to Node's 10.
    */
   maxListeners?: number;
+
+  /**
+   * Remote debugging port of the browsers. By default the port of `--remote-debugging-port`
+   * in the launch options is used, which requires a single worker.
+   */
+  debuggingPort?: DebuggingPortOptions;
+
+  /**
+   * - `port` (default): the reporter connects to the browsers via their remote debugging port
+   * - `fixture`: the `withPerformance` fixture of `playwright-performance-reporter/fixture` measures every test
+   *   inside its worker via Playwright's CDP session, and the reporter only reads the measurements from the
+   *   test attachments. Works with any amount of workers and with sharding.
+   */
+  mode?: 'port' | 'fixture';
 
   presenters?: PresenterWriter[];
   browsers: BrowserOptions;

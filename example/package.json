@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Example project for playwright-performance-reporter",
   "scripts": {
-    "test": "cd .. && npm install && npm run build && cd example && playwright test"
+    "test": "cd .. && npm install && npm run build && cd example && playwright test",
+    "test:multi-worker": "cd .. && npm install && npm run build && cd example && playwright test --config playwright.multi-worker.config.ts",
+    "test:fixture-mode": "cd .. && npm install && npm run build && cd example && playwright test --config playwright.fixture-mode.config.ts"
   },
   "author": {
     "name": "Nikita Trotner",

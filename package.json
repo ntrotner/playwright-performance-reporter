@@ -3,7 +3,16 @@
   "version": "0.0.0-development",
   "description": "Measure and publish performance metrics from browser dev-tools when running playwright",
   "type": "module",
-  "exports": "./lib/index.js",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./fixture": {
+      "types": "./lib/fixture/index.d.ts",
+      "default": "./lib/fixture/index.js"
+    }
+  },
   "types": "./lib/index.d.ts",
   "files": [
     "lib/**/*"

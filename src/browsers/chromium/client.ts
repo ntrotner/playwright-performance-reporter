@@ -17,12 +17,12 @@ export class ChromiumDevelopmentTools implements BrowserClient {
   /**
    * Chrome dev tools protocol client
    */
-  private readonly clients: Record<string, CDP.Client> = {};
+  protected readonly clients: Record<string, CDP.Client> = {};
 
   /**
    * Chrome dev tools target for metadata extraction
    */
-  private readonly targets: Record<string, CDP.Target> = {};
+  protected readonly targets: Record<string, CDP.Target> = {};
 
   /**
    * Lock to indicate if connection request is going on
