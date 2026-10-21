@@ -19,6 +19,9 @@ import {
 import {
   MarkdownSummaryPresenter,
 } from './markdown-summary-presenter/index.js';
+import {
+  WaterfallPresenter,
+} from './waterfall-presenter/index.js';
 
 export const nativePresenters = {
   jsonChunkPresenter: JsonChunkPresenter,
@@ -28,9 +31,11 @@ export const nativePresenters = {
   comparisonPresenter: ComparisonPresenter,
   statisticsPresenter: StatisticsPresenter,
   markdownSummaryPresenter: MarkdownSummaryPresenter,
+  waterfallPresenter: WaterfallPresenter,
 } as const;
 
 export type * from './comparison-presenter/types.js';
 export type * from './statistics-presenter/types.js';
 export type * from './markdown-summary-presenter/types.js';
+export type * from './waterfall-presenter/types.js';
 export type * from './json-aggregate-presenter/types.js';
