@@ -2,6 +2,14 @@ import {defineConfig, devices} from '@playwright/test';
 import type {Options, ResultAccumulator} from '../lib';
 import {nativeChromiumObservers, nativePresenters} from '../lib';
 
+const comparisonPresenter = new nativePresenters.comparisonPresenter({
+  historyDir: './performance-history',
+  outputDir: './',
+  visualReportOutputFile: 'example-comparison.html',
+  jsonReportOutputFile: 'example-comparison.json',
+  bandPercentile: 0.15
+});
+
 const PlaywrightPerformanceReporterOptions: Options = {
   deleteOnFailure: false,
   maxListeners: 10,
@@ -9,13 +17,9 @@ const PlaywrightPerformanceReporterOptions: Options = {
     new nativePresenters.jsonChunkPresenter({outputDir: './', outputFile: 'example-json-writer.json'}),
     new nativePresenters.jsonAggregatePresenter({outputDir: './', outputFile: 'example-json-aggregate.json'}),
     new nativePresenters.chartPresenter({outputDir: './', outputFile: 'example-chart-presenter.html'}),
-    new nativePresenters.comparisonPresenter({
-      historyDir: './performance-history',
-      outputDir: './',
-      visualReportOutputFile: 'example-comparison.html',
-      jsonReportOutputFile: 'example-comparison.json',
-      bandPercentile: 0.15
-    })
+    comparisonPresenter,
+    // Verdicts of the comparison as markdown, also appended to the GitHub Actions job summary
+    new nativePresenters.markdownSummaryPresenter({outputDir: './', outputFile: 'example-summary.md', comparison: comparisonPresenter})
   ],
   budgets: {
     // Fails the run if any test or step exceeds the threshold, which is set high to keep the example green

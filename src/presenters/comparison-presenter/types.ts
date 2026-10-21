@@ -182,6 +182,11 @@ export type RunSummary = {
    * Runs without the field count as unthrottled.
    */
   conditions?: string;
+
+  /**
+   * Information about the run, e.g. commit and machine, if recorded by the reporter
+   */
+  metadata?: Record<string, string>;
   entities: Record<string, EntitySummary>;
 };
 

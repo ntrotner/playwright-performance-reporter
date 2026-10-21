@@ -208,6 +208,7 @@ The options are the second element of the reporter tuple: `['playwright-performa
 | `debuggingPort`   | `{perWorker: boolean; base?: number}` | no | one port from `launchOptions.args` | With `perWorker: true`, each test is measured on port `base + parallelIndex` of its worker. `base` defaults to the port in `launchOptions.args`, or `9222`. See [Multiple workers](#multiple-workers). |
 | `mode`            | `'port' \| 'fixture'` | no | `'port'` | `fixture`: tests are measured inside their worker by the `withPerformance` fixture, and the reporter only writes the attached measurements. See [Fixture mode](#fixture-mode). |
 | `steps`           | `{categories?: StepCategory[]; titlePattern?: string; nested?: boolean}` | no | every `test.step()` | Steps measured by `onTestStep` and sampling. See [Measuring without `test.step()`](#measuring-without-teststep). |
+| `metadata`        | `Record<string, string> \| () => Record<string, string>` | no | detected | Information about the run, written to the `metadata` field of every test entry. Merged over the detected values: `ci`, `commit`, `branch`, `ciRunId`, `ciRunUrl` (GitHub Actions, GitLab CI, else git), `platform`, `cpu`, `memory`, `node`. |
 
 `defaultOptions` is exported as a ready-made starting point. It runs `allPerformanceMetrics` on `onTest` and samples `usedJsHeapSize` every 1000 ms. It is **not** applied automatically, so you have to pass it yourself: `['playwright-performance-reporter', defaultOptions]`.
 
@@ -558,6 +559,7 @@ The presenters are available as `nativePresenters.<name>`. The sources are in [`
 | `chartPresenter`        | Self-contained HTML report (Chart.js) with summary cards and a timeline per test and metric | `{outputDir: string; outputFile: string}`            |
 | `comparisonPresenter`   | Stores each run in a history folder and compares the latest runs against a baseline. Writes HTML and JSON ([format](#comparison-report-format)) | `ComparisonPresenterOptions`, see below |
 | `statisticsPresenter`   | JSON with count, min, max, mean, MAD and percentiles of every metric of every test and step across its executions, e.g. of `repeatEach` | `{outputDir: string; outputFile: string; percentiles?: number[] /* [0.5, 0.75, 0.95] */; includeRetries?: boolean /* false */; pretty?: boolean}` |
+| `markdownSummaryPresenter` | Markdown table of every test and step with duration, selected metrics, the verdict of a `comparisonPresenter` and the budget violations. Also appended to the GitHub Actions job summary | `MarkdownSummaryPresenterOptions`, see below |
 
 `jsonChunkPresenter`, `timelineDataPresenter` and `chartPresenter` open their file in the constructor. Make sure `outputDir` exists. `jsonAggregatePresenter` keeps the merged result in memory and only creates its file on `close()`, so `outputDir` must exist by the end of the run. `comparisonPresenter` creates its folders itself.
 
@@ -598,6 +600,80 @@ The workflow has four steps:
 Only runs measured under the same [conditions](#conditions) are compared. Runs without conditions count as `unthrottled`.
 
 Tests are matched across runs by the Playwright test id. Steps are matched by test id, step name and occurrence.
+
+### `markdownSummaryPresenter`
+
+```ts
+const comparison = new nativePresenters.comparisonPresenter({historyDir: './performance-history', outputDir: './'});
+
+presenters: [
+  comparison,
+  new nativePresenters.markdownSummaryPresenter({outputDir: './', outputFile: 'performance-summary.md', comparison}),
+],
+```
+
+| Option              | Type                  | Default                                                                                  | Description                                                                                       |
+|---------------------|-----------------------|------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| `outputDir`         | `string`              | none (required)                                                                          | Folder of the summary. Must exist at the end of the run.                                          |
+| `outputFile`        | `string`              | none (required)                                                                          | File name of the summary.                                                                          |
+| `metrics`           | `string[]`            | `['largestContentfulPaint', 'totalBlockingTime', 'JSHeapUsedSize', 'totalNetworkTransferSize']` | Columns besides the duration, from the latest `stopMetrics` of a test or step, pages preferred.   |
+| `comparison`        | `ComparisonPresenter` | none                                                                                     | Adds the verdict and the most severe change of every test and step. Pass the same instance as in `presenters`. |
+| `githubStepSummary` | `boolean`             | `true`                                                                                   | Append the summary to `$GITHUB_STEP_SUMMARY` when it's set, so it shows up on the run page of GitHub Actions. |
+| `title`             | `string`              | `'Performance report'`                                                                   | Heading of the summary.                                                                            |
+
+Example output:
+
+```markdown
+## Performance report
+
+5 step(s) · 1 regressed · 0 improved · 4 mixed · 0 budget violation(s) · commit `eb52763`
+
+| Test / step | Duration | LCP | TBT | JS heap | Transfer | Verdict |
+|---|---:|---:|---:|---:|---:|---|
+| **chromium > example.spec.ts > Navigate GitHub profile tabs** | 21.07 s | – | – | – | – | 🟡 mixed |
+| Open profile | 1.93 s | 1.62 s | 482 ms | 10.7 MB | – | 🔴 regressed (+23 % LCP) |
+```
+
+Budget violations are listed below the table if `budgets` are configured. Presenters receive them through the optional `onBudgetViolations(violations)` of `PresenterWriter`, which is called before `close`.
+
+### GitHub Actions
+
+The workflow below keeps the history of `comparisonPresenter` in the Actions cache, writes the summary to the job summary, comments it on pull requests, and uploads the HTML reports:
+
+```yaml
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci && npx playwright install --with-deps chromium
+      - uses: actions/cache@v4
+        with:
+          path: performance-history
+          # A new key per run, restoring the latest history of the branch or of main
+          key: performance-history-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            performance-history-${{ github.ref_name }}-
+            performance-history-main-
+      - run: npx playwright test
+      - uses: marocchino/sticky-pull-request-comment@v2
+        if: always() && github.event_name == 'pull_request'
+        with:
+          header: performance
+          path: performance-summary.md
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-reports
+          path: |
+            performance-*.html
+            performance-*.json
+```
+
+Run the same runner type for every run, as the comparison is only meaningful on similar machines. The `metadata` of every run records the machine.
 
 ## Output format
 
@@ -797,7 +873,7 @@ Register it like a native observer: `onTestStep: {metrics: [new DomElementCount(
 
 ### Custom presenter
 
-Implement `PresenterWriter`. `write` is called for every chunk, `close` once when the run ends, and `delete` after `close` if the run failed and `deleteOnFailure` is `true`.
+Implement `PresenterWriter`. `write` is called for every chunk, `close` once when the run ends, and `delete` after `close` if the run failed and `deleteOnFailure` is `true`. The optional `onBudgetViolations(violations)` is called before `close` when `budgets` are configured.
 
 ```ts
 import fs from 'node:fs';

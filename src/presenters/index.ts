@@ -16,6 +16,9 @@ import {
 import {
   StatisticsPresenter,
 } from './statistics-presenter/index.js';
+import {
+  MarkdownSummaryPresenter,
+} from './markdown-summary-presenter/index.js';
 
 export const nativePresenters = {
   jsonChunkPresenter: JsonChunkPresenter,
@@ -24,8 +27,10 @@ export const nativePresenters = {
   timelineDataPresenter: TimelineDataPresenter,
   comparisonPresenter: ComparisonPresenter,
   statisticsPresenter: StatisticsPresenter,
+  markdownSummaryPresenter: MarkdownSummaryPresenter,
 } as const;
 
 export type * from './comparison-presenter/types.js';
 export type * from './statistics-presenter/types.js';
+export type * from './markdown-summary-presenter/types.js';
 export type * from './json-aggregate-presenter/types.js';

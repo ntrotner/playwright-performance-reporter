@@ -53,6 +53,11 @@ export class ComparisonPresenter implements PresenterWriter {
   private closing: Promise<boolean> | undefined;
 
   /**
+   * Comparison of the current run, once closed
+   */
+  private report: ComparisonReport | undefined;
+
+  /**
    * File name of the current run in the history
    */
   private readonly runFile: string;
@@ -143,6 +148,17 @@ export class ComparisonPresenter implements PresenterWriter {
   }
 
   /**
+   * Comparison of the current run, available once the presenter is closed.
+   * Closes the presenter, so call it only after all tests ran, e.g. from the `close` of another presenter.
+   *
+   * @returns the report, or undefined if nothing was measured or the comparison failed
+   */
+  async getReport(): Promise<ComparisonReport | undefined> {
+    await this.close();
+    return this.report;
+  }
+
+  /**
    * Read the history and create the json chunk file of the current run
    */
   private initialize(): JsonChunkPresenter {
@@ -166,6 +182,7 @@ export class ComparisonPresenter implements PresenterWriter {
 
     try {
       const {report, runs} = await this.compare();
+      this.report = report;
       await fs.promises.writeFile(this.getJsonReportPath(), JSON.stringify(report, null, 2));
       await fs.promises.writeFile(this.getVisualReportPath(), renderComparisonHtml(report, runs, {sortValue: this.options.runSortValue, label: this.options.runLabel}));
       Logger.info(report.message);

@@ -9,4 +9,5 @@ export * from './step-selection.js';
 export * from './test-case.js';
 export * from './test-step.js';
 export * from './logger.js';
+export * from './metadata.js';
 export * from './time.js';
