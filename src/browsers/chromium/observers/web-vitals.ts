@@ -52,7 +52,9 @@ export class WebVitalsObserver implements ChromiumMetricObserver {
    * Installs a persistent PerformanceObserver and reads the accumulated Web Vitals.
    *
    * Note: LCP, CLS and event entries are only recorded when observed, so the observer must
-   * be registered with `buffered: true` and kept alive across evaluations.
+   * be registered with `buffered: true` and kept alive across evaluations. Entries that were
+   * not delivered to the callback yet are taken with `takeRecords()`, so a read right after the
+   * install, e.g. of a new document, contains the buffered entries.
    */
   private getWebVitalsExpression() {
     return `
@@ -68,33 +70,41 @@ export class WebVitalsObserver implements ChromiumMetricObserver {
         'mousemove', 'mouseover', 'mouseout', 'mouseenter', 'mouseleave',
         'scroll', 'wheel', 'drag', 'dragstart', 'dragend', 'dragenter', 'dragleave', 'dragover', 'drop',
       ]);
-      const observer = new PerformanceObserver(list => {
-        for (const entry of list.getEntries()) {
+      buf.record = entries => {
+        for (const entry of entries) {
           if (entry.entryType === 'largest-contentful-paint') buf.lcp.push(entry.startTime);
           if (entry.entryType === 'layout-shift' && !entry.hadRecentInput) buf.cls.push(entry.value);
           if (entry.entryType === 'paint' && entry.name === 'first-contentful-paint') buf.fcp.push(entry.startTime);
           if (entry.entryType === 'event' && !continuous.has(entry.name)) buf.inp.push(Math.max(entry.duration, entry.processingEnd - entry.startTime));
         }
-      });
+      };
+      buf.observer = new PerformanceObserver(list => buf.record(list.getEntries()));
 
       try {
-        observer.observe({type: 'largest-contentful-paint', buffered: true});
-        observer.observe({type: 'layout-shift', buffered: true});
-        observer.observe({type: 'paint', buffered: true});
-        observer.observe({type: 'event', buffered: true, durationThreshold: 16});
+        buf.observer.observe({type: 'largest-contentful-paint', buffered: true});
+        buf.observer.observe({type: 'layout-shift', buffered: true});
+        buf.observer.observe({type: 'paint', buffered: true});
+        buf.observer.observe({type: 'event', buffered: true, durationThreshold: 16});
       } catch {}
     }
 
-    const last = values => values.length > 0 ? values[values.length - 1] : 0;
+    // Entries are delivered to the callback asynchronously, e.g. the buffered ones right after the install
+    try {
+      buf.record(buf.observer.takeRecords());
+    } catch {}
+
+    const last = values => values.length > 0 ? values[values.length - 1] : undefined;
     const max = values => values.length > 0 ? Math.max(...values) : 0;
     const sum = values => values.reduce((total, value) => total + value, 0);
 
-    return {
+    // A paint that wasn't recorded yet is left out instead of reported as 0, e.g. WebKit can record it after the load event
+    const vitals = {
       largestContentfulPaint: last(buf.lcp),
       firstContentfulPaint: last(buf.fcp),
       cumulativeLayoutShift: sum(buf.cls),
       interactionToNextPaint: max(buf.inp),
     };
+    return Object.fromEntries(Object.entries(vitals).filter(([, value]) => value !== undefined));
   })()
 `;
   }

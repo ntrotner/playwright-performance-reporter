@@ -64,7 +64,11 @@ export class NetworkActivityObserver implements ChromiumMetricObserver {
   private readonly requestMethods: Map<string, string>;
   private readonly networkActivities: NetworkActivity[];
   private readonly subscriptions: CdpClientSubscription[];
-  private isEnabled: boolean;
+
+  /**
+   * Clients with listeners. The reporter connects a new client for every test, so each client is subscribed.
+   */
+  private readonly subscribedClients = new WeakSet<CDP.Client>();
 
   constructor(protected options?: NetworkActivityObserverOptions) {
     this.includeDetailsInSampling = options?.includeDetailsInSampling ?? false;
@@ -72,7 +76,6 @@ export class NetworkActivityObserver implements ChromiumMetricObserver {
     this.requestMethods = new Map<string, string>();
     this.networkActivities = [];
     this.subscriptions = [];
-    this.isEnabled = false;
   }
 
   /**
@@ -100,7 +103,7 @@ export class NetworkActivityObserver implements ChromiumMetricObserver {
    * Common function for all lifecycle hooks
    */
   private common(accumulator: Metric, client: CDP.Client, includeDetails: boolean): void {
-    if (!this.isEnabled) {
+    if (!this.subscribedClients.has(client)) {
       this.setupListeners(client);
     }
 
@@ -116,7 +119,7 @@ export class NetworkActivityObserver implements ChromiumMetricObserver {
    * Setup network event listeners
    */
   private setupListeners(client: CDP.Client): void {
-    this.isEnabled = true;
+    this.subscribedClients.add(client);
 
     // Listen for request start
     this.subscriptions.push(

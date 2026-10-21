@@ -42,6 +42,16 @@ import {
   MetricsEngine,
 } from './index.js';
 
+/**
+ * Playwright hook of a measurement
+ */
+type HookKind = 'testBegin' | 'stepBegin' | 'stepEnd' | 'testEnd';
+
+/**
+ * Hooks that may measure concurrently when Playwright calls them one after another, e.g. the ends of nested steps
+ */
+const concurrentHookKinds = new Set<HookKind>(['stepBegin', 'stepEnd']);
+
 export class PerformanceReporter implements Reporter {
   /**
    * Maps unique playwright test ids to the computed name
@@ -86,6 +96,19 @@ export class PerformanceReporter implements Reporter {
    */
   private readonly budgetStore: BudgetSample[] = [];
 
+  /**
+   * Hooks that ran or are still running, in the order Playwright called them.
+   * Playwright doesn't await the hooks, so without the queue the start of a step could run
+   * while the stop of the previous step is still measuring, or the test end could close the
+   * connection before the last step was measured.
+   */
+  private hookQueue: Promise<void> = Promise.resolve();
+
+  /**
+   * Consecutive hooks of the same kind, which start after all hooks before them
+   */
+  private hookBatch: {kind: HookKind; start: Promise<void>} | undefined;
+
   constructor(private readonly options: Options) {
     if (options.maxListeners !== undefined) {
       EventEmitter.setMaxListeners(options.maxListeners);
@@ -109,6 +132,9 @@ export class PerformanceReporter implements Reporter {
   onBegin(config: FullConfig, suite: Suite) {}
 
   async onEnd(result: FullResult) {
+    // Playwright doesn't await the other hooks, so the last test can still be measured
+    await this.hookQueue;
+
     // Enforce budgets before closing presenters, so a failing presenter can't skip it
     this.enforceBudgets(result);
 
@@ -136,6 +162,25 @@ export class PerformanceReporter implements Reporter {
   }
 
   async onTestBegin(test: TestCase, result: TestResult) {
+    return this.enqueue('testBegin', async () => this.measureTestBegin(test, result));
+  }
+
+  async onTestEnd(test: TestCase, result: TestResult) {
+    return this.enqueue('testEnd', async () => this.measureTestEnd(test, result));
+  }
+
+  async onStepBegin(test: TestCase, result: TestResult, step: TestStep) {
+    return this.enqueue('stepBegin', async () => this.measureStepBegin(test, result, step));
+  }
+
+  async onStepEnd(test: TestCase, result: TestResult, step: TestStep) {
+    return this.enqueue('stepEnd', async () => this.measureStepEnd(test, result, step));
+  }
+
+  /**
+   * Measure the start of a test and start its sampling
+   */
+  private async measureTestBegin(test: TestCase, result: TestResult) {
     const browserDetails = test.parent.project()?.use;
     if (browserDetails && browserDetails.defaultBrowserType) {
       try {
@@ -167,7 +212,10 @@ export class PerformanceReporter implements Reporter {
     await this.executeMetrics(samplingResults, id, testCaseParent, 'onTest', 'onSampling', browserName);
   }
 
-  async onTestEnd(test: TestCase, result: TestResult) {
+  /**
+   * Measure the end of a test and close the connection to the browser
+   */
+  private async measureTestEnd(test: TestCase, result: TestResult) {
     const browserName = this.metricsEngine.getBrowser();
     if (!browserName) {
       // Browser not stable
@@ -188,7 +236,10 @@ export class PerformanceReporter implements Reporter {
     await this.writeToPresenters(results);
   }
 
-  async onStepBegin(test: TestCase, result: TestResult, step: TestStep) {
+  /**
+   * Measure the start of a step and start its sampling
+   */
+  private async measureStepBegin(test: TestCase, result: TestResult, step: TestStep) {
     const browserName = this.metricsEngine.getBrowser();
     if (!browserName) {
       // Browser not stable
@@ -218,7 +269,10 @@ export class PerformanceReporter implements Reporter {
     await this.executeMetrics(samplingResults, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onSampling', browserName);
   }
 
-  async onStepEnd(test: TestCase, result: TestResult, step: TestStep) {
+  /**
+   * Measure the end of a step
+   */
+  private async measureStepEnd(test: TestCase, result: TestResult, step: TestStep) {
     const browserName = this.metricsEngine.getBrowser();
     if (!browserName) {
       // Browser not stable
@@ -241,6 +295,37 @@ export class PerformanceReporter implements Reporter {
     await this.executeMetrics(results, caseIdentifier.id, stepIdentifier.id, 'onTestStep', 'onStop', browserName);
     this.captureFinalMetrics(results);
     await this.writeToPresenters(results);
+  }
+
+  /**
+   * Run a hook after all hooks that were called before it.
+   * Consecutive step begins or step ends run concurrently, as nested steps begin and end at the same time,
+   * e.g. the end of an outer step doesn't wait for the end of its inner step while the page closes.
+   *
+   * @param kind kind of the hook
+   * @param hook measurement of the hook
+   */
+  private async enqueue(kind: HookKind, hook: () => Promise<void>): Promise<void> {
+    if (this.hookBatch?.kind !== kind || !concurrentHookKinds.has(kind)) {
+      this.hookBatch = {kind, start: this.hookQueue};
+    }
+
+    const {start} = this.hookBatch;
+    const running = (async () => {
+      await start;
+      await hook();
+    })();
+
+    // A failing hook must not stop the following hooks
+    const previous = this.hookQueue;
+    this.hookQueue = (async () => {
+      await previous;
+      try {
+        await running;
+      } catch {}
+    })();
+
+    return running;
   }
 
   /**
@@ -417,16 +502,16 @@ export class PerformanceReporter implements Reporter {
       delay: samplingItem.samplingTimeoutInMilliseconds,
     }));
 
-    for (const sampling of samplingArguments) {
-      if (!sampling) {
-        continue;
-      }
+    const intervals = samplingArguments
+      .filter(Boolean)
+      .map(sampling => setInterval(sampling.callback, sampling.delay));
 
-      const interval = setInterval(sampling.callback, sampling.delay);
-      this.samplingRunner.get(hook)?.set(caseId + stepId, () => {
+    // Clear every interval of the test or step, not only the last one
+    this.samplingRunner.get(hook)?.set(caseId + stepId, () => {
+      for (const interval of intervals) {
         clearInterval(interval);
-      });
-    }
+      }
+    });
   }
 }
 
