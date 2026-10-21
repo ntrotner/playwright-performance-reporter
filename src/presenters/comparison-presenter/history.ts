@@ -22,6 +22,7 @@ import {
   type ExcludedRun,
   type MetricKind,
   type MetricSummary,
+  type LongAnimationFrameScript,
   type RunSummary,
   type WebVitalsAttribution,
 } from './types.js';
@@ -410,6 +411,7 @@ export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile: n
 
     Object.assign(metrics, summarizeTotals(raw.observations));
     const attribution = summarizeAttribution(raw.observations);
+    const longAnimationFrameScripts = summarizeLongAnimationFrameScripts(raw.observations);
 
     const key = isTest ? raw.caseId : `${raw.caseId}|${raw.name}|${occurrence}`;
     entities[key] = {
@@ -423,6 +425,7 @@ export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile: n
       duration,
       metrics,
       ...(attribution ? {attribution} : {}),
+      ...(longAnimationFrameScripts ? {longAnimationFrameScripts} : {}),
     };
   }
 
@@ -565,6 +568,27 @@ function summarizeAttribution(observations: Observation[]): WebVitalsAttribution
   }
 
   return Object.keys(attribution).length > 0 ? attribution : undefined;
+}
+
+/**
+ * Scripts of the latest long animation frames measurement of an entity
+ *
+ * @param observations observations of an entity
+ */
+function summarizeLongAnimationFrameScripts(observations: Observation[]): LongAnimationFrameScript[] | undefined {
+  const latest = observations
+    .filter(observation => typeof observation.metric.loafTopScripts === 'string')
+    .sort((a, b) => b.time - a.time)[0];
+  if (!latest) {
+    return undefined;
+  }
+
+  try {
+    const scripts: unknown = JSON.parse(String(latest.metric.loafTopScripts));
+    return Array.isArray(scripts) && scripts.length > 0 ? scripts as LongAnimationFrameScript[] : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /**

@@ -61,6 +61,8 @@ export const ignoredMetrics = new Set([
   'DomContentLoaded',
   'traceSizeBytes',
   'traceDataLoss',
+  // Constant flag whether the browser supports long animation frames
+  'loafSupported',
 ]);
 
 /**
@@ -124,6 +126,10 @@ const millisecondMetrics = new Set([
   'inpInputDelay',
   'inpProcessingDuration',
   'inpPresentationDelay',
+  'totalLoafDuration',
+  'totalLoafBlockingDuration',
+  'maxLoafDuration',
+  'totalForcedStyleAndLayoutDuration',
 ]);
 
 /**

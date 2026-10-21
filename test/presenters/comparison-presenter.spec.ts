@@ -680,6 +680,26 @@ describe('Comparison presenter', () => {
       expect(html).toContain('<div id="attribution" class="attribution" hidden></div>');
     });
 
+    it('should keep the slowest scripts of the latest long animation frames measurement of a step', async () => {
+      const run = buildRun(baselineInputs[0]);
+      const scripts = [{
+        sourceURL: 'app.js', sourceFunctionName: 'render', invoker: 'BUTTON.onclick', invokerType: 'event-listener', duration: 140, forcedStyleAndLayoutDuration: 15, count: 2,
+      }];
+      const openPage = run.filter(chunk => chunk.case.step?.stopMetrics.length > 0).at(-1)!.case.step;
+      openPage.stopMetrics.push(target({loafCount: 2, loafTopScripts: JSON.stringify(scripts)}));
+      run[1].case.step.startMetrics.push(target({loafCount: 0, loafTopScripts: '[]'}));
+      run.at(-2)!.case.second.stopMetrics.push(target({loafTopScripts: 'not json'}));
+
+      const entities = summarizeEntities(run, 0.05);
+      const {html} = await runPresenter(run);
+
+      expect(entities['case|open page|0'].longAnimationFrameScripts).toEqual(scripts);
+      expect(entities['case|submit form|0'].longAnimationFrameScripts).toBeUndefined();
+      expect(entities['case|open page|0'].metrics).not.toHaveProperty('loafTopScripts');
+      expect(html).toContain('"scripts":[{"sourceURL":"app.js"');
+      expect(html).toContain('<div id="scripts" class="scripts" hidden></div>');
+    });
+
     it('should escape data embedded into the html', async () => {
       const run = buildRun(baselineInputs[0]);
       (run[0].case.TEST_CASE_PARENT as any).name = '</script><script>alert(1)</script>';

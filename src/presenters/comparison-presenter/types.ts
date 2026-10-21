@@ -169,6 +169,11 @@ export type EntitySummary = ComparisonEntity & {
   metrics: Record<string, MetricSummary>;
 
   /**
+   * Scripts that ran longest in long animation frames, from the latest measurement of `longAnimationFrames`
+   */
+  longAnimationFrameScripts?: LongAnimationFrameScript[];
+
+  /**
    * What caused the Web Vitals, if `webVitals` was configured with `attribution`
    */
   attribution?: WebVitalsAttribution;
@@ -206,6 +211,19 @@ export type WebVitalsAttribution = {
      */
     eventType: string;
   };
+};
+
+/**
+ * Script that ran in long animation frames, see `longAnimationFrames`
+ */
+export type LongAnimationFrameScript = {
+  sourceURL: string;
+  sourceFunctionName: string;
+  invoker: string;
+  invokerType: string;
+  duration: number;
+  forcedStyleAndLayoutDuration: number;
+  count: number;
 };
 
 /**
