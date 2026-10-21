@@ -6,6 +6,7 @@ import {
 } from '../../types/index.js';
 import {
   assignConfig,
+  unthrottledDescription,
   Logger,
 } from '../../helpers/index.js';
 import {
@@ -202,7 +203,17 @@ export class ComparisonPresenter implements PresenterWriter {
     }
 
     const current = loaded.run;
-    const {recent, baseline} = splitRuns(history.runs, current, this.settings);
+    const conditionsOf = (run: RunSummary) => run.conditions ?? unthrottledDescription;
+    report.conditions = conditionsOf(current);
+    // Runs under other throttling are not comparable, e.g. a CPU slowdown would look like a regression
+    const comparableRuns = history.runs.filter(run => conditionsOf(run) === report.conditions);
+    report.excludedRuns = [
+      ...history.excluded,
+      ...history.runs
+        .filter(run => conditionsOf(run) !== report.conditions)
+        .map(run => ({file: run.file, reason: `Different measurement conditions: ${conditionsOf(run)}`})),
+    ];
+    const {recent, baseline} = splitRuns(comparableRuns, current, this.settings);
     const describeRun = (run: RunSummary) => ({id: run.id, file: run.file, startedAt: new Date(run.startedAt).toISOString()});
     const comparisons = compareRuns(recent, baseline, this.settings);
     report.currentRun = describeRun(current);

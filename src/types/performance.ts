@@ -1,4 +1,7 @@
 import type CDP from 'chrome-remote-interface';
+import {
+  type AppliedConditions,
+} from './conditions.js';
 
 export enum HookOrderToMetricOrder {
   onStart = 'startMetrics',
@@ -65,6 +68,11 @@ export type PerformanceMetrics = {
    * Metrics gathered from the extractors in sampling mode
    */
   samplingMetrics: TargetMetric[];
+
+  /**
+   * Throttling the test was measured under, only set on the test itself if configured
+   */
+  conditions?: AppliedConditions;
 };
 
 /**

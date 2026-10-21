@@ -176,6 +176,12 @@ export type RunSummary = {
   id: string;
   file: string;
   startedAt: number;
+
+  /**
+   * Description of the throttling the run was measured under, `unthrottled` without throttling.
+   * Runs without the field count as unthrottled.
+   */
+  conditions?: string;
   entities: Record<string, EntitySummary>;
 };
 
@@ -245,6 +251,11 @@ export type ComparisonReport = {
   status: 'ok' | 'low-confidence' | 'no-baseline' | 'invalid-current-run';
   message: string;
   currentRun?: {id: string; file: string; startedAt: string};
+
+  /**
+   * Throttling of the current run. Only runs measured under the same conditions are compared.
+   */
+  conditions?: string;
 
   /**
    * Latest runs including the current run, which are compared against the baseline

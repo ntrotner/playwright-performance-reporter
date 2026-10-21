@@ -9,6 +9,7 @@ import {
   type OnStartMeasure,
   type OnStopMeasure,
   type ResultAccumulator,
+  type ThrottlingOptions,
 } from './index.js';
 
 /**
@@ -93,6 +94,11 @@ type BrowserOptions = {
     sampling?: {
       metrics: Array<MetricSampling<BrowserDeveloperToolsClient[browser]>>;
     };
+
+    /**
+     * Throttling applied to every page before it's measured. Only supported for Chromium.
+     */
+    conditions?: ThrottlingOptions;
   };
 };
 

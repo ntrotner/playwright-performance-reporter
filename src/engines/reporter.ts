@@ -27,11 +27,14 @@ import {
   defaultDebuggingPort,
   fixtureAttachmentName,
   type BudgetSample,
+  type AppliedConditions,
+  supportedBrowsers,
 } from '../types/index.js';
 import {
   evaluateBudgets,
   formatBudgetViolation,
   validateBudgetRules,
+  resolveConditions,
   buildTestCaseIdentifier,
   buildTestPerformance,
   buildTestStepIdentifier,
@@ -120,6 +123,11 @@ export class PerformanceReporter implements Reporter {
    */
   private readonly budgetStore: BudgetSample[] = [];
 
+  /**
+   * Validated throttling conditions per browser
+   */
+  private readonly conditions: Partial<Record<SupportedBrowsers, AppliedConditions>> = {};
+
   constructor(private readonly options: Options) {
     if (options.maxListeners !== undefined) {
       EventEmitter.setMaxListeners(options.maxListeners);
@@ -127,6 +135,15 @@ export class PerformanceReporter implements Reporter {
 
     if (options.budgets) {
       validateBudgetRules(options.budgets.rules);
+    }
+
+    for (const browser of supportedBrowsers) {
+      const conditions = resolveConditions(options.browsers[browser]?.conditions);
+      if (conditions && browser !== 'chromium') {
+        Logger.warning(`Conditions are only supported for chromium and are ignored for ${browser}`);
+      } else if (conditions) {
+        this.conditions[browser] = conditions;
+      }
     }
 
     this.metricsEngine = new MetricsEngine();
@@ -212,7 +229,7 @@ export class PerformanceReporter implements Reporter {
     const browserDetails = test.parent.project()?.use;
     if (browserDetails && browserDetails.defaultBrowserType) {
       try {
-        await worker.metricsEngine.setupBrowser(browserDetails.defaultBrowserType, this.withDebuggingPort(browserDetails, result));
+        await worker.metricsEngine.setupBrowser(browserDetails.defaultBrowserType, this.withDebuggingPort(browserDetails, result), this.conditions[browserDetails.defaultBrowserType as SupportedBrowsers]);
       } catch {}
     }
 
@@ -234,6 +251,11 @@ export class PerformanceReporter implements Reporter {
     worker.latestName = name;
 
     const results = this.createTestPerformance(id, testCaseParent, name);
+    const conditions = this.conditions[browserName];
+    if (conditions) {
+      results[id][testCaseParent].conditions = conditions;
+    }
+
     await this.executeMetrics(results, id, testCaseParent, 'onTest', 'onStart', browserName);
     await this.writeToPresenters(results);
 

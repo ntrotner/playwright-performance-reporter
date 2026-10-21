@@ -1,5 +1,6 @@
 import type CDP from 'chrome-remote-interface';
 import {
+  type AppliedConditions,
   type MetricObserver,
 } from '../../types/index.js';
 import {
@@ -84,8 +85,11 @@ export const playwrightTargetType = 'playwright';
  * Chromium client on CDP sessions that were opened by Playwright, instead of a remote debugging port
  */
 export class ChromiumSessionDevelopmentTools extends ChromiumDevelopmentTools {
-  constructor() {
-    super({});
+  /**
+   * @param conditions throttling to apply to every page that is added
+   */
+  constructor(conditions?: AppliedConditions) {
+    super({}, conditions);
   }
 
   /**
@@ -102,6 +106,16 @@ export class ChromiumSessionDevelopmentTools extends ChromiumDevelopmentTools {
   public addTarget(target: CDP.Target, client: CDP.Client): void {
     this.clients[target.id] = client;
     this.targets[target.id] = target;
+  }
+
+  /**
+   * Apply the throttling conditions to a page, before it is added and measured for the first time
+   *
+   * @param client client of the page
+   * @param url current url of the page
+   */
+  public async throttlePage(client: CDP.Client, url: string): Promise<void> {
+    await this.applyConditions(client, {type: 'page', url} as CDP.Target);
   }
 
   /**
