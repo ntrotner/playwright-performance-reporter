@@ -203,6 +203,12 @@ describe('Comparison presenter', () => {
       ['largestContentfulPaint', 'total', 'ms'],
       ['interactionToNextPaint', 'total', 'ms'],
       ['cumulativeLayoutShift', 'total', 'score'],
+      ['lcpRenderDelay', 'total', 'ms'],
+      ['lcpSize', 'total', 'count'],
+      ['clsLargestShiftValue', 'total', 'score'],
+      ['inpInputDelay', 'total', 'ms'],
+      ['inpProcessingDuration', 'total', 'ms'],
+      ['inpPresentationDelay', 'total', 'ms'],
     ])('should classify %s as %s in %s', (metric, kind, unit) => {
       expect(classifyMetric(metric)).toBe(kind);
       expect(metricUnit(metric)).toBe(unit);
@@ -647,6 +653,31 @@ describe('Comparison presenter', () => {
       expect(await presenter.delete()).toBe(true);
       expect(fs.readdirSync(historyDir)).toEqual([]);
       expect(fs.readdirSync(outputDir)).toEqual([]);
+    });
+
+    it('should keep the Web Vitals attribution of the latest measurement of a step', async () => {
+      const run = buildRun(baselineInputs[0]);
+      const attributed = (lcpElement: string) => target({
+        largestContentfulPaint: 1200, lcpElement, lcpUrl: 'hero.png', lcpRenderDelay: 20, inpTarget: 'button.buy', inpEventType: 'click',
+      });
+      const openPage = run.filter(chunk => chunk.case.step?.stopMetrics.length > 0).at(-1)!.case.step;
+      openPage.stopMetrics.push(attributed('img#hero'));
+      // Older measurement of the same step
+      run[1].case.step.startMetrics.push(attributed('img#old'));
+
+      const entities = summarizeEntities(run, 0.05);
+      const {report, html} = await runPresenter(run);
+
+      expect(entities['case|open page|0'].attribution).toEqual({
+        lcp: {element: 'img#hero', url: 'hero.png'},
+        inp: {target: 'button.buy', eventType: 'click'},
+      });
+      expect(entities['case|submit form|0'].attribution).toBeUndefined();
+      expect(entities['case|open page|0'].metrics.lcpRenderDelay).toEqual(expect.objectContaining({kind: 'total', value: 20}));
+      expect(entities['case|open page|0'].metrics).not.toHaveProperty('lcpElement');
+      expect(report.steps.flatMap(step => step.changes).some(change => change.metric === 'lcpElement')).toBe(false);
+      expect(html).toContain('"attribution":{"lcp":{"element":"img#hero","url":"hero.png"}');
+      expect(html).toContain('<div id="attribution" class="attribution" hidden></div>');
     });
 
     it('should escape data embedded into the html', async () => {

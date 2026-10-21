@@ -23,6 +23,7 @@ import {
   type MetricKind,
   type MetricSummary,
   type RunSummary,
+  type WebVitalsAttribution,
 } from './types.js';
 
 /**
@@ -408,6 +409,7 @@ export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile: n
     }
 
     Object.assign(metrics, summarizeTotals(raw.observations));
+    const attribution = summarizeAttribution(raw.observations);
 
     const key = isTest ? raw.caseId : `${raw.caseId}|${raw.name}|${occurrence}`;
     entities[key] = {
@@ -420,6 +422,7 @@ export function summarizeEntities(chunks: ResultAccumulator[], bandPercentile: n
       order,
       duration,
       metrics,
+      ...(attribution ? {attribution} : {}),
     };
   }
 
@@ -533,6 +536,35 @@ function metadataOf(chunks: ResultAccumulator[]): {metadata?: Record<string, str
   }
 
   return {};
+}
+
+/**
+ * Cause of the Web Vitals of an entity, taken from its latest observation that contains it
+ *
+ * @param observations observations of an entity
+ */
+function summarizeAttribution(observations: Observation[]): WebVitalsAttribution | undefined {
+  const latest = (key: string) => observations
+    .filter(observation => typeof observation.metric[key] === 'string')
+    .sort((a, b) => b.time - a.time)[0]?.metric;
+
+  const attribution: WebVitalsAttribution = {};
+  const lcp = latest('lcpElement');
+  if (lcp) {
+    attribution.lcp = {element: String(lcp.lcpElement), url: String(lcp.lcpUrl ?? '')};
+  }
+
+  const cls = latest('clsLargestShiftSource');
+  if (cls) {
+    attribution.cls = {source: String(cls.clsLargestShiftSource)};
+  }
+
+  const inp = latest('inpTarget');
+  if (inp) {
+    attribution.inp = {target: String(inp.inpTarget), eventType: String(inp.inpEventType ?? '')};
+  }
+
+  return Object.keys(attribution).length > 0 ? attribution : undefined;
 }
 
 /**

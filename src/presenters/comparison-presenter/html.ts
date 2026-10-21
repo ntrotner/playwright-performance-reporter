@@ -6,6 +6,7 @@ import {
 import {
   type ComparisonReport,
   type RunSummary,
+  type WebVitalsAttribution,
 } from './types.js';
 
 /**
@@ -44,7 +45,7 @@ const metricLabels: Record<string, string> = {
 type EmbeddedData = {
   currentRunId: string | undefined;
   runs: Array<{id: string; label: string}>;
-  steps: Array<{key: string; name: string; kind: string}>;
+  steps: Array<{key: string; name: string; kind: string; attribution?: WebVitalsAttribution}>;
   metrics: Array<{name: string; label: string; unit: string}>;
   thresholds: Record<string, {good: number; poor: number}>;
   bandPercentile: number;
@@ -129,8 +130,20 @@ function fillSelect(select, options) {
   }));
 }
 
+function renderAttribution(step) {
+  const container = document.getElementById('attribution');
+  const attribution = (data.steps.find(function (candidate) { return candidate.key === step; }) || {}).attribution || {};
+  const lines = [];
+  if (attribution.lcp) { lines.push('LCP element: ' + (attribution.lcp.element || 'unknown') + (attribution.lcp.url ? ' (' + attribution.lcp.url + ')' : '')); }
+  if (attribution.inp) { lines.push('Slowest interaction: ' + (attribution.inp.eventType || 'event') + ' on ' + (attribution.inp.target || 'unknown')); }
+  if (attribution.cls) { lines.push('Largest layout shift: ' + (attribution.cls.source || 'unknown')); }
+  container.replaceChildren.apply(container, lines.map(function (line) { return el('div', {text: line}); }));
+  container.hidden = lines.length === 0;
+}
+
 function updateMetrics() {
   const step = document.getElementById('stepSelect').value;
+  renderAttribution(step);
   const metricSelect = document.getElementById('metricSelect');
   const selected = metricSelect.value;
   const metrics = Object.keys(data.values[step] || {}).map(function (name) {
@@ -303,6 +316,7 @@ function escapeHtml(text: string): string {
  */
 export function renderComparisonHtml(report: ComparisonReport, runs: RunSummary[], runAxis: RunAxis): string {
   const sortedRuns = [...runs].sort((a, b) => runAxis.sortValue(a) - runAxis.sortValue(b));
+  const currentRun = runs.find(run => run.id === report.currentRun?.id);
 
   const values = buildValueMatrix(sortedRuns);
   const metricNames = [...new Set(Object.values(values).flatMap(metrics => Object.keys(metrics)))]
@@ -311,7 +325,9 @@ export function renderComparisonHtml(report: ComparisonReport, runs: RunSummary[
   const data: EmbeddedData = {
     currentRunId: report.currentRun?.id,
     runs: sortedRuns.map(run => ({id: run.id, label: runAxis.label(run)})),
-    steps: report.steps.map(step => ({key: step.key, name: step.name, kind: step.kind})),
+    steps: report.steps.map(step => ({
+      key: step.key, name: step.name, kind: step.kind, attribution: currentRun?.entities[step.key]?.attribution,
+    })),
     metrics: metricNames.map(name => ({name, label: metricLabels[name] ?? name, unit: metricUnit(name)})),
     thresholds: webVitalThresholds,
     bandPercentile: report.settings.bandPercentile,
@@ -337,6 +353,7 @@ export function renderComparisonHtml(report: ComparisonReport, runs: RunSummary[
     .controls select { min-width: 220px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; background: #fff; }
     .chart-box { position: relative; height: 420px; }
     .conditions { margin: 0; font-size: 13px; color: var(--muted); }
+    .attribution { margin-top: 12px; font-size: 13px; color: var(--muted); }
   </style>
 </head>
 <body>
@@ -355,6 +372,7 @@ export function renderComparisonHtml(report: ComparisonReport, runs: RunSummary[
       </label>
     </div>
     <div class="chart-box"><canvas id="historyChart"></canvas></div>
+    <div id="attribution" class="attribution" hidden></div>
   </section>
 
   <script id="comparisonData" type="application/json">${serializeForScript(data)}</script>

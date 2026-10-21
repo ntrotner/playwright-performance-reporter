@@ -121,4 +121,70 @@ describe('Web vitals observer', () => {
 
     expect(accumulator).toEqual({});
   });
+
+  describe('attribution', () => {
+    const element = (tagName: string, id = '', classes: string[] = []) => ({nodeType: 1, tagName, id, classList: classes});
+
+    it('should only emit the attribution with the option', async () => {
+      const entries = [{entryType: 'largest-contentful-paint', startTime: 1200, element: element('IMG'), url: 'hero.png'}];
+      const withoutAttribution: Record<string, string | number> = {};
+      const withAttribution: Record<string, string | number> = {};
+
+      evaluateIn(createPage(entries));
+      await new nativeChromiumObservers.webVitals().onStop(withoutAttribution, cdp);
+      evaluateIn(createPage(entries));
+      await new nativeChromiumObservers.webVitals({attribution: true}).onStop(withAttribution, cdp);
+
+      expect(Object.keys(withoutAttribution)).toEqual(['largestContentfulPaint', 'cumulativeLayoutShift', 'interactionToNextPaint']);
+      expect(withAttribution).toEqual(expect.objectContaining({lcpElement: 'img', lcpUrl: 'hero.png'}));
+    });
+
+    it('should describe the elements that caused LCP, CLS and INP', async () => {
+      const page = createPage([
+        {entryType: 'largest-contentful-paint', startTime: 900, element: element('H1'), url: '', renderTime: 900, loadTime: 0, size: 2000},
+        {entryType: 'largest-contentful-paint', startTime: 1200, element: element('IMG', 'hero', ['banner', 'wide', 'extra']), url: 'https://example.com/hero.png', renderTime: 1200, loadTime: 1000, size: 50_000},
+        {entryType: 'layout-shift', value: 0.02, hadRecentInput: false, sources: [{node: element('P')}]},
+        // A text node moved, so its parent element is described
+        {entryType: 'layout-shift', value: 0.08, hadRecentInput: false, sources: [{node: null}, {node: {nodeType: 3, parentElement: element('DIV', 'ad')}}]},
+      ]);
+      evaluateIn(page);
+      const observer = new nativeChromiumObservers.webVitals({attribution: true});
+      const accumulator: Record<string, string | number> = {};
+
+      await observer.onStart({}, cdp);
+      page.deliver([
+        {entryType: 'event', name: 'keydown', duration: 80, startTime: 100, processingStart: 110, processingEnd: 150, target: element('INPUT', 'search')},
+        {entryType: 'event', name: 'click', duration: 200, startTime: 1000, processingStart: 1030, processingEnd: 1150, target: element('BUTTON', '', ['buy'])},
+      ]);
+      await observer.onStop(accumulator, cdp);
+
+      expect(accumulator).toEqual({
+        largestContentfulPaint: 1200,
+        cumulativeLayoutShift: 0.1,
+        interactionToNextPaint: 200,
+        lcpElement: 'img#hero.banner.wide',
+        lcpUrl: 'https://example.com/hero.png',
+        lcpRenderDelay: 200,
+        lcpSize: 50_000,
+        clsLargestShiftSource: 'div#ad',
+        clsLargestShiftValue: 0.08,
+        inpTarget: 'button.buy',
+        inpEventType: 'click',
+        inpInputDelay: 30,
+        inpProcessingDuration: 120,
+        inpPresentationDelay: 50,
+      });
+    });
+
+    it('should leave out the attribution of Web Vitals that did not occur', async () => {
+      evaluateIn(createPage([{entryType: 'largest-contentful-paint', startTime: 500, element: null}]));
+      const accumulator: Record<string, string | number> = {};
+
+      await new nativeChromiumObservers.webVitals({attribution: true}).onStop(accumulator, cdp);
+
+      expect(accumulator).toEqual(expect.objectContaining({lcpElement: '', lcpUrl: '', lcpRenderDelay: 0}));
+      expect(accumulator).not.toHaveProperty('clsLargestShiftSource');
+      expect(accumulator).not.toHaveProperty('inpTarget');
+    });
+  });
 });
