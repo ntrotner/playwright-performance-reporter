@@ -207,6 +207,7 @@ The options are the second element of the reporter tuple: `['playwright-performa
 | `maxListeners`    | `number`            | no       | Node default (`10`)                                              | Sets `EventEmitter.setMaxListeners()` globally. Raise it if many presenters cause a `MaxListenersExceededWarning`. `0` removes the limit.                                                  |
 | `debuggingPort`   | `{perWorker: boolean; base?: number}` | no | one port from `launchOptions.args` | With `perWorker: true`, each test is measured on port `base + parallelIndex` of its worker. `base` defaults to the port in `launchOptions.args`, or `9222`. See [Multiple workers](#multiple-workers). |
 | `mode`            | `'port' \| 'fixture'` | no | `'port'` | `fixture`: tests are measured inside their worker by the `withPerformance` fixture, and the reporter only writes the attached measurements. See [Fixture mode](#fixture-mode). |
+| `steps`           | `{categories?: StepCategory[]; titlePattern?: string; nested?: boolean}` | no | every `test.step()` | Steps measured by `onTestStep` and sampling. See [Measuring without `test.step()`](#measuring-without-teststep). |
 
 `defaultOptions` is exported as a ready-made starting point. It runs `allPerformanceMetrics` on `onTest` and samples `usedJsHeapSize` every 1000 ms. It is **not** applied automatically, so you have to pass it yourself: `['playwright-performance-reporter', defaultOptions]`.
 
@@ -231,7 +232,7 @@ type BrowserOptions = {
 | Key          | When observers run                                                                    | Written to                                                                    |
 |--------------|---------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
 | `onTest`     | `onStart` at test begin, `onStop` at test end                                         | `startMetrics` / `stopMetrics` of the `TEST_CASE_PARENT` entry                |
-| `onTestStep` | `onStart` at `test.step()` begin, `onStop` at its end. Only steps of category `test.step`. | `startMetrics` / `stopMetrics` of the step entry                              |
+| `onTestStep` | `onStart` at `test.step()` begin, `onStop` at its end. Only steps of category `test.step`, unless [`steps`](#measuring-without-teststep) selects others. | `startMetrics` / `stopMetrics` of the step entry                              |
 | `sampling`   | `onSampling` every `samplingTimeoutInMilliseconds`, while a test or step is running   | `samplingMetrics` of the step (or test) that is active at that moment         |
 
 Only `chromium` collects data today. The `firefox` and `webkit` keys are accepted, but those clients return no metrics.
@@ -341,6 +342,31 @@ budgets: {rules: [
 - Durations are in ms. For page requests they come from `request.timing()`. For the API request context they come from `APIResponse.timing()` in newer Playwright versions, or from the wall time around the call.
 - Percentiles over few requests are noisy, check `requestCount` next to them.
 - The fixture measures the recorded requests on a virtual target of type `playwright`, so they appear as their own entry in the output. Observers declare `capabilities: ['playwright']` to run on it.
+
+### Measuring without `test.step()`
+
+By default only `test.step()` blocks are measured. `steps` selects other steps that Playwright reports, so existing specs can be measured without changes. For example, every navigation:
+
+```ts
+const options: Options = {
+  deleteOnFailure: false,
+  steps: {categories: ['pw:api'], titlePattern: 'Navigate to *'},
+  browsers: {chromium: {onTestStep: {metrics: [new nativeChromiumObservers.navigationTiming(), new nativeChromiumObservers.webVitals()]}}},
+};
+```
+
+| Field          | Type                | Default         | Description |
+|----------------|---------------------|-----------------|-------------|
+| `categories`   | `Array<'test.step' \| 'pw:api' \| 'expect' \| 'fixture' \| 'hook'>` | `['test.step']` | Step categories of Playwright. `pw:api` are Playwright API calls, e.g. `Navigate to "/profile"` or `Click getByRole('button')`. |
+| `titlePattern` | `string`            | `'*'`           | Glob (`*` and `?`) on the title of the step. |
+| `nested`       | `boolean`           | `false`         | Also measure selected steps within a selected step. By default a navigation inside a measured `test.step()` is part of that step and not measured on its own. `test.step()` blocks are always measured, also nested ones. |
+
+- The step name is its title path, e.g. `Open profile > Navigate to "/profile"`, so `namePattern` of budgets matches it.
+- Playwright titles of API calls changed between versions, e.g. `page.goto(...)` in older versions and `Navigate to "..."` in newer ones. Check the step titles in Playwright's HTML report or trace when writing `titlePattern`.
+- A navigation step ends at the `load` event, which is before the final LCP. Web Vitals at its end show the value at that time. Sampling or a following step catches the final value.
+- `pw:api` and `expect` steps are frequent and short. Measure them with light observers, as heavy ones like `cpuProfiler` or `heapDump` slow the test down.
+- Invalid categories throw when the reporter is created.
+- The [fixture mode](#fixture-mode) only sees `test.step()`, so there `titlePattern` applies and the other categories are ignored with a warning.
 
 ### Sampling
 
@@ -798,7 +824,7 @@ Use it with `presenters: [new NdjsonPresenter('./performance.ndjson')]`. If any 
 - **Browser detection.** The reporter uses `project.use.defaultBrowserType` and `project.use.launchOptions.args`. `devices[...]` presets set `defaultBrowserType`. Without it, nothing is measured.
 - **Asynchronous measurements.** Playwright does not wait for reporter hooks. The browser may already run the next action while metrics are fetched. `startMeasurementOffset` and `endMeasurementOffset` (ms) show how long a fetch took. High values mean the measurement drifted into later work.
 - **Hook order.** The reporter measures the hooks one after another, in the order Playwright calls them. A step starts measuring only after the previous step's `onStop` finished, so stateful observers like `cpuProfiler` don't overlap. Playwright closes the page right after the last step, so slow `onStop` observers of the last step, for example `cpuProfiler`, can miss it.
-- **Steps.** Only `test.step()` is measured. Playwright API calls, `expect`, fixtures and hooks are not.
+- **Steps.** By default only `test.step()` is measured. Playwright API calls, `expect`, fixtures and hooks can be selected with [`steps`](#measuring-without-teststep).
 - **Units.** `allPerformanceMetrics` reports durations in **seconds** (Chromium's convention). `cpuProfile*`, `webVitals`, `longTasks` and `networkActivity` durations are in **milliseconds**.
 - **Viewing HTML reports.** `chartPresenter` and `comparisonPresenter` load Chart.js from `cdn.jsdelivr.net`, so viewing them needs internet access.
 
@@ -817,7 +843,7 @@ Check four things:
 Empty `onTest` start and stop entries are expected. At test begin the page may not exist yet, and at test end it is already closed. Use `onTestStep` and `sampling` instead.
 
 **No step entries.**
-Only `test.step()` blocks are measured. Wrap the interesting parts of your test in steps.
+By default only `test.step()` blocks are measured. Wrap the interesting parts of your test in steps, or select Playwright API steps like navigations with [`steps`](#measuring-without-teststep).
 
 **`MaxListenersExceededWarning` in the console.**
 Set `maxListeners` in `Options`, for example to `20`, or to `0` for no limit.

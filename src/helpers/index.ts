@@ -5,6 +5,7 @@ export * from './hash.js';
 export * from './lock.js';
 export * from './observers.js';
 export * from './sanitizer.js';
+export * from './step-selection.js';
 export * from './test-case.js';
 export * from './test-step.js';
 export * from './logger.js';

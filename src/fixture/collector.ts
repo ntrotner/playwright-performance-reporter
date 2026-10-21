@@ -41,6 +41,7 @@ import {
 type RunningStep = {
   titlePath: string[];
   startTime: Date;
+  parent?: RunningStep;
 };
 
 /**
@@ -99,6 +100,8 @@ export class PerformanceCollector {
       debuggingPort: undefined,
       // Budgets are evaluated by the reporter of the test runner
       budgets: undefined,
+      // The fixture only sees `test.step()`, the reporter of the test runner warns about other categories
+      steps: options.steps && {...options.steps, categories: options.steps.categories?.filter(category => category === 'test.step')},
       presenters: [collector],
     });
     this.reporter.useBrowserClient(this.developmentTools);
@@ -148,7 +151,8 @@ export class PerformanceCollector {
    * @param title title of the step
    */
   public async stepBegin(title: string): Promise<void> {
-    const step: RunningStep = {titlePath: [...(this.steps.at(-1)?.titlePath ?? []), title], startTime: new Date()};
+    const parent = this.steps.at(-1);
+    const step: RunningStep = {titlePath: [...(parent?.titlePath ?? []), title], startTime: new Date(), parent};
     this.steps.push(step);
     await this.waitForPages();
     await this.reporter.onStepBegin(this.buildTestCase(), this.buildTestResult(), this.buildTestStep(step));
@@ -248,6 +252,7 @@ export class PerformanceCollector {
       title: step.titlePath.at(-1),
       titlePath: () => step.titlePath,
       startTime: step.startTime,
+      parent: step.parent ? this.buildTestStep(step.parent) : undefined,
     } as unknown as TestStep;
   }
 }

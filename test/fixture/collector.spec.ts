@@ -106,4 +106,21 @@ describe('Performance collector', () => {
     const urls = chunks.flatMap(chunk => Object.values(chunk['test-1']).flatMap(performance => performance.stopMetrics.map(metric => metric.url)));
     expect(urls).toEqual(['https://example.com', 'https://example.com']);
   });
+
+  it('should apply the title pattern of the step selection to test.step()', async () => {
+    const context = new ContextFixture([new PageFixture('https://example.com')]);
+    const collector = new PerformanceCollector({...options, steps: {categories: ['test.step', 'pw:api'], titlePattern: 'Open *'}}, testInfo as any);
+    collector.observeContext(context as any);
+
+    await collector.stepBegin('Open profile');
+    await collector.stepBegin('Open nested');
+    await collector.stepEnd();
+    await collector.stepEnd();
+    await collector.stepBegin('Close');
+    await collector.stepEnd();
+    const chunks = await collector.testEnd();
+
+    const names = chunks.flatMap(chunk => Object.values(chunk['test-1']).map(performance => performance.name));
+    expect(names).toEqual(['Open profile', 'Open profile > Open nested', 'Open profile > Open nested', 'Open profile', ' > chromium > example.spec.ts > suite > test']);
+  });
 });
