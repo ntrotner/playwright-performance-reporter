@@ -820,6 +820,12 @@ describe('Playwright Performance Reporter', () => {
       expect(mockMetricsEngine.destroy).not.toHaveBeenCalled();
     });
 
+    it('should group the budget samples of the attached chunks by the test name', async () => {
+      await reporter.onTestEnd(mockTestCase, withAttachment(JSON.stringify([chunk('a', 1000)])));
+
+      expect((reporter as any).budgetStore).toEqual([{name: 'a', testName: 'title > path', metric: {largestContentfulPaint: 1000}}]);
+    });
+
     it('should ignore tests without measurements and log invalid ones', async () => {
       const errorSpy = jest.spyOn(Logger, 'error').mockImplementation(() => {});
 
@@ -919,6 +925,22 @@ describe('Playwright Performance Reporter', () => {
 
       expect((reporter as any).executeMetrics).toHaveBeenCalledTimes(2);
       expect((reporter as any).executeMetrics).toHaveBeenCalledWith(expect.anything(), '1f', expect.any(String), 'onTestStep', 'onStart', 'chromium');
+    });
+  });
+
+  describe('executions', () => {
+    it('should record the execution of a test and group its budget samples by the test name', async () => {
+      const reporter = new PlaywrightPerformanceReporter({...options, budgets: {rules: [{metric: 'value', max: 1}]}});
+      (reporter as any).metricsEngine = mockMetricsEngine;
+      mockMetricsEngine.getBrowser.mockReturnValue('chromium');
+      mockMetricsEngine.getMetric.mockResolvedValue([{metric: {value: 2}}]);
+
+      await reporter.onTestBegin({...mockTestCase, repeatEachIndex: 2} as TestCase, {...mockTestResult, retry: 1});
+      await reporter.onTestEnd(mockTestCase, mockTestResult);
+
+      const [[chunk]] = (options.presenters![0].write as jest.Mock).mock.calls as Array<[Record<string, Record<string, {execution?: unknown}>>]>;
+      expect(chunk['1f'].TEST_CASE_PARENT.execution).toEqual({repeatEachIndex: 2, retry: 1});
+      expect((reporter as any).budgetStore).toContainEqual({name: 'title > path', testName: 'title > path', metric: {value: 2}});
     });
   });
 });

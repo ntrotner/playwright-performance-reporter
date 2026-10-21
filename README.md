@@ -368,6 +368,29 @@ const options: Options = {
 - Invalid categories throw when the reporter is created.
 - The [fixture mode](#fixture-mode) only sees `test.step()`, so there `titlePattern` applies and the other categories are ignored with a warning.
 
+### Repeating for stable numbers
+
+A single execution of a step is a noisy sample. Lab tools like sitespeed.io and WebPageTest run several iterations and report the median. Use Playwright's `repeatEach` for the performance project, and condense the executions:
+
+```ts
+const options: Options = {
+  deleteOnFailure: false,
+  budgets: {rules: [{metric: 'largestContentfulPaint', max: 2500, aggregate: 'median'}]},
+  presenters: [new nativePresenters.statisticsPresenter({outputDir: './', outputFile: 'performance-statistics.json'})],
+  browsers: {chromium: {onTestStep: {metrics: [new nativeChromiumObservers.webVitals()]}}},
+};
+
+export default defineConfig({
+  repeatEach: 3,
+  reporter: [['playwright-performance-reporter', options]],
+});
+```
+
+- Every repeat has its own test id in Playwright, but the same name. Repeats are matched by the name of the test and the name and occurrence of the step.
+- The test entry records `execution: {repeatEachIndex, retry}`.
+- `statisticsPresenter` leaves out retries by default, as a retry is not an independent sample. Budgets with `aggregate` include every execution.
+- `comparisonPresenter` merges the repeats of a test into the entry of its first repeat, with the median across the repeats as value and the spread of the repeats as band. Runs without repeats are compared as before.
+
 ### Sampling
 
 Start and stop values alone are inaccurate for long steps. Sampling adds intermediate points:
@@ -450,6 +473,7 @@ const PlaywrightPerformanceReporterOptions: Options = {
 
 - `metric`: key of the metric as written in `stopMetrics[].metric`
 - `max` / `min`: fail if any matching value is above / below the bound (at least one is required)
+- `aggregate`: `each` (default) checks every execution. `median`, `mean`, `p75`, `p95`, `min` or `max` first condense the values of all executions of the same test or step, e.g. of `repeatEach`, so a single noisy execution doesn't fail the run. See [Repeating for stable numbers](#repeating-for-stable-numbers)
 - `namePattern`: glob matched against the name of the test or step (default `*`). A test is named by its title path, e.g. `" > chromium > profile.spec.ts > Profile"`, a step only by its title, e.g. `"Open profile"`
 
 A violation is logged as `Budget violation: metric "largestContentfulPaint" = 3120.5 > 2500 (ms) (test: "...")`.
@@ -533,6 +557,7 @@ The presenters are available as `nativePresenters.<name>`. The sources are in [`
 | `timelineDataPresenter` | JSON array of numeric data points, timestamps relative to each execution ([format](#timeline-data-format)) | `{outputDir: string; outputFile: string}` |
 | `chartPresenter`        | Self-contained HTML report (Chart.js) with summary cards and a timeline per test and metric | `{outputDir: string; outputFile: string}`            |
 | `comparisonPresenter`   | Stores each run in a history folder and compares the latest runs against a baseline. Writes HTML and JSON ([format](#comparison-report-format)) | `ComparisonPresenterOptions`, see below |
+| `statisticsPresenter`   | JSON with count, min, max, mean, MAD and percentiles of every metric of every test and step across its executions, e.g. of `repeatEach` | `{outputDir: string; outputFile: string; percentiles?: number[] /* [0.5, 0.75, 0.95] */; includeRetries?: boolean /* false */; pretty?: boolean}` |
 
 `jsonChunkPresenter`, `timelineDataPresenter` and `chartPresenter` open their file in the constructor. Make sure `outputDir` exists. `jsonAggregatePresenter` keeps the merged result in memory and only creates its file on `close()`, so `outputDir` must exist by the end of the run. `comparisonPresenter` creates its folders itself.
 

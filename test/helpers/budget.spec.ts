@@ -157,4 +157,39 @@ describe('Budget helpers', () => {
       })).toEqual('Budget violation: metric "value" = 1 < 2 (test: "X")');
     });
   });
+
+  describe('aggregate', () => {
+    const samples: BudgetSample[] = [
+      {name: 'Open', testName: 'Profile', metric: {lcp: 2000}},
+      {name: 'Open', testName: 'Profile', metric: {lcp: 2100}},
+      {name: 'Open', testName: 'Profile', metric: {lcp: 9000}},
+      // Same step title in another test
+      {name: 'Open', testName: 'Settings', metric: {lcp: 3000}},
+    ];
+
+    it('should check every execution by default', () => {
+      expect(evaluateBudgets(samples, [{metric: 'lcp', max: 2500}]).map(violation => violation.actual)).toEqual([9000, 3000]);
+    });
+
+    it('should check the aggregate of the executions of each test and step', () => {
+      expect(evaluateBudgets(samples, [{metric: 'lcp', max: 2500, aggregate: 'median'}])).toEqual([{
+        metric: 'lcp', name: 'Open', actual: 3000, limit: 2500, direction: 'max', unit: 'count', aggregate: 'median', executions: 1,
+      }]);
+      expect(evaluateBudgets(samples, [{metric: 'lcp', min: 2050, aggregate: 'min'}]).map(violation => [violation.actual, violation.executions])).toEqual([[2000, 3]]);
+      expect(evaluateBudgets(samples, [{metric: 'lcp', max: 8000, aggregate: 'max'}]).map(violation => violation.actual)).toEqual([9000]);
+      expect(evaluateBudgets(samples, [{metric: 'lcp', max: 4000, aggregate: 'mean'}]).map(violation => violation.actual)).toEqual([4366.666_666_666_667]);
+      expect(evaluateBudgets(samples, [{metric: 'lcp', max: 8000, aggregate: 'p95'}]).map(violation => violation.actual)).toEqual([8310]);
+      expect(evaluateBudgets(samples, [{metric: 'lcp', max: 5000, aggregate: 'p75'}]).map(violation => violation.actual)).toEqual([5550]);
+    });
+
+    it('should throw on an unknown aggregate', () => {
+      expect(() => validateBudgetRules([{metric: 'lcp', max: 1, aggregate: 'p99' as 'p95'}])).toThrow('"aggregate" must be one of');
+    });
+
+    it('should describe an aggregated violation', () => {
+      expect(formatBudgetViolation({
+        metric: 'lcp', name: 'Open', actual: 3000, limit: 2500, direction: 'max', aggregate: 'median', executions: 3,
+      })).toEqual('Budget violation: metric "lcp" median of 3 execution(s) = 3000 > 2500 (test: "Open")');
+    });
+  });
 });

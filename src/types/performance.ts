@@ -73,6 +73,26 @@ export type PerformanceMetrics = {
    * Throttling the test was measured under, only set on the test itself if configured
    */
   conditions?: AppliedConditions;
+
+  /**
+   * Execution of the test, e.g. with `repeatEach`. Only set on the test itself, at its start.
+   */
+  execution?: TestExecution;
+};
+
+/**
+ * Execution of a test. Every repeat has its own test id, while the name stays the same.
+ */
+export type TestExecution = {
+  /**
+   * Index of the repeat with `repeatEach`, starting at 0
+   */
+  repeatEachIndex: number;
+
+  /**
+   * Retry of a failed execution, 0 for the first attempt
+   */
+  retry: number;
 };
 
 /**

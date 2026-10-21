@@ -49,6 +49,8 @@ const testInfo = {
   testId: 'test-1',
   titlePath: ['example.spec.ts', 'suite', 'test'],
   project: {name: 'chromium'},
+  repeatEachIndex: 2,
+  retry: 1,
 };
 
 const options: Options = {
@@ -87,6 +89,7 @@ describe('Performance collector', () => {
       'outer',
       ' > chromium > example.spec.ts > suite > test',
     ]);
+    expect(entries[0][1].execution).toEqual({repeatEachIndex: 2, retry: 1});
     const [, stop] = entries.at(-1)!;
     expect(stop.stopMetrics).toEqual([{metric: {usedJsHeapSize: 42}, id: 'page-1', type: 'page', url: 'https://example.com'}]);
   });
