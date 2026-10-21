@@ -51,13 +51,16 @@ export const higherIsBetterMetrics = new Set(['performanceScore']);
 export const entityDurationMetric = 'entityDuration';
 
 /**
- * Absolute timestamps, which are not comparable across runs
+ * Absolute timestamps, which are not comparable across runs, and
+ * metadata of written artifacts, e.g. of the trace capture
  */
 export const ignoredMetrics = new Set([
   'Timestamp',
   'NavigationStart',
   'FirstMeaningfulPaint',
   'DomContentLoaded',
+  'traceSizeBytes',
+  'traceDataLoss',
 ]);
 
 /**

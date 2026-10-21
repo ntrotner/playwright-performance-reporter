@@ -1,8 +1,13 @@
+import path from 'node:path';
+import {
+  type ResultAccumulator,
+} from '../../types/index.js';
 import {
   TimelineDataPresenter,
   type TimelineDataPoint,
 } from '../timeline-data-presenter/index.js';
 import {
+  type ArtifactLink,
   type MetricSummary,
 } from './types.js';
 
@@ -10,6 +15,30 @@ import {
  * Presenter that generates an HTML chart visualization using Chart.js
  */
 export class ChartPresenter extends TimelineDataPresenter {
+  /**
+   * Files written by observers, e.g. traces, in order of arrival
+   */
+  private readonly artifacts: ArtifactLink[] = [];
+
+  /**
+   * Maps unique test ids to the name of the test
+   */
+  private readonly testNames = new Map<string, string>();
+
+  /**
+   * Collect the timeline data and the files written by observers
+   *
+   * @param content The result accumulator containing test performance data
+   */
+  override async write(content: ResultAccumulator): Promise<boolean> {
+    const status = await super.write(content);
+    if (status) {
+      this.collectArtifacts(content);
+    }
+
+    return status;
+  }
+
   /**
    * Generate the HTML with Chart.js visualization
    */
@@ -138,6 +167,26 @@ export class ChartPresenter extends TimelineDataPresenter {
     .metric-max {
       color: #dc3545;
     }
+    .artifacts-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .artifacts-section h2 {
+      margin: 0 0 5px 0;
+      font-size: 18px;
+      color: #333;
+    }
+    .artifacts-section h3 {
+      font-size: 14px;
+      color: #666;
+    }
+    .artifacts-hint {
+      font-size: 12px;
+      color: #888;
+    }
     .metric-count {
       font-size: 11px;
       color: #adb5bd;
@@ -170,6 +219,8 @@ export class ChartPresenter extends TimelineDataPresenter {
   <div class="chart-container">
     <canvas id="performanceChart" width="900" height="500"></canvas>
   </div>
+
+  ${this.generateArtifactsSection()}
 
   <script>
     const chartData = ${chartDataJson};
@@ -552,6 +603,67 @@ export class ChartPresenter extends TimelineDataPresenter {
     </div>
   </div>
 `;
+  }
+
+  /**
+   * Remember files written by observers. Metrics ending with `File` hold the path of a file.
+   *
+   * @param content The result accumulator containing test performance data
+   */
+  private collectArtifacts(content: ResultAccumulator): void {
+    for (const [caseId, steps] of Object.entries(content)) {
+      for (const [stepId, testPerformance] of Object.entries(steps)) {
+        if (stepId === 'TEST_CASE_PARENT') {
+          this.testNames.set(caseId, testPerformance.name);
+        }
+
+        const targetMetrics = [...testPerformance.startMetrics, ...testPerformance.stopMetrics, ...testPerformance.samplingMetrics];
+        const files = targetMetrics
+          .flatMap(targetMetric => Object.entries(targetMetric?.metric ?? {}))
+          .filter((entry): entry is [string, string] => entry[0].endsWith('File') && typeof entry[1] === 'string' && entry[1] !== '');
+        for (const [metric, file] of files) {
+          this.artifacts.push({
+            caseId, step: testPerformance.name, metric, file,
+          });
+        }
+      }
+    }
+  }
+
+  /**
+   * Generate HTML with links to the files written by observers, grouped by test
+   *
+   * @returns HTML string, empty if no files were written
+   */
+  private generateArtifactsSection(): string {
+    if (this.artifacts.length === 0) {
+      return '';
+    }
+
+    const reportDir = path.dirname(path.resolve(this.filePath ?? '.'));
+    const byTest = new Map<string, ArtifactLink[]>();
+    for (const artifact of this.artifacts) {
+      const testName = this.testNames.get(artifact.caseId) ?? artifact.caseId;
+      byTest.set(testName, [...(byTest.get(testName) ?? []), artifact]);
+    }
+
+    const groups = [...byTest.entries()].map(([testName, artifacts]) => {
+      const items = artifacts.map(artifact => {
+        const href = path.relative(reportDir, path.resolve(artifact.file)).split(path.sep).join('/');
+        return `<li>${this.escapeHtml(artifact.step)}: <a href="${this.escapeHtml(href)}">${this.escapeHtml(path.basename(artifact.file))}</a> (${this.escapeHtml(artifact.metric)})</li>`;
+      });
+
+      return `<h3>${this.escapeHtml(testName)}</h3>
+    <ul>
+      ${items.join('\n      ')}
+    </ul>`;
+    });
+
+    return `<div class="artifacts-section">
+    <h2>Artifacts</h2>
+    <p class="artifacts-hint">Traces can be loaded in Chrome DevTools: Performance panel, "Load profile".</p>
+    ${groups.join('\n    ')}
+  </div>`;
   }
 
   /**

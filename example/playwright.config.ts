@@ -44,7 +44,8 @@ const PlaywrightPerformanceReporterOptions: Options = {
           new nativeChromiumObservers.webVitals(),
           new nativeChromiumObservers.navigationTiming(),
           new nativeChromiumObservers.resourceTiming(),
-          new nativeChromiumObservers.longTasks()
+          new nativeChromiumObservers.longTasks(),
+          new nativeChromiumObservers.traceCapture({outputDir: './traces'})
         ],
       },
       sampling: {

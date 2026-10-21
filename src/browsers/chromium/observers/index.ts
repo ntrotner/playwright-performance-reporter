@@ -29,6 +29,9 @@ import {
   ResourceTimingObserver,
 } from './resource-timing.js';
 import {
+  TraceCaptureObserver,
+} from './trace-capture.js';
+import {
   TotalJsHeapSize,
 } from './total-js-heap-size.js';
 import {
@@ -50,6 +53,7 @@ export const nativeChromiumObservers = {
   requestTiming: RequestTimingObserver,
   resourceTiming: ResourceTimingObserver,
   totalJsHeapSize: TotalJsHeapSize,
+  traceCapture: TraceCaptureObserver,
   usedJsHeapSize: UsedJsHeapSize,
   webVitals: WebVitalsObserver,
 } as const;
