@@ -23,6 +23,9 @@ import {
   NetworkActivityObserver,
 } from './network-activity.js';
 import {
+  RequestTimingObserver,
+} from './request-timing.js';
+import {
   ResourceTimingObserver,
 } from './resource-timing.js';
 import {
@@ -44,6 +47,7 @@ export const nativeChromiumObservers = {
   longTasks: LongTasksObserver,
   navigationTiming: NavigationTimingObserver,
   networkActivity: NetworkActivityObserver,
+  requestTiming: RequestTimingObserver,
   resourceTiming: ResourceTimingObserver,
   totalJsHeapSize: TotalJsHeapSize,
   usedJsHeapSize: UsedJsHeapSize,

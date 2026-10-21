@@ -56,12 +56,26 @@ export const ignoredMetrics = new Set([
 ]);
 
 /**
+ * Durations of the requests of a test or step, measured once between its start and stop by `requestTiming`
+ */
+export const requestDurationPrefixes = ['requestDuration', 'requestTtfb', 'apiRequestDuration'];
+
+/**
+ * Whether a metric is a request duration of `requestTiming`
+ *
+ * @param metricName name of the metric
+ */
+function isRequestDuration(metricName: string): boolean {
+  return requestDurationPrefixes.some(prefix => metricName.startsWith(prefix));
+}
+
+/**
  * Decide on how to condense a metric
  *
  * @param metricName name of the metric
  */
 export function classifyMetric(metricName: string): MetricKind {
-  if (metricName.startsWith(totalMetricPrefix) || webVitalsMetrics.has(metricName) || navigationTimingMetrics.has(metricName)) {
+  if (metricName.startsWith(totalMetricPrefix) || isRequestDuration(metricName) || webVitalsMetrics.has(metricName) || navigationTimingMetrics.has(metricName)) {
     return 'total';
   }
 
@@ -96,6 +110,11 @@ const millisecondMetrics = new Set([
 export function metricUnit(metricName: string): MetricUnit {
   if (metricName === 'cumulativeLayoutShift') {
     return 'score';
+  }
+
+  // Names of endpoints are chosen by the user, so their suffix says nothing about the unit
+  if (isRequestDuration(metricName)) {
+    return 'ms';
   }
 
   if (/(?:Size|Bytes)$/.test(metricName)) {

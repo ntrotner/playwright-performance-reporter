@@ -320,6 +320,27 @@ export default defineConfig({
 - `deleteOnFailure`, budgets and all presenters work as in port mode. The measurements are also visible as an attachment named `playwright-performance-reporter` in Playwright's HTML report.
 - A runnable setup is in [`example/playwright.fixture-mode.config.ts`](example/playwright.fixture-mode.config.ts) (`cd example && npm run test:fixture-mode`).
 
+### API tests and request timing
+
+`requestTiming` measures the requests of a test or step as Playwright sees them: the requests of every page of the context, and the requests of the `request` fixture. Unlike `networkActivity` it doesn't need a page, so it also measures API tests, but only in the [fixture mode](#fixture-mode).
+
+```ts
+browsers: {
+  chromium: {
+    onTestStep: {metrics: [new nativeChromiumObservers.requestTiming({endpoints: [{name: 'search', pattern: '*/api/search*'}]})]},
+  },
+},
+budgets: {rules: [
+  {metric: 'requestDuration:search', max: 1000},
+  {metric: 'requestFailedCount', max: 0},
+]},
+```
+
+- Use the `request` fixture of the test returned by `withPerformance`, its requests are recorded. `page.request` and request contexts created with `request.newContext()` are not.
+- Durations are in ms. For page requests they come from `request.timing()`. For the API request context they come from `APIResponse.timing()` in newer Playwright versions, or from the wall time around the call.
+- Percentiles over few requests are noisy, check `requestCount` next to them.
+- The fixture measures the recorded requests on a virtual target of type `playwright`, so they appear as their own entry in the output. Observers declare `capabilities: ['playwright']` to run on it.
+
 ### Sampling
 
 Start and stop values alone are inaccurate for long steps. Sampling adds intermediate points:
@@ -398,6 +419,7 @@ The observers are available as `nativeChromiumObservers.<name>`. Each one is a c
 | `longTasks`             | Main-thread [long tasks](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceLongTaskTiming) (> 50 ms) from an in-page `PerformanceObserver`, since the latest `onStart` | `longTaskCount`, `totalLongTasksDuration`, `totalBlockingTime` (sum of `max(0, duration - 50)`), `maxLongTaskDuration` | count, ms | start (always `0`), sampling, stop | none |
 | `navigationTiming`      | [Navigation Timing](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceNavigationTiming) of the current document via `Runtime.evaluate` | `timeToFirstByte`, `redirectTime`, `dnsLookupTime`, `tcpConnectTime`, `tlsTime`, `requestTime` (server response time), `responseTime` (download), `domContentLoadedTime`, `domCompleteTime`, `loadEventTime`, `nextHopProtocol`, `navigationTransferSize`, `navigationEncodedBodySize`, `navigationDecodedBodySize` | ms (`timeToFirstByte` and load milestones since the navigation start), sizes in bytes, `nextHopProtocol` is a string | start, sampling, stop | `{includeSizes?: boolean /* true */, includeLoadMilestones?: boolean /* true */}`: `false` drops the size/protocol keys or the load milestone keys |
 | `networkActivity`       | Requests seen via the CDP `Network` domain, counted from the first time this instance observed a target                                          | `totalNetworkRequests`, `totalNetworkTransferSize`, `totalNetworkDuration`, `networkActivities` (array of `{requestId, url, method, status?, transferSize?, duration?, timestamp}`)                                                                                                                          | count, bytes (encoded), ms (sum of request durations)                                                                                         | start, sampling, stop                 | `{includeDetailsInSampling?: boolean /* false */, triggerGarbageCollectionOnObserve: boolean /* required by the type, ignored */}`: if `includeDetailsInSampling` is `false`, `networkActivities` is `[]` while sampling |
+| `requestTiming`         | Requests of the pages and of the `request` fixture (API request context) since the latest `onStart`, as recorded by Playwright. Fixture mode only, also tests without a page | `requestCount`, `requestFailedCount`, `requestDurationP50`, `requestDurationP95`, `requestDurationMax`, `requestTtfbP95` (if known), `apiRequestCount`, `apiRequestDurationP95`, `requestDuration:<endpoint>` (p95), `slowestRequests` (JSON string of `[{url, method, status, resourceType, duration}]`) | ms, counts | start (zeros), sampling, stop | `{endpoints?: Array<{name: string; pattern: string}>, topSlowest?: number /* 5 */}` |
 | `resourceTiming`        | [Resource Timing](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceResourceTiming) of every subresource of the page via `Runtime.evaluate` | `totalResources`, `totalTransferSize`, `totalEncodedBodySize`, `totalDecodedBodySize`, `totalDnsTime`, `totalTcpTime`, `totalTlsTime`, `totalRequestTime` (time to first byte), `totalResponseTime` (download), `totalRedirectTime`, `totalBlockedTime` (queueing before the fetch), `cacheHits`, `timingHiddenResources`, `resourceTimings` (array of `{name, initiatorType, nextHopProtocol, transferSize, encodedBodySize, decodedBodySize, dnsTime, tcpTime, tlsTime, requestTime, responseTime, redirectTime, blockedTime, cached, timingHidden}`) | ms, sizes in bytes, counts | start, sampling, stop | `{includeDetails?: boolean /* true */, bufferSize?: number /* 500 */}`: `includeDetails: false` omits `resourceTimings` (recommended for sampling). `bufferSize` is passed to `performance.setResourceTimingBufferSize()` |
 | `heapDump`              | Full heap snapshot (`HeapProfiler.takeHeapSnapshot`)                                                                                             | `heap`                                                                                                                                                                                                                                                                                                        | string (`.heapsnapshot` JSON). **Very large**                                                                                                 | start, sampling, stop                 | `ObserverOptions`                                                                    |
 | `heapProfilerSampling`  | Sampling heap profile between start and stop                                                                                                     | `heapProfilerSampling`                                                                                                                                                                                                                                                                                        | string (JSON of `HeapProfiler.SamplingHeapProfile`)                                                                                           | stop (start begins sampling)          | `ObserverOptions`                                                                    |

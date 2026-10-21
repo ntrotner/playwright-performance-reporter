@@ -1,5 +1,8 @@
 import type CDP from 'chrome-remote-interface';
 import {
+  type MetricObserver,
+} from '../../types/index.js';
+import {
   ChromiumDevelopmentTools,
 } from './client.js';
 
@@ -73,6 +76,11 @@ export function createCdpSessionClient(session: CdpSessionLike): CDP.Client {
 }
 
 /**
+ * Type of the virtual target of the fixture, which holds what Playwright recorded, e.g. the requests of a test
+ */
+export const playwrightTargetType = 'playwright';
+
+/**
  * Chromium client on CDP sessions that were opened by Playwright, instead of a remote debugging port
  */
 export class ChromiumSessionDevelopmentTools extends ChromiumDevelopmentTools {
@@ -107,4 +115,28 @@ export class ChromiumSessionDevelopmentTools extends ChromiumDevelopmentTools {
       Object.assign(this.targets[targetId], target);
     }
   }
+
+  /**
+   * Observers of recordings of Playwright run on the recording target, all others on the pages
+   *
+   * @param metric observer to measure
+   */
+  protected override targetsFor(metric: MetricObserver<CDP.Client>): string[] {
+    const isPlaywrightObserver = metric.capabilities?.includes('playwright') ?? false;
+    return Object.keys(this.clients).filter(targetId => (this.targets[targetId]?.type === playwrightTargetType) === isPlaywrightObserver);
+  }
+}
+
+/**
+ * Client of the virtual target of the fixture. The target has no page, so every command fails,
+ * also commands with a callback like the `IO.close` when the target is destroyed.
+ */
+export function createRecordingClient(): CDP.Client {
+  return createCdpSessionClient({
+    async send(method: string) {
+      throw new Error(`${method} is not available, the recording target has no page`);
+    },
+    on() {},
+    off() {},
+  });
 }
