@@ -1,0 +1,74 @@
+{
+  "name": "playwright-performance-attribution",
+  "version": "0.0.0-development",
+  "description": "Attribute performance regressions of playwright-performance-reporter runs to the changed lines of code",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./analysis": {
+      "types": "./lib/analysis/index.d.ts",
+      "default": "./lib/analysis/index.js"
+    },
+    "./cli": {
+      "types": "./lib/cli/index.d.ts",
+      "default": "./lib/cli/index.js"
+    }
+  },
+  "types": "./lib/index.d.ts",
+  "bin": {
+    "performance-attribution": "./bin/performance-attribution.js"
+  },
+  "files": [
+    "bin/**/*",
+    "lib/**/*"
+  ],
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "clean": "rm -rf ./lib/",
+    "eval": "npm run build && node --max-old-space-size=8192 eval/run-eval.mjs",
+    "lint": "cd ../.. && npx --no-install xo packages/attribution",
+    "test": "export NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" && jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ntrotner/playwright-performance-reporter.git",
+    "directory": "packages/attribution"
+  },
+  "keywords": [
+    "playwright",
+    "performance",
+    "regression",
+    "attribution"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Nikita Trotner",
+    "email": "ntrotner@users.noreply.github.com",
+    "url": "https://github.com/ntrotner"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "peerDependencies": {
+    "playwright-performance-reporter": "^0.0.0-development"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.5.2",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.20.5",
+    "jest": "^30.5.2",
+    "playwright-performance-reporter": "file:../..",
+    "ts-jest": "^29.4.15",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@mastra/core": "^1.81.0",
+    "@memlab/core": "^2.0.6",
+    "@paulirish/trace_engine": "^0.0.67",
+    "zod": "^4.6.7"
+  }
+}

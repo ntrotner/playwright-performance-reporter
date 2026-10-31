@@ -15,7 +15,8 @@ The project is organized as follows:
   - **`presenters/`**: Logic for presenting and writing the collected metrics (e.g., JSON, HTML charts).
   - **`types/`**: Shared TypeScript types and interfaces.
 - **`test/`**: Unit tests for the library.
-- **`example/`**: A complete, runnable simulation of how the reporter integrates with a Playwright project.
+- **`example/`**: A complete, runnable simulation of how the reporter integrates with a Playwright project. `example/basic/` holds the default suite, `example/seeded-regressions/` a local app with three seeded regressions for the attribution package.
+- **`packages/attribution/`**: The standalone package `playwright-performance-attribution` (presenter, analysis, agent, CLI) with its own `package.json`, lockfile, jest config and CI job. The root jest, tsc and xo ignore it.
 - **`lib/`**: Compiled JavaScript and type definitions (generated after `npm run build`).
 - **`package.json`**: Defines dependencies, build scripts, and metadata.
 - **`README.md`**: The main user-facing documentation.
@@ -33,13 +34,13 @@ The `example` folder is a crucial part of this repository as it provides a real-
 
 ### Key Components of the Example
 
-- **`example/playwright.config.ts`**: This file demonstrates how to configure the reporter within a Playwright setup. It includes:
+- **`example/basic/playwright.config.ts`**: This file demonstrates how to configure the reporter within a Playwright setup. It includes:
   - Registration of the reporter using the `reporter` property.
   - Configuration of multiple presenters (JSON and HTML).
   - Definition of metric observers for different test hooks (`onTest`, `onTestStep`) and periodic sampling.
   - Browser launch options to enable remote debugging (`--remote-debugging-port=9222`), which is required for CDP metrics.
 
-- **`example/tests/example.spec.ts`**: A sample test suite that demonstrates how metrics are collected during actual test steps.
+- **`example/basic/tests/example.spec.ts`**: A sample test suite that demonstrates how metrics are collected during actual test steps.
 
 ### How to Run the Simulation
 

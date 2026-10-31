@@ -23,3 +23,25 @@ jobs:
         uses: codecov/codecov-action@v4.2.0
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  attribution:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.x
+      # The package resolves playwright-performance-reporter from the repository root (file:../..), which needs lib/
+      - run: npm ci
+      - run: npm run build
+      - run: npm ci
+        working-directory: packages/attribution
+      - run: npm run typecheck
+        working-directory: packages/attribution
+      # xo of the repository root, which the root npm ci installed
+      - run: npm run lint
+        working-directory: packages/attribution
+      - run: npm test
+        working-directory: packages/attribution

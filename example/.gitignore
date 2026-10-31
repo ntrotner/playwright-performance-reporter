@@ -1,7 +1,8 @@
 
 # Playwright
 node_modules/
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
+# Unanchored, as Playwright writes next to every config, e.g. basic/ and seeded-regressions/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

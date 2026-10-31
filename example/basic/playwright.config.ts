@@ -1,6 +1,6 @@
 import {defineConfig, devices} from '@playwright/test';
-import type {Options, ResultAccumulator} from '../lib';
-import {nativeChromiumObservers, nativePresenters} from '../lib';
+import type {Options, ResultAccumulator} from '../../lib';
+import {nativeChromiumObservers, nativePresenters} from '../../lib';
 
 const comparisonPresenter = new nativePresenters.comparisonPresenter({
   historyDir: './performance-history',
@@ -76,7 +76,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   reporter: [
-    ['../lib', PlaywrightPerformanceReporterOptions]
+    ['../../lib', PlaywrightPerformanceReporterOptions]
   ],
   use: {
     trace: 'on-first-retry',

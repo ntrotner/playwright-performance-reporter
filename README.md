@@ -174,7 +174,7 @@ test('open profile', async ({page}) => {
 
 Run `npx playwright test`. You get `performance.json` and `performance.html` in the working directory.
 
-A more complete setup is in [`example/playwright.config.ts`](example/playwright.config.ts). It configures four presenters, sampling, CPU profiling, Web Vitals, long tasks and network activity.
+A more complete setup is in [`example/basic/playwright.config.ts`](example/basic/playwright.config.ts). It configures four presenters, sampling, CPU profiling, Web Vitals, long tasks and network activity.
 
 ## How it works
 
@@ -241,7 +241,7 @@ Only `chromium` collects data today. The `firefox` and `webkit` keys are accepte
 
 > `onTest` start and stop measurements are often empty. At test begin, the page under test may not exist yet. At test end, it is already closed. For reliable data, use `onTestStep` and `sampling`.
 
-> Observers can keep state between calls. For example, `cpuProfiler` holds a lock and `networkActivity` keeps running counters. Use a **separate instance** for each hook and for each sampling entry, as in [`example/playwright.config.ts`](example/playwright.config.ts).
+> Observers can keep state between calls. For example, `cpuProfiler` holds a lock and `networkActivity` keeps running counters. Use a **separate instance** for each hook and for each sampling entry, as in [`example/basic/playwright.config.ts`](example/basic/playwright.config.ts).
 
 ### Multiple workers
 
@@ -605,6 +605,7 @@ The presenters are available as `nativePresenters.<name>`. The sources are in [`
 | `statisticsPresenter`   | JSON with count, min, max, mean, MAD and percentiles of every metric of every test and step across its executions, e.g. of `repeatEach` | `{outputDir: string; outputFile: string; percentiles?: number[] /* [0.5, 0.75, 0.95] */; includeRetries?: boolean /* false */; pretty?: boolean}` |
 | `markdownSummaryPresenter` | Markdown table of every test and step with duration, selected metrics, the verdict of a `comparisonPresenter` and the budget violations. Also appended to the GitHub Actions job summary | `MarkdownSummaryPresenterOptions`, see below |
 | `waterfallPresenter`    | Self-contained HTML with a network waterfall and the transfer per domain of every HAR file of `networkActivity({har})`, linked to the HAR file | `{outputDir: string; outputFile: string; maxRequests?: number /* 200 */}` |
+| `AttributionPresenter` (separate package [`playwright-performance-attribution`](packages/attribution/)) | `performance-attribution.json`: the regressions of a `comparisonPresenter`, the paths of their traces and heap snapshots, and the lines changed since the baseline commit. The `performance-attribution` CLI attributes them offline to `file:line`, see [Attribution of regressions](#attribution-of-regressions) | `{outputDir: string; comparison: ComparisonPresenter; historyDir: string; repoDir?: string; outputFile?: string; caps?: {...}; sourceRoots?: Array<{url: string; path: string}>}` |
 
 `jsonChunkPresenter`, `timelineDataPresenter` and `chartPresenter` open their file in the constructor. Make sure `outputDir` exists. `jsonAggregatePresenter` keeps the merged result in memory and only creates its file on `close()`, so `outputDir` must exist by the end of the run. `comparisonPresenter` creates its folders itself.
 
@@ -720,6 +721,30 @@ jobs:
 ```
 
 Run the same runner type for every run, as the comparison is only meaningful on similar machines. The `metadata` of every run records the machine.
+
+### Attribution of regressions
+
+The separate package [`playwright-performance-attribution`](packages/attribution/) answers "what did my change cost?": it attributes the regressions of `comparisonPresenter` to `file:line` inside the lines that changed since the baseline commit, from the function self time of `traceCapture` traces and the class growth of `heapDiff` snapshots. It is a separate package, so the reporter carries none of its dependencies (memlab, the DevTools trace engine, Mastra).
+
+```ts
+import {AttributionPresenter} from 'playwright-performance-attribution';
+
+const comparison = new nativePresenters.comparisonPresenter({historyDir: './performance-history', outputDir: './'});
+
+presenters: [
+  comparison,
+  // After the comparison presenter, as it reads its report
+  new AttributionPresenter({outputDir: './', comparison, historyDir: './performance-history'}),
+],
+```
+
+The presenter only hands off: at the end of the run it writes `performance-attribution.json` with the regressions, the artifact paths and the changed lines (`git diff <baseline commit>...<commit> --unified=0`). It opens no artifact, calls no model and never fails the run. The analysis runs afterwards:
+
+```bash
+npx performance-attribution attribute ./   # writes attribution.md and attribution.json, appends to $GITHUB_STEP_SUMMARY
+```
+
+With `ANTHROPIC_API_KEY` set, an agent works through the regressions with tools over the bounded analysis; without it, every regression is marked `no-agent`. Every culprit is validated against the changed lines, and the confidence is computed from the evidence. Scripts are matched to changed files only through `sourceRoots` (where the app serves the repository) or by two or more trailing path segments on the page origin; third-party and source-mapped scripts never match. In CI, check out enough history to contain the baseline commit (`fetch-depth: 0`), otherwise the bundle says `baseline commit is not an ancestor`. Setup, CLI flags and the seeded-regressions eval are in the [package README](packages/attribution/README.md).
 
 ## Output format
 
@@ -1031,7 +1056,8 @@ src/
   presenters/                     # json-chunk, json-aggregate, timeline-data, chart, comparison (register in presenters/index.ts)
   types/                          # Options, MetricObserver, PerformanceMetrics, ResultAccumulator
 test/                             # Jest unit tests (*.spec.ts) and fixtures
-example/                          # runnable Playwright project using ../lib
+packages/attribution/             # standalone package playwright-performance-attribution: AttributionPresenter, analysis, agent, CLI (own lockfile, jest and CI job)
+example/                          # runnable Playwright project using ../lib: basic/ (default suite), seeded-regressions/ (attribution eval)
 docs/images/                      # README screenshots
 ```
 
@@ -1045,7 +1071,9 @@ Commands (run from the repo root):
 | `npm test`                    | Jest with coverage                                              |
 | `npm run lint`                | xo on `src/`. **Applies fixes** (`--fix`)                       |
 | `npm run lint:tests`          | xo on `test/`. **Applies fixes** (`--fix`)                      |
-| `cd example && npm run test`  | Build the library and run the example suite. Writes `example/example-*.json` / `.html` and `example/performance-history/` |
+| `cd example && npm run test`  | Build the library and run the example suite (`example/basic/`). Writes `example/example-*.json` / `.html` and `example/performance-history/` |
+| `cd example && npm run test:seeded-regressions` | Build both packages and run the seeded regressions suite against its local app. Writes into `example/seeded-regressions/` |
+| `cd packages/attribution && npm ci && npm test` | Tests of the attribution package (node 22) |
 
 Conventions:
 
