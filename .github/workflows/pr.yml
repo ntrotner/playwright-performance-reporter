@@ -23,3 +23,25 @@ jobs:
         uses: codecov/codecov-action@v4.2.0
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  attribution:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.x
+      # The package resolves the types of playwright-performance-reporter from the root (file:../..), which needs lib/
+      - run: npm ci
+      - run: npm run build
+      - run: npm ci
+        working-directory: packages/attribution
+      - run: npm test
+        working-directory: packages/attribution
+      - run: npm run typecheck
+        working-directory: packages/attribution
+      # Without --fix, so the gate rejects what the local `npm run lint` would rewrite
+      - run: npm run lint:check
+        working-directory: packages/attribution
