@@ -22,6 +22,7 @@
 - [Configuration reference](#configuration-reference)
 - [Chromium observers](#chromium-observers)
 - [Presenters](#presenters)
+- [Performance attribution](#performance-attribution)
 - [Output format](#output-format)
 - [Extending](#extending)
 - [Browser support and limitations](#browser-support-and-limitations)
@@ -174,7 +175,7 @@ test('open profile', async ({page}) => {
 
 Run `npx playwright test`. You get `performance.json` and `performance.html` in the working directory.
 
-A more complete setup is in [`example/playwright.config.ts`](example/playwright.config.ts). It configures four presenters, sampling, CPU profiling, Web Vitals, long tasks and network activity.
+A more complete setup is in [`example/basic/playwright.config.ts`](example/basic/playwright.config.ts). It configures four presenters, sampling, CPU profiling, Web Vitals, long tasks and network activity.
 
 ## How it works
 
@@ -241,7 +242,7 @@ Only `chromium` collects data today. The `firefox` and `webkit` keys are accepte
 
 > `onTest` start and stop measurements are often empty. At test begin, the page under test may not exist yet. At test end, it is already closed. For reliable data, use `onTestStep` and `sampling`.
 
-> Observers can keep state between calls. For example, `cpuProfiler` holds a lock and `networkActivity` keeps running counters. Use a **separate instance** for each hook and for each sampling entry, as in [`example/playwright.config.ts`](example/playwright.config.ts).
+> Observers can keep state between calls. For example, `cpuProfiler` holds a lock and `networkActivity` keeps running counters. Use a **separate instance** for each hook and for each sampling entry, as in [`example/basic/playwright.config.ts`](example/basic/playwright.config.ts).
 
 ### Multiple workers
 
@@ -670,6 +671,22 @@ presenters: [
 Example output:
 
 ```markdown
+## Performance attribution
+
+The separate package [`playwright-performance-attribution`](packages/attribution/) attributes the regressions of a
+`comparisonPresenter` to the changed lines of the commit range: function self time from the traces of `traceCapture`
+and retainer paths of the heap snapshots of `heapDiff({writeSnapshots: true})`, validated against the changed hunks.
+It is not published yet and keeps its heavy dependencies (trace engine, memlab, Mastra) out of this package.
+
+- Its `attributionPresenter` only hands off: after the last test it writes `attribution-bundle.json` with the
+  regressions, the artifact paths and the changed hunks since the baseline commit, or why they are unknown. It never
+  opens an artifact, never calls a model and never fails the run.
+- `performance-attribution attribute <report-dir>` runs after the tests, offline: it analyzes the artifacts, lets an
+  agent pick culprits (opt-in with `ANTHROPIC_API_KEY`, otherwise `no-agent`), drops every culprit outside the changed
+  hunks, writes `attribution.md` and appends it to `$GITHUB_STEP_SUMMARY`.
+
+See [`packages/attribution/README.md`](packages/attribution/README.md) for the setup, the bundle and the seeded eval.
+
 ## Performance report
 
 5 step(s) · 1 regressed · 0 improved · 4 mixed · 0 budget violation(s) · commit `eb52763`
@@ -1032,6 +1049,9 @@ src/
   types/                          # Options, MetricObserver, PerformanceMetrics, ResultAccumulator
 test/                             # Jest unit tests (*.spec.ts) and fixtures
 example/                          # runnable Playwright project using ../lib
+  basic/                          # the example suite of `npm run test` (playwright.config.ts, tests/)
+  seeded-regressions/             # on-demand suite of the attribution package, efficient on main
+packages/attribution/             # playwright-performance-attribution: standalone package, own lockfile, node >= 22
 docs/images/                      # README screenshots
 ```
 
@@ -1045,7 +1065,9 @@ Commands (run from the repo root):
 | `npm test`                    | Jest with coverage                                              |
 | `npm run lint`                | xo on `src/`. **Applies fixes** (`--fix`)                       |
 | `npm run lint:tests`          | xo on `test/`. **Applies fixes** (`--fix`)                      |
-| `cd example && npm run test`  | Build the library and run the example suite. Writes `example/example-*.json` / `.html` and `example/performance-history/` |
+| `cd example && npm run test`  | Build the library and run the example suite in `example/basic/`. Writes `example/example-*.json` / `.html` and `example/performance-history/` |
+| `cd example && npm run test:seeded-regressions` | Build the reporter and run `example/seeded-regressions/` (its config imports the attribution presenter from source). Writes `example/seeded-regressions/report/` |
+| `cd packages/attribution && npm ci && npm test` | Install and test the attribution package (node >= 22; needs the root built, see its README) |
 
 Conventions:
 
