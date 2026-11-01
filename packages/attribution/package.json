@@ -1,0 +1,87 @@
+{
+  "name": "playwright-performance-attribution",
+  "version": "0.0.0-development",
+  "private": true,
+  "description": "Attribute performance regressions of playwright-performance-reporter runs to the changed hunks of a commit range",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./analysis": {
+      "types": "./lib/analysis/index.d.ts",
+      "default": "./lib/analysis/index.js"
+    },
+    "./agent": {
+      "types": "./lib/agent/index.d.ts",
+      "default": "./lib/agent/index.js"
+    },
+    "./cli": {
+      "types": "./lib/cli.d.ts",
+      "default": "./lib/cli.js"
+    }
+  },
+  "types": "./lib/index.d.ts",
+  "bin": {
+    "performance-attribution": "./bin/performance-attribution.js"
+  },
+  "files": [
+    "bin/**/*",
+    "lib/**/*"
+  ],
+  "scripts": {
+    "attribute": "node --max-old-space-size=8192 bin/performance-attribution.js attribute",
+    "build": "tsc --project tsconfig.build.json",
+    "clean": "rm -rf ./lib/",
+    "eval": "npm run build && node --max-old-space-size=8192 eval/run-eval.mjs",
+    "lint": "xo --fix",
+    "lint:check": "xo",
+    "prebuild": "npm run reporter-types",
+    "pretest": "npm run reporter-types",
+    "pretypecheck": "npm run reporter-types",
+    "reporter-types": "test -f ../../lib/index.d.ts && test -z \"$(find ../../src -newer ../../lib/index.d.ts -print -quit)\" || npm --prefix ../.. run build",
+    "test": "export NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" && jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ntrotner/playwright-performance-reporter.git",
+    "directory": "packages/attribution"
+  },
+  "keywords": [
+    "playwright",
+    "performance",
+    "regression",
+    "attribution"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Nikita Trotner",
+    "email": "ntrotner@users.noreply.github.com",
+    "url": "https://github.com/ntrotner"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "peerDependencies": {
+    "playwright-performance-reporter": "*"
+  },
+  "dependencies": {
+    "@mastra/core": "^1.81.0",
+    "@memlab/core": "^2.0.6",
+    "@memlab/heap-analysis": "^2.0.6",
+    "@paulirish/trace_engine": "^0.0.67",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.0.0",
+    "eslint-plugin-import-newlines": "^1.4.0",
+    "jest": "^30.2.0",
+    "playwright-performance-reporter": "file:../..",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.9.3",
+    "xo": "^1.2.3"
+  }
+}
